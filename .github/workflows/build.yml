@@ -68,9 +68,6 @@ jobs:
           name: artifact
           path: bin
 
-      - name: Display structure of downloaded files
-        run: ls -R bin
-
       - name: Release
         uses: softprops/action-gh-release@v1
         with:

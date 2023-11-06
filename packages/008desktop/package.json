@@ -24,6 +24,7 @@
     "artifactName": "008-desktop-${os}.${ext}",
     "buildDependenciesFromSource": true,
     "extends": null,
+    "afterSign": "scripts/notarize.js",
     "directories": {
       "output": "build"
     },
