@@ -23,7 +23,7 @@ This project is a WebRTC softphone, and communication is achieved via SIP over a
 
 ## Configuration
 
-The softphone is internally configured using a JSON definition. This configuration can either be generated from the UI (with some settings not yet implemented) or through a remote configuration by setting the `settingsUri` (details below).
+The softphone is internally configured using a JSON definition. This configuration can either be generated from the UI (still in progress) or through a remote configuration by setting `settingsUri` (details below).
 
 ```json
 {
@@ -32,7 +32,7 @@ The softphone is internally configured using a JSON definition. This configurati
   "sipPassword": "securepass",
   "sipUser": "JohnDoe",
   "wsUri": "wss://example.com:8089/ws",
-  "videoAllowed": true,
+  "allowVideo": true,
   "allowTransfers": true,
   "allowBlindTransfers": true,
   "allowAutoanswer": false,
@@ -278,6 +278,10 @@ All events come with a `context` field. This includes various account details th
   "size": { "width": 360, "height": 500 }
 }
 ```
+
+### Retry
+
+If the http call fails the softphone will try the request 5 times delaying the request gradually up to 2.5 minutes.
 
 ### CDR payload
 
