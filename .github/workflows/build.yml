@@ -15,13 +15,7 @@ jobs:
           node-version: "18"
 
       - name: Build
-        env:
-          CSC_LINK: ${{ secrets.MACOS_CERT }}
-          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CERT_PASS }}
-          NOT_APPLE_ID: ${{ secrets.APPLE_ID }}
-          NOT_APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
         run: |
-
           yarn install
           yarn run build-desktop
 

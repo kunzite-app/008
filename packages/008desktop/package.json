@@ -24,7 +24,6 @@
     "artifactName": "008-desktop-${os}.${ext}",
     "buildDependenciesFromSource": true,
     "extends": null,
-    "afterSign": "scripts/notarize.js",
     "directories": {
       "output": "build"
     },
@@ -37,7 +36,9 @@
       "target": [
         {
           "target": "nsis",
-          "arch": "x64"
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
@@ -65,7 +66,9 @@
       "target": [
         {
           "target": "AppImage",
-          "arch": "x64"
+          "arch": [
+            "x64"
+          ]
         }
       ]
     }
