@@ -1,0 +1,93 @@
+{
+  "name": "008desktop",
+  "description": "Open-source event-driven AI powered Softphone",
+  "private": true,
+  "author": {
+    "name": "Kunzite",
+    "email": "support@kunzite.app",
+    "url": "https://kunzite.app"
+  },
+  "version": "1.0.0",
+  "productName": "008",
+  "main": "index.js",
+  "scripts": {
+    "start": "APP_DEBUG=true APP_URL=http://localhost:19006/ electron .",
+    "lint": "eslint ./",
+    "format": "prettier --write",
+    "build": "yarn build-icons && electron-builder build -mwl -c.extraMetadata.main=index.js --publish never",
+    "build-icons": "yarn build-icons-mac && yarn build-icons-win",
+    "build-icons-mac": "electron-icon-builder --input=assets/logo-round.png --output=./build",
+    "build-icons-win": "electron-icon-builder --input=assets/logo.png --output=./build/win"
+  },
+  "build": {
+    "appId": "app.kunzite.008",
+    "artifactName": "008-desktop-${os}.${ext}",
+    "buildDependenciesFromSource": true,
+    "extends": null,
+    "afterSign": "scripts/notarize.js",
+    "directories": {
+      "output": "build"
+    },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false
+    },
+    "win": {
+      "icon": "build/win/icons/win/icon.ico",
+      "target": [
+        {
+          "target": "nsis"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "build/icons/mac/icon.icns",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "The microphone is needed to be able to talk",
+        "NSCameraUsageDescription": "The camera is needed in order to make video calls",
+        "com.apple.security.device.audio-input": true,
+        "com.apple.security.device.camera": true
+      },
+      "target": [
+        {
+          "target": "dmg",
+          "arch": "universal"
+        }
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "publish": null
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage"
+        }
+      ]
+    }
+  },
+  "dependencies": {
+    "electron-log": "^4.4.8",
+    "electron-tray-window": "https://github.com/sostribe/electron-tray-window",
+    "node-fetch": "2",
+    "rage-edit": "^1.2.0"
+  },
+  "devDependencies": {
+    "electron": "27.0.2",
+    "electron-builder": "^24.8.0",
+    "electron-icon-builder": "^2.0.1",
+    "electron-notarize": "^1.2.2",
+    "eslint": "^8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^16.1.0",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-promise": "^6.0.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "prettier": "^2.7.1"
+  }
+}
