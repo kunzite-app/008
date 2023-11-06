@@ -1,6 +1,13 @@
 {
   "name": "@kunzite/008",
+  "description": "Open-source event-driven AI powered Softphone",
   "version": "1.0.0",
+  "private": true,
+  "author": {
+    "name": "Kunzite",
+    "email": "support@kunzite.app",
+    "url": "https://kunzite.app"
+  },
   "homepage": "./",
   "scripts": {
     "start": "expo start --dev-client",
@@ -64,6 +71,5 @@
     "prettier": "^3.0.3",
     "prop-types": "^15.8.1",
     "react-native-safe-area-context": "^4.7.1"
-  },
-  "private": true
+  }
 }
