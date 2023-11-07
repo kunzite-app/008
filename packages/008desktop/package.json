@@ -77,6 +77,7 @@
   "dependencies": {
     "electron-log": "^4.4.8",
     "electron-tray-window": "https://github.com/sostribe/electron-tray-window",
+    "fix-path": "^4.0.0",
     "node-fetch": "2",
     "rage-edit": "^1.2.0"
   },

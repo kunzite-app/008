@@ -13,14 +13,17 @@ const {
   protocol,
   nativeTheme
 } = require('electron');
-const { openExternal } = shell;
 
 const trayWindow = require('electron-tray-window');
 const regedit = require('rage-edit');
 const log = require('electron-log');
 
+const fixPath = require('fix-path')();
+
 const pjson = require('./package.json');
 const { download } = require('./utils');
+
+const { openExternal } = shell;
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -224,6 +227,8 @@ const requestPermissions = async () => {
 };
 
 const launchQ = async () => {
+  fixPath();
+
   const isDev = process.defaultApp;
   const qpath = path.join(
     isDev ? __dirname : process.resourcesPath,
