@@ -18,7 +18,7 @@ const trayWindow = require('electron-tray-window');
 const regedit = require('rage-edit');
 const log = require('electron-log');
 
-const fixPath = require('fix-path')();
+const fixPath = require('fix-path');
 
 const pjson = require('./package.json');
 const { download } = require('./utils');
