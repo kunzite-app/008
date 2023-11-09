@@ -18,9 +18,11 @@ import { useStore } from '../store/Context';
 
 import { readFileAsText } from '../utils';
 
+const fontFamily = 'Roboto Flex';
+
 const Title = ({ children, style }) => (
   <Text
-    style={[{ fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }, style]}
+    style={[{ fontFamily, fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }, style]}
   >
     {children}
   </Text>
@@ -42,7 +44,7 @@ const RowLink = ({ onClick, text }) => {
       }}
     >
       {icons[text.toLowerCase()]}
-      <Text style={{ paddingLeft: 5 }} onClick={onClick}>
+      <Text style={{ fontFamily, paddingLeft: 5 }} onClick={onClick}>
         {text}
       </Text>
     </TouchableOpacity>
@@ -81,7 +83,7 @@ export const DangerZone = ({ style }) => {
 
   return (
     <View style={ style }>
-      <Title style={{ fontSize: 14, color: 'red' }}>Danger Zone</Title>
+      <Title style={{ fontFamily, fontSize: 14, color: 'red' }}>Danger Zone</Title>
       <Button 
         color='danger' 
         onClick={clear}
@@ -284,7 +286,7 @@ export const ContactsForm = () => {
           padding: 5
         }}
       >
-        <Text style={{ fontSize: 14, textAlign: 'center' }}>
+        <Text style={{ fontFamily, fontSize: 14, textAlign: 'center' }}>
           Drop here VCF file to add your contacts.
         </Text>
       </div>
@@ -454,7 +456,7 @@ export const SettingsScreen = () => {
 
   return (
     <Screen
-      closeable={closeable}
+      closeable={true}
       visible={showSettings}
       onClose={toggleShowSettings}
       style={{ padding: 10 }}

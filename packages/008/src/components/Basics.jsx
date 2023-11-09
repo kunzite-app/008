@@ -34,9 +34,11 @@ import {
 
 import '@elastic/eui/dist/eui_theme_light.css';
 
+const fontFamily = 'Roboto Flex';
+
 export const Link = ({ children, style = {}, onClick }) => (
   <TouchableOpacity onPress={() => onClick?.()}>
-    <Text style={{ textDecorationLine: 'underline', ...style }}>
+    <Text style={{ fontFamily, textDecorationLine: 'underline', ...style }}>
       {children}
     </Text>
   </TouchableOpacity>
@@ -148,7 +150,7 @@ export const FieldText = ({
         placeholder={placeholder}
         onKeyPress={e => onKeyPress?.(e.charCode)}
         onChange={e => onChange?.(e.target.value)}
-        style={style}
+        style={{ fontFamily, ...style }}
       />
     );
 

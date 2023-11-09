@@ -22,6 +22,7 @@ export const Numbers = ({ numbers, number, onChange }) => {
   return (
     <Combobox
       autoFocus={false}
+      className="numdialer"
       prepend={
         <View
           focusable={false}
@@ -42,6 +43,7 @@ export const Numbers = ({ numbers, number, onChange }) => {
       onChange={onChange}
       isClearable={false}
       singleSelection
+      style={{ }}
     />
   );
 };
