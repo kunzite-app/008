@@ -72,16 +72,18 @@ export const play_hangup = () => {
   setTimeout(() => REJECT_TONE.stop(), 3000);
 };
 
-export const audio_devices = async () => {
+export const getSpeakers = async () => {
+  return getDevices({ kind: 'audiooutput' });
+};
+
+export const getMicrophones = async () => {
+  return getDevices({ kind: 'audioinput' });
+};
+
+export const getDevices = async ({ kind }) => {
   try {
-    const devices = (await navigator?.mediaDevices.enumerateDevices()) || [];
-    return devices
-      .map(({ label, kind, deviceId } = {}) => ({
-        label: label || deviceId,
-        kind,
-        deviceId
-      }))
-      .filter(dev => dev.kind === 'audiooutput');
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    return devices.filter(dev => dev.kind === kind);
   } catch (err) {
     console.log('Error getting audio devices', err);
   }

@@ -1,5 +1,3 @@
-import { encode } from 'base-64';
-import _ from 'lodash';
 import { createContext } from 'react';
 import { Platform } from 'react-native';
 import { create } from 'zustand';
@@ -8,9 +6,11 @@ import {
   createJSONStorage,
   subscribeWithSelector
 } from 'zustand/middleware';
+import { encode } from 'base-64';
+import _ from 'lodash';
 
+import { getMicrophones, getSpeakers } from '../Sound';
 import Contacts from './Contacts';
-import { audio_devices } from '../Sound';
 import { genId } from '../utils';
 
 const contacts = new Contacts();
@@ -21,15 +21,15 @@ const CONTACTS_ID = 'KZSC';
 const initializeStore = async () => {
   const initAudioDevices = () => {
     const setAudioDevices = async () => {
-      const devices = await audio_devices();
-      useStore.setState({ devices });
+      const devices = await getSpeakers();
+      const microphones = await getMicrophones();
+      useStore.setState({ devices, microphones });
     };
-
-    setAudioDevices();
 
     if (Platform.OS === 'web') {
       navigator.mediaDevices.ondevicechange = setAudioDevices;
     }
+    setAudioDevices();
   };
 
   const initContacts = () => {
@@ -58,8 +58,11 @@ const DEFAULTS = {
     { value: 'offline', text: 'Offline', color: '#A9A9A9' }
   ],
 
-  device: 'default',
   devices: [],
+  microphones: [],
+  ringer: 'default',
+  speaker: 'default',
+  microphone: 'default',
 
   number_out: undefined,
   numbers: [],
@@ -81,6 +84,7 @@ const DEFAULTS = {
 
   size: { width: 360, height: 500 }
 };
+
 export const useStore = create(
   persist(
     subscribeWithSelector((set, get) => {
@@ -101,8 +105,11 @@ export const useStore = create(
             cdrs: [],
             webhooks: []
           }));
+
+          initializeStore();
         },
         setSettings: settings => {
+          console.log(settings);
           const { settingsUri, logout } = get();
 
           set(() => ({ ...settings }));

@@ -15,12 +15,14 @@ import { Dialer } from '../Dialer';
 import { Header } from './Components';
 import { Screen } from '../../screens/Screen';
 import { SessionScreen } from '../../screens/SessionScreen';
+
 import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { name as packageName } from '../../../package.json';
 import { tts } from '../../008Q';
+
+import { name as packageName } from '../../../package.json';
 
 class Phone extends React.Component {
   constructor(props) {
@@ -453,14 +455,7 @@ class Phone extends React.Component {
         else if (!ua?.isRegistered()) ua?.register();
     }
 
-    if (prevState.deviceId !== state.deviceId) {
-      const { devices } = state;
-      const deviceId = devices.find(dev => dev.deviceId === state.deviceId)
-        ? state.deviceId
-        : 'default';
-
-      RING_TONE.setDevice(deviceId);
-    }
+    if (prevState.ringer !== state.ringer) RING_TONE.setDevice(state.ringer);
 
     if (!state.sipUri?.length) this.ua?.stop();
   }
@@ -469,7 +464,7 @@ class Phone extends React.Component {
     this.unsubscribe = useStore.subscribe(state => {
       const {
         numbers = [],
-        deviceId,
+        ringer,
         devices,
         status,
         statuses,
@@ -495,7 +490,7 @@ class Phone extends React.Component {
       this.setState({
         numbers,
         number_out,
-        deviceId,
+        ringer,
         devices,
         status,
         statuses,

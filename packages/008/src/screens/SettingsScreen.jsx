@@ -182,13 +182,8 @@ export const ConnectionForm = ({ onChange, ...initialValues }) => {
   );
 };
 
-export const SettingsForm = ({
-  statuses = [],
-  devices = [],
-  onChange,
-  style,
-  ...initialValues
-}) => {
+export const SettingsForm = (props) => {
+  const { style, onChange, ...initialValues } = props
   const [values, setValues] = useState(initialValues);
 
   const setValue = (field, value) => {
@@ -203,7 +198,7 @@ export const SettingsForm = ({
     if (!_.isEqual(initialValues, values)) setValues(initialValues);
   }, [initialValues]);
 
-  const { status, deviceId, language } = values;
+  const { statuses, devices, microphones, status, ringer, microphone, speaker } = values;
   const { color } = statuses?.find(({ value }) => value === status) || {};
   return (
     <View style={style}>
@@ -229,18 +224,40 @@ export const SettingsForm = ({
         </FormRow>
       )}
 
-      {devices?.length > 0 && (
-        <FormRow label={'Ringer'}>
-          <Select
-            tabIndex="-1"
-            options={devices.map(({ deviceId, label }) => {
-              return { value: deviceId, text: label };
-            })}
-            value={deviceId}
-            onChange={e => setValue('deviceId', e.target.value)}
-          />
-        </FormRow>
-      )}
+      <HRule />
+
+      <FormRow label={'Speakers'}>
+        <Select
+          tabIndex="-1"
+          options={devices.map(({ ringer, label }) => {
+            return { value: ringer, text: label };
+          })}
+          value={speaker}
+          onChange={e => setValue('speaker', e.target.value)}
+        />
+      </FormRow>
+
+      <FormRow label={'Microphone'}>
+        <Select
+          tabIndex="-1"
+          options={microphones.map(({ ringer, label }) => {
+            return { value: ringer, text: label };
+          })}
+          value={microphone}
+          onChange={e => setValue('microphone', e.target.value)}
+        />
+      </FormRow>
+
+      <FormRow label={'Ringer'}>
+        <Select
+          tabIndex="-1"
+          options={devices.map(({ ringer, label }) => {
+            return { value: ringer, text: label };
+          })}
+          value={ringer}
+          onChange={e => setValue('ringer', e.target.value)}
+        />
+      </FormRow>
 
       <HRule />
 
@@ -451,6 +468,7 @@ export const SettingsScreen = () => {
   };
 
   const closeable = settingsUri?.length || (wsUri?.length && wsUri?.sipUri && wsUri?.sipPassword);
+  console.error(settingsUri?.length)
 
   return (
     <Screen
