@@ -1,6 +1,8 @@
 import { Session } from 'sip.js';
 
 Session.prototype.isVideo = function () {
+  if (!this.sessionDescriptionHandler) return;
+
   if (!this.isInbound())
     return this.sessionDescriptionHandlerOptions.constraints?.video;
 
@@ -11,6 +13,8 @@ Session.prototype.isVideo = function () {
 };
 
 Session.prototype.setMuted = function (muted) {
+  if (!this.sessionDescriptionHandler) return;
+
   const { peerConnection } = this.sessionDescriptionHandler;
   peerConnection.getLocalStreams().forEach(stream => {
     stream.getAudioTracks().forEach(track => {
@@ -20,6 +24,8 @@ Session.prototype.setMuted = function (muted) {
 };
 
 Session.prototype.setMutedVideo = function (muted) {
+  if (!this.sessionDescriptionHandler) return;
+
   const { peerConnection } = this.sessionDescriptionHandler;
   peerConnection.getLocalStreams().forEach(stream => {
     stream.getVideoTracks().forEach(track => {
@@ -33,5 +39,5 @@ Session.prototype.isInbound = function () {
 };
 
 Session.prototype.autoanswer = function () {
-  return this.request.getHeader('X-Autoanswer');
+  return this.request?.getHeader('X-Autoanswer');
 };
