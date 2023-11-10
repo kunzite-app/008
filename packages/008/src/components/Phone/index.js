@@ -35,7 +35,7 @@ class Phone extends React.Component {
       sessiont: null,
 
       show_transfer: false,
-      show_blindTransfer: false
+      show_blindTransfer: false,
     };
 
     this.state = {
@@ -60,7 +60,8 @@ class Phone extends React.Component {
           const notification = new Notification(packageName, {
             icon: 'icon.png',
             title: `${packageName}`,
-            body: `${contact.name || ''} (${from})`
+            body: `${contact.name || ''} (${from})`,
+            silent: true
           });
 
           notification.onclick = ev => {
@@ -118,6 +119,14 @@ class Phone extends React.Component {
   };
 
   set_ua_daemon = () => {
+
+    if (this.ua) {
+    this.ua.stop();
+    clearInterval(this.connWatcher);
+    clearInterval(this.networkWatcher);
+    }
+
+
     this.set_ua();
 
     this.connWatcher = setInterval(() => {
@@ -138,14 +147,15 @@ class Phone extends React.Component {
       sipPassword,
       wsUri,
       status,
-      userAgent = '008 Softphone'
+      userAgent = '008 Softphone',
+      speaker = 'default'
     } = this.state;
 
     this.ua?.stop();
 
     if (!wsUri?.length) return;
 
-    const register = status !== 'offline';
+        const register = status !== 'offline';
     const ua = new UA({
       uri: sipUri,
       authorizationUser: sipUser,
@@ -247,7 +257,7 @@ class Phone extends React.Component {
   };
 
   call = async (opts = {}) => {
-    const { dialer_number, number_out } = this.state;
+    const { dialer_number, number_out, microphone } = this.state;
     const { number = dialer_number, extraHeaders = [], video = false } = opts;
 
     const indentityHeaders = number_out
@@ -258,7 +268,10 @@ class Phone extends React.Component {
       const target = cleanPhoneNumber(number);
       const session = this.ua.invite(target, {
         extraHeaders: [...indentityHeaders, ...extraHeaders],
-        sessionDescriptionHandlerOptions: { constraints: { video } }
+        sessionDescriptionHandlerOptions: { constraints: { 
+          audio: { deviceId: { ideal: microphone }},
+          video 
+        }}
       });
 
       this.processRecording({ session });
@@ -295,7 +308,7 @@ class Phone extends React.Component {
   };
 
   transfer = (opts = {}) => {
-    const { session, dialer_number, show_blindTransfer } = this.state;
+    const { session, dialer_number, show_blindTransfer, microphone } = this.state;
 
     const {
       number = dialer_number,
@@ -307,7 +320,10 @@ class Phone extends React.Component {
     const target = cleanPhoneNumber(number);
     const payload = {
       extraHeaders,
-      sessionDescriptionHandlerOptions: { constraints: { video } }
+      sessionDescriptionHandlerOptions: { constraints: {
+        audio: { deviceId: { ideal: microphone }}, 
+        video 
+      }}
     };
 
     if (blind) {
@@ -455,7 +471,15 @@ class Phone extends React.Component {
         else if (!ua?.isRegistered()) ua?.register();
     }
 
-    if (prevState.ringer !== state.ringer) RING_TONE.setDevice(state.ringer);
+    if (prevState.ringer !== state.ringer) {
+      const { devices } = state;
+      const ringer = devices.find(dev => dev.deviceId === state.ringer)
+        ? state.ringer
+        : 'default';
+
+      RING_TONE.setDevice(ringer);
+      NOTIFICATION_TONE.setDevice(ringer);
+    }
 
     if (!state.sipUri?.length) this.ua?.stop();
   }
@@ -464,6 +488,8 @@ class Phone extends React.Component {
     this.unsubscribe = useStore.subscribe(state => {
       const {
         numbers = [],
+        speaker,
+        microphone,
         ringer,
         devices,
         status,
@@ -490,6 +516,8 @@ class Phone extends React.Component {
       this.setState({
         numbers,
         number_out,
+        speaker,
+        microphone,
         ringer,
         devices,
         status,
@@ -534,6 +562,8 @@ class Phone extends React.Component {
 
       numbers = [],
       number_out,
+
+      speaker,
 
       statuses = [],
       status,

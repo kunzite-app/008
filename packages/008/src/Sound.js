@@ -35,9 +35,10 @@ export default class Sound {
   }
 
   async setDevice(deviceId = 'default') {
-    this.playing && this.audio.pause?.();
-    this.audio?.setSinkId?.(deviceId);
-    this.playing && this.audio?.play?.();
+    this.playing && this.audio.pause();
+    await this.audio.setSinkId(deviceId);
+    console.log('setting', deviceId )
+    this.playing && this.audio.play();
   }
 }
 
@@ -83,6 +84,7 @@ export const getMicrophones = async () => {
 export const getDevices = async ({ kind }) => {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
+    console.log('herhere', devices)
     return devices.filter(dev => dev.kind === kind);
   } catch (err) {
     console.log('Error getting audio devices', err);

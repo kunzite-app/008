@@ -1,16 +1,15 @@
 import { Session } from 'sip.js';
 
-Session.prototype.isVideo = function () {
-  if (!this.sessionDescriptionHandler) return;
 
-  if (!this.isInbound())
-    return this.sessionDescriptionHandlerOptions.constraints?.video;
+Session.prototype.getStream = function () {
+  const stream = new MediaStream();
+  const { peerConnection } = this.sessionDescriptionHandler;
+  peerConnection.getReceivers().forEach(({ track }) => {
+    if (track) stream.addTrack(track);
+  });
 
-  return (
-    this.request?.body?.includes?.('m=video') ||
-    this.request?.body?.body?.includes?.('m=video')
-  );
-};
+  return stream;
+}
 
 Session.prototype.setMuted = function (muted) {
   if (!this.sessionDescriptionHandler) return;
@@ -32,6 +31,18 @@ Session.prototype.setMutedVideo = function (muted) {
       track.enabled = !muted;
     });
   });
+};
+
+Session.prototype.isVideo = function () {
+  if (!this.sessionDescriptionHandler) return;
+
+  if (!this.isInbound())
+    return this.sessionDescriptionHandlerOptions.constraints?.video;
+
+  return (
+    this.request?.body?.includes?.('m=video') ||
+    this.request?.body?.body?.includes?.('m=video')
+  );
 };
 
 Session.prototype.isInbound = function () {

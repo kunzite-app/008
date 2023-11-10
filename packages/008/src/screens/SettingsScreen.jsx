@@ -229,8 +229,8 @@ export const SettingsForm = (props) => {
       <FormRow label={'Speakers'}>
         <Select
           tabIndex="-1"
-          options={devices.map(({ ringer, label }) => {
-            return { value: ringer, text: label };
+          options={devices.map(({ deviceId, label }) => {
+            return { value: deviceId, text: label };
           })}
           value={speaker}
           onChange={e => setValue('speaker', e.target.value)}
@@ -240,8 +240,8 @@ export const SettingsForm = (props) => {
       <FormRow label={'Microphone'}>
         <Select
           tabIndex="-1"
-          options={microphones.map(({ ringer, label }) => {
-            return { value: ringer, text: label };
+          options={microphones.map(({ deviceId, label }) => {
+            return { value: deviceId, text: label };
           })}
           value={microphone}
           onChange={e => setValue('microphone', e.target.value)}
@@ -251,8 +251,8 @@ export const SettingsForm = (props) => {
       <FormRow label={'Ringer'}>
         <Select
           tabIndex="-1"
-          options={devices.map(({ ringer, label }) => {
-            return { value: ringer, text: label };
+          options={devices.map(({ deviceId, label }) => {
+            return { value: deviceId, text: label };
           })}
           value={ringer}
           onChange={e => setValue('ringer', e.target.value)}
@@ -472,7 +472,7 @@ export const SettingsScreen = () => {
 
   return (
     <Screen
-      closeable={closeable}
+      closeable={true}
       visible={showSettings}
       onClose={toggleShowSettings}
       style={{ padding: 10 }}

@@ -19,10 +19,20 @@ const COOKIE_ID = 'KZS';
 const CONTACTS_ID = 'KZSC';
 
 const initializeStore = async () => {
-  const initAudioDevices = () => {
+  const requestPermissions = async () => {
+    await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true
+    });
+
+    await Notification.requestPermission();
+  };
+
+  const initAudioDevices = async () => {
     const setAudioDevices = async () => {
       const devices = await getSpeakers();
       const microphones = await getMicrophones();
+      
       useStore.setState({ devices, microphones });
     };
 
@@ -47,6 +57,7 @@ const initializeStore = async () => {
     }, 1000);
   };
 
+  await requestPermissions();
   initAudioDevices();
   initContacts();
 };
@@ -67,7 +78,7 @@ const DEFAULTS = {
   number_out: undefined,
   numbers: [],
 
-  settingsUri: undefined,
+  // settingsUri: undefined,
   sipUri: undefined,
   sipUser: undefined,
   sipPassword: undefined,
@@ -103,7 +114,8 @@ export const useStore = create(
             contactsDialer: {},
             contactsDialerFilter: '',
             cdrs: [],
-            webhooks: []
+            webhooks: [],
+            settingsUri: undefined,
           }));
 
           initializeStore();
