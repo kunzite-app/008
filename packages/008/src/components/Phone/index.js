@@ -472,13 +472,8 @@ class Phone extends React.Component {
     }
 
     if (prevState.ringer !== state.ringer) {
-      const { devices } = state;
-      const ringer = devices.find(dev => dev.deviceId === state.ringer)
-        ? state.ringer
-        : 'default';
-
-      RING_TONE.setDevice(ringer);
-      NOTIFICATION_TONE.setDevice(ringer);
+      RING_TONE.setDevice(state.ringer);
+      NOTIFICATION_TONE.setDevice(state.ringer);
     }
 
     if (!state.sipUri?.length) this.ua?.stop();

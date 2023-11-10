@@ -1,5 +1,14 @@
-import { Audio as AVAudio } from 'expo-av';
 import { Platform } from 'react-native';
+import { Audio as AVAudio } from 'expo-av';
+
+const setSinkId = async ({ audio, deviceId }) => {
+  await audio?.stopAsync?.();
+  audio.pause?.();
+
+  const speakers = await getSpeakers();
+  const speaker = speakers.find(dev => dev.deviceId === deviceId)?.deviceId || 'default';
+  await audio.setSinkId(speaker);
+}
 
 export default class Sound {
   constructor({ media, loop = false } = {}) {
@@ -20,25 +29,31 @@ export default class Sound {
   }
 
   async play() {
+    await setSinkId({  audio: this.audio, deviceId: this.deviceId });
     this.audio?.playAsync?.();
     this.audio?.play?.();
     this.playing = true;
   }
 
-  async stop() {
+  async stop(pause) {
     await this.audio?.stopAsync?.();
-    await this.audio?.setPositionAsync?.(0);
-
     this.audio.pause?.();
-    this.audio.currentTime = 0;
+
+    if (!pause) {
+      await this.audio?.setPositionAsync?.(0);
+      this.audio.currentTime = 0;
+    }
+
     this.playing = false;
   }
 
-  async setDevice(deviceId = 'default') {
-    this.playing && this.audio.pause();
-    await this.audio.setSinkId(deviceId);
-    console.log('setting', deviceId )
-    this.playing && this.audio.play();
+  async setDevice(deviceId) {  
+    this.deviceId = deviceId;
+
+    if (this.playing) {
+      this.stop(true);
+      this.audio.play();
+    }
   }
 }
 
@@ -84,7 +99,6 @@ export const getMicrophones = async () => {
 export const getDevices = async ({ kind }) => {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
-    console.log('herhere', devices)
     return devices.filter(dev => dev.kind === kind);
   } catch (err) {
     console.log('Error getting audio devices', err);

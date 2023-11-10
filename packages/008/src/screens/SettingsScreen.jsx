@@ -18,6 +18,17 @@ import { useStore } from '../store/Context';
 
 import { readFileAsText } from '../utils';
 
+const SelectDevice = ({ devices, deviceId, onChange }) => (
+  <Select
+    tabIndex="-1"
+    options={devices.map(({ deviceId, label }) => {
+      return { value: deviceId, text: label };
+    })}
+    value={deviceId}
+    onChange={e => onChange?.(e.target.value)}
+  />
+)
+
 const Title = ({ children, style }) => (
   <Text
     style={[{ fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }, style]}
@@ -198,7 +209,7 @@ export const SettingsForm = (props) => {
     if (!_.isEqual(initialValues, values)) setValues(initialValues);
   }, [initialValues]);
 
-  const { statuses, devices, microphones, status, ringer, microphone, speaker } = values;
+  const { statuses = [], devices = [], microphones = [], status, ringer, microphone, speaker } = values;
   const { color } = statuses?.find(({ value }) => value === status) || {};
   return (
     <View style={style}>
@@ -227,36 +238,15 @@ export const SettingsForm = (props) => {
       <HRule />
 
       <FormRow label={'Speakers'}>
-        <Select
-          tabIndex="-1"
-          options={devices.map(({ deviceId, label }) => {
-            return { value: deviceId, text: label };
-          })}
-          value={speaker}
-          onChange={e => setValue('speaker', e.target.value)}
-        />
+        <SelectDevice devices={devices} deviceId={speaker} onChange={(val) => setValue('speaker', val)} />
       </FormRow>
 
       <FormRow label={'Microphone'}>
-        <Select
-          tabIndex="-1"
-          options={microphones.map(({ deviceId, label }) => {
-            return { value: deviceId, text: label };
-          })}
-          value={microphone}
-          onChange={e => setValue('microphone', e.target.value)}
-        />
+        <SelectDevice devices={devices} deviceId={speaker} onChange={(val) => setValue('microphone', val)} />
       </FormRow>
 
       <FormRow label={'Ringer'}>
-        <Select
-          tabIndex="-1"
-          options={devices.map(({ deviceId, label }) => {
-            return { value: deviceId, text: label };
-          })}
-          value={ringer}
-          onChange={e => setValue('ringer', e.target.value)}
-        />
+        <SelectDevice devices={devices} deviceId={speaker} onChange={(val) => setValue('ringer', val)} />
       </FormRow>
 
       <HRule />
@@ -466,10 +456,7 @@ export const SettingsScreen = () => {
       </View>
     )
   };
-
-  const closeable = settingsUri?.length || (wsUri?.length && wsUri?.sipUri && wsUri?.sipPassword);
-  console.error(settingsUri?.length)
-
+  
   return (
     <Screen
       closeable={true}
