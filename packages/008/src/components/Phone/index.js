@@ -145,8 +145,7 @@ class Phone extends React.Component {
       sipPassword,
       wsUri,
       status,
-      userAgent = '008 Softphone',
-      microphone
+      userAgent = '008 Softphone'
     } = this.state;
 
     this.ua?.stop();
