@@ -4,14 +4,13 @@ import { FiEyeOff, FiFile, FiSearch } from 'react-icons/fi';
 import {
   ActivityIndicator,
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   FlatList
 } from 'react-native';
 
 import { ContactAvatar } from './Avatars';
-import { ButtonIcon } from './Basics';
+import { ButtonIcon, Text } from './Basics';
 import { CallIcon } from './Phone/Components';
 import { VideoIcon } from './Icons';
 
@@ -212,7 +211,6 @@ class List extends React.Component {
                 flex: 1,
                 textAlign: 'right',
                 fontSize: 12,
-                fontFamily: 'Roboto Flex'
               }}
             >
               {maxItems} / {total || data.length}

@@ -11,7 +11,7 @@
   },
   "scripts": {
     "start": "yarn start-desktop",
-    "start-desktop": "lerna run web --scope @kunzite/008",
+    "start-desktop": "lerna run web --scope @kunzite/008 & lerna run start --scope 008desktop",
     "build-web": "lerna run build-web",
     "build-desktop": "lerna run build-web && rm -rf packages/008desktop/app && mv packages/008/web-build packages/008desktop/app && lerna run build --scope 008desktop",
     "clean": "lerna clean",

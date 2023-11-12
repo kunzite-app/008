@@ -1,21 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { View } from 'react-native';
 
-export const AudioPlayer = ({ session }) => {
+export const AudioPlayer = ({ session, speaker }) => {
   const ref = useRef(null);
 
   useEffect(() => {
     session?.on('accepted', () => {
-      const stream = new MediaStream();
-      const { peerConnection } = session.sessionDescriptionHandler;
-      peerConnection.getReceivers().forEach(({ track }) => {
-        if (track) stream.addTrack(track);
-      });
-
+      const stream = session.getStream();
       const elem = ref.current;
       elem.srcObject = stream;
+      elem.setSinkId(speaker)
     });
-  }, [session?.id]);
+  }, [session?.id, speaker]);
 
   if (!session) return null;
 
