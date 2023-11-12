@@ -473,7 +473,7 @@ export const SettingsScreen = () => {
       closeable={true}
       visible={showSettings}
       onClose={toggleShowSettings}
-      style={{ padding: 10}}
+      style={{ padding: 10 }}
     >
       <View style={{ flex: 1, flexDirection: 'row', paddingRight: 5  }}>
         <View style={{ paddingRight: 15 }}>
