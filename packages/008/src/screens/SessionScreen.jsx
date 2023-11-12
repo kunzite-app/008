@@ -6,6 +6,7 @@ import { AudioPlayer } from '../components/Audioplayer';
 import { ButtonIcon, CancelAccept } from '../components/Basics';
 import { DialGrid } from '../components/Dialer';
 import { CallInfo, ContactDetails } from '../components/Phone/Components';
+import { useStore } from '../store/Context';
 
 const Round = ({ children }) => {
   const size = 30;
@@ -37,6 +38,11 @@ export const SessionScreen = ({
   onBlindTransfer,
   onContactClick
 }) => {
+  const store = useStore();
+  const {
+    speaker
+  } = store;
+
   const [showDialer, setShowDialer] = useState(false);
   const [hold, setHold] = useState(false);
   const [muted, setMuted] = useState(false);
@@ -67,7 +73,7 @@ export const SessionScreen = ({
 
   return (
     <Screen closeable={closeable} visible={visible}>
-      <AudioPlayer session={session} />
+      <AudioPlayer session={session} speaker={speaker} />
 
       <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute', padding: 10 }}>
         <CallInfo

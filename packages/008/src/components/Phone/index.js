@@ -15,12 +15,14 @@ import { Dialer } from '../Dialer';
 import { Header } from './Components';
 import { Screen } from '../../screens/Screen';
 import { SessionScreen } from '../../screens/SessionScreen';
+
 import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { name as packageName } from '../../../package.json';
 import { tts } from '../../008Q';
+
+import { name as packageName } from '../../../package.json';
 
 class Phone extends React.Component {
   constructor(props) {
@@ -58,7 +60,8 @@ class Phone extends React.Component {
           const notification = new Notification(packageName, {
             icon: 'icon.png',
             title: `${packageName}`,
-            body: `${contact.name || ''} (${from})`
+            body: `${contact.name || ''} (${from})`,
+            silent: true
           });
 
           notification.onclick = ev => {
@@ -116,6 +119,12 @@ class Phone extends React.Component {
   };
 
   set_ua_daemon = () => {
+    if (this.ua) {
+      this.ua.stop();
+      clearInterval(this.connWatcher);
+      clearInterval(this.networkWatcher);
+    }
+
     this.set_ua();
 
     this.connWatcher = setInterval(() => {
@@ -157,12 +166,6 @@ class Phone extends React.Component {
         connectionTimeout: 5,
         reconnectionTimeout: 5,
         maxReconnectionAttempts: 0
-      },
-      sessionDescriptionHandlerFactoryOptions: {
-        constraints: {
-          audio: true,
-          video: true
-        }
       }
     });
 
@@ -229,12 +232,17 @@ class Phone extends React.Component {
   };
 
   answer = async () => {
-    const { session } = this.state;
+    const { session, microphone } = this.state;
     if (session?.hasAnswer) return;
 
     const video = session.request?.body?.includes('m=video');
     session?.accept({
-      sessionDescriptionHandlerOptions: { constraints: { video } }
+      sessionDescriptionHandlerOptions: {
+        constraints: {
+          audio: { deviceId: { ideal: microphone } },
+          video
+        }
+      }
     });
   };
 
@@ -245,7 +253,7 @@ class Phone extends React.Component {
   };
 
   call = async (opts = {}) => {
-    const { dialer_number, number_out } = this.state;
+    const { dialer_number, number_out, microphone } = this.state;
     const { number = dialer_number, extraHeaders = [], video = false } = opts;
 
     const indentityHeaders = number_out
@@ -256,7 +264,12 @@ class Phone extends React.Component {
       const target = cleanPhoneNumber(number);
       const session = this.ua.invite(target, {
         extraHeaders: [...indentityHeaders, ...extraHeaders],
-        sessionDescriptionHandlerOptions: { constraints: { video } }
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
+          }
+        }
       });
 
       this.processRecording({ session });
@@ -293,7 +306,8 @@ class Phone extends React.Component {
   };
 
   transfer = (opts = {}) => {
-    const { session, dialer_number, show_blindTransfer } = this.state;
+    const { session, dialer_number, show_blindTransfer, microphone } =
+      this.state;
 
     const {
       number = dialer_number,
@@ -305,7 +319,12 @@ class Phone extends React.Component {
     const target = cleanPhoneNumber(number);
     const payload = {
       extraHeaders,
-      sessionDescriptionHandlerOptions: { constraints: { video } }
+      sessionDescriptionHandlerOptions: {
+        constraints: {
+          audio: { deviceId: { ideal: microphone } },
+          video
+        }
+      }
     };
 
     if (blind) {
@@ -453,13 +472,9 @@ class Phone extends React.Component {
         else if (!ua?.isRegistered()) ua?.register();
     }
 
-    if (prevState.deviceId !== state.deviceId) {
-      const { devices } = state;
-      const deviceId = devices.find(dev => dev.deviceId === state.deviceId)
-        ? state.deviceId
-        : 'default';
-
-      RING_TONE.setDevice(deviceId);
+    if (prevState.ringer !== state.ringer) {
+      RING_TONE.setDevice(state.ringer);
+      NOTIFICATION_TONE.setDevice(state.ringer);
     }
 
     if (!state.sipUri?.length) this.ua?.stop();
@@ -469,7 +484,9 @@ class Phone extends React.Component {
     this.unsubscribe = useStore.subscribe(state => {
       const {
         numbers = [],
-        deviceId,
+        speaker,
+        microphone,
+        ringer,
         devices,
         status,
         statuses,
@@ -495,7 +512,9 @@ class Phone extends React.Component {
       this.setState({
         numbers,
         number_out,
-        deviceId,
+        speaker,
+        microphone,
+        ringer,
         devices,
         status,
         statuses,
@@ -539,6 +558,8 @@ class Phone extends React.Component {
 
       numbers = [],
       number_out,
+
+      speaker,
 
       statuses = [],
       status,

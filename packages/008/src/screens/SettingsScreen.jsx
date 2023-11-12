@@ -18,6 +18,17 @@ import { useStore } from '../store/Context';
 
 import { readFileAsText } from '../utils';
 
+const SelectDevice = ({ devices, deviceId, onChange }) => (
+  <Select
+    tabIndex="-1"
+    options={devices.map(({ deviceId, label }) => {
+      return { value: deviceId, text: label };
+    })}
+    value={deviceId}
+    onChange={e => onChange?.(e.target.value)}
+  />
+)
+
 const Title = ({ children, style }) => (
   <Text
     style={[{ fontSize: 20, fontWeight: 'bold', paddingBottom: 10 }, style]}
@@ -26,19 +37,19 @@ const Title = ({ children, style }) => (
   </Text>
 );
 
-const RowLink = ({ onClick, text }) => {
+const RowLink = ({ onClick, text, iconSize = 15 }) => {
   const icons = {
-    anchor: <AnchorIcon size={18} />,
-    unanchor: <UnanchorIcon size={18} />,
-    quit: <XIcon size={18} />,
-    logout: <LogOutIcon size={18} />
+    anchor: <AnchorIcon size={iconSize} />,
+    unanchor: <UnanchorIcon size={iconSize} />,
+    quit: <XIcon size={iconSize} />,
+    logout: <LogOutIcon size={iconSize} />
   };
   return (
     <TouchableOpacity
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: 10
+        paddingVertical: 15
       }}
     >
       {icons[text.toLowerCase()]}
@@ -57,7 +68,8 @@ export const ExitForm = () => {
     sipUri,
     sipPassword,
     setSettings,
-    logout
+    logout,
+    anchored
   } = useStore();
   
   if (!electron && !settingsUri) return <View />;
@@ -66,9 +78,21 @@ export const ExitForm = () => {
 
   return (
     <View>
+      {electron && (
+        <View>
+          <RowLink
+            onClick={() => setSettings({ anchored: !anchored })}
+            text={!anchored ? 'Anchor' : 'Unanchor'}
+          />
+           <HRule />
+        </View>
+      )}
+      
       {isLogout && <RowLink onClick={logout} text="Logout" />}
       {electron && (
-        <RowLink onClick={() => setSettings({ doquit: true })} text="Quit" />
+        <View>
+           <RowLink onClick={() => setSettings({ doquit: true })} text="Quit" />
+        </View>
       )}
     </View>
   );
@@ -92,22 +116,46 @@ export const DangerZone = ({ style }) => {
   )
 }
 
-export const AnchorForm = () => {
-  const {
-    electron,
-    anchored,
-    setSettings,
-  } = useStore();
+export const SettingsForm = (props) => {
+  const { style, onChange, ...initialValues } = props
+  const [values, setValues] = useState(initialValues);
 
+  const setValue = (field, value) => {
+    const val = { ...values };
+    val[field] = value;
+
+    setValues(val);
+    onChange?.(val);
+  };
+
+  useEffect(() => {
+    if (!_.isEqual(initialValues, values)) setValues(initialValues);
+  }, [initialValues]);
+
+  const { statuses = [], status } = values;
+  const { color } = statuses?.find(({ value }) => value === status) || {};
   return (
-    <View>
-      {electron && (
-        <View>
-          <RowLink
-            onClick={() => setSettings({ anchored: !anchored })}
-            text={!anchored ? 'Anchor' : 'Unanchor'}
+    <View style={style}>
+      {statuses?.length > 0 && (
+        <FormRow label={'Status'}>
+          <Select
+            tabIndex="-1"
+            prepend={
+              <View
+                style={{
+                  paddingLeft: 10,
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}
+              >
+                <Status color={color} />
+              </View>
+            }
+            options={statuses}
+            value={status}
+            onChange={e => setValue('status', e.target.value)}
           />
-        </View>
+        </FormRow>
       )}
     </View>
   );
@@ -182,13 +230,8 @@ export const ConnectionForm = ({ onChange, ...initialValues }) => {
   );
 };
 
-export const SettingsForm = ({
-  statuses = [],
-  devices = [],
-  onChange,
-  style,
-  ...initialValues
-}) => {
+export const DevicesForm = (props) => {
+  const { style, onChange, ...initialValues } = props
   const [values, setValues] = useState(initialValues);
 
   const setValue = (field, value) => {
@@ -203,48 +246,22 @@ export const SettingsForm = ({
     if (!_.isEqual(initialValues, values)) setValues(initialValues);
   }, [initialValues]);
 
-  const { status, deviceId, language } = values;
-  const { color } = statuses?.find(({ value }) => value === status) || {};
+  const { statuses = [], devices = [], microphones = [], ringer, microphone, speaker } = values;
   return (
     <View style={style}>
-      {statuses?.length > 0 && (
-        <FormRow label={'Status'}>
-          <Select
-            tabIndex="-1"
-            prepend={
-              <View
-                style={{
-                  paddingLeft: 10,
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}
-              >
-                <Status color={color} />
-              </View>
-            }
-            options={statuses}
-            value={status}
-            onChange={e => setValue('status', e.target.value)}
-          />
-        </FormRow>
-      )}
+      <FormRow label={'Speakers'}>
+        <SelectDevice devices={devices} deviceId={speaker} onChange={(val) => setValue('speaker', val)} />
+      </FormRow>
 
-      {devices?.length > 0 && (
-        <FormRow label={'Ringer'}>
-          <Select
-            tabIndex="-1"
-            options={devices.map(({ deviceId, label }) => {
-              return { value: deviceId, text: label };
-            })}
-            value={deviceId}
-            onChange={e => setValue('deviceId', e.target.value)}
-          />
-        </FormRow>
-      )}
+      <FormRow label={'Microphone'}>
+        <SelectDevice devices={microphones} deviceId={microphone} onChange={(val) => setValue('microphone', val)} />
+      </FormRow>
+
+      <FormRow label={'Ringer'}>
+        <SelectDevice devices={devices} deviceId={ringer} onChange={(val) => setValue('ringer', val)} />
+      </FormRow>
 
       <HRule />
-
-      <AnchorForm />
     </View>
   );
 };
@@ -336,7 +353,7 @@ export const SettingsScreen = () => {
 
     showSettings,
     toggleShowSettings,
-    settingsTab = 'settings',
+    settingsTab = 'user',
     setSettings,
 
     webhooks,
@@ -378,12 +395,14 @@ export const SettingsScreen = () => {
   );
 
   const content = {
-    settings: (
+    user: (
       <View style={{ flex: 1 }}>
-        <Title>Preferences</Title>
-        <ScrollView style={{ flex: 1 }}>
-          <SettingsForm {...store} onChange={onChangeSettingsHandler} />
-        </ScrollView>
+        <SettingsForm {...store} onChange={onChangeSettingsHandler} />
+        <HRule/>
+        <View style={{ flex: 1, justifyContent: 'space-between' }}>
+          <ExitForm />
+          <DangerZone />
+        </View>
       </View>
     ),
     connection: (
@@ -407,6 +426,14 @@ export const SettingsScreen = () => {
             }}
             onAccept={() => setSettings(connection)}
           />
+        </ScrollView>
+      </View>
+    ),
+    devices: (
+      <View style={{ flex: 1 }}>
+        <Title>Devices</Title>
+        <ScrollView style={{ flex: 1 }}>
+          <DevicesForm {...store} onChange={onChangeSettingsHandler} />
         </ScrollView>
       </View>
     ),
@@ -439,33 +466,22 @@ export const SettingsScreen = () => {
         </Screen>
       </View>
     ),
-    user: (
-      <View style={{ flex: 1 }}>
-        <Title style={{ fontSize: 16 }}>User</Title>
-        <View style={{ flex: 1, justifyContent: 'space-between' }}>
-          <ExitForm />
-          <DangerZone />
-        </View>
-      </View>
-    )
   };
-
-  const closeable = settingsUri?.length || (wsUri?.length && wsUri?.sipUri && wsUri?.sipPassword);
-
+  
   return (
     <Screen
-      closeable={closeable}
+      closeable={true}
       visible={showSettings}
       onClose={toggleShowSettings}
       style={{ padding: 10 }}
     >
-      <View style={{ flex: 1, flexDirection: 'row' }}>
-        <View style={{ paddingRight: 10 }}>
-          <SettingsButton icon="settings" option="settings" />
-          <SettingsButton icon="phone" option="connection" />
+      <View style={{ flex: 1, flexDirection: 'row', paddingRight: 5  }}>
+        <View style={{ paddingRight: 15 }}>
+          <SettingsButton icon="user" option="user" />
+          <SettingsButton icon="settings" option="connection" />
+          <SettingsButton icon="headphones" option="devices" />
           <SettingsButton icon="users" option="contacts" />
           <SettingsButton icon="share2" option="webhooks" />
-          <SettingsButton icon="user" option="user" />
         </View>
 
         {content[option]}
