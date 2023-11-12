@@ -6,9 +6,10 @@ const setSinkId = async ({ audio, deviceId }) => {
   audio.pause?.();
 
   const speakers = await getSpeakers();
-  const speaker = speakers.find(dev => dev.deviceId === deviceId)?.deviceId || 'default';
+  const speaker =
+    speakers.find(dev => dev.deviceId === deviceId)?.deviceId || 'default';
   await audio.setSinkId(speaker);
-}
+};
 
 export default class Sound {
   constructor({ media, loop = false } = {}) {
@@ -29,7 +30,7 @@ export default class Sound {
   }
 
   async play() {
-    await setSinkId({  audio: this.audio, deviceId: this.deviceId });
+    await setSinkId({ audio: this.audio, deviceId: this.deviceId });
     this.audio?.playAsync?.();
     this.audio?.play?.();
     this.playing = true;
@@ -47,7 +48,7 @@ export default class Sound {
     this.playing = false;
   }
 
-  async setDevice(deviceId) {  
+  async setDevice(deviceId) {
     this.deviceId = deviceId;
 
     if (this.playing) {
