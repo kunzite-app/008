@@ -239,7 +239,7 @@ const launchQ = async () => {
   }
 
   const url = `https://kunziteq.s3.gra.perf.cloud.ovh.net/${bin}`;
-  // await download({ url, destination: qpath });
+  await download({ url, destination: qpath });
 
   log.info(`Launching Q at ${qpath}`);
   return new Promise((resolve, reject) => {

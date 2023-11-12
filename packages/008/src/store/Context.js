@@ -32,7 +32,7 @@ const initializeStore = async () => {
     const setAudioDevices = async () => {
       const devices = await getSpeakers();
       const microphones = await getMicrophones();
-      
+
       useStore.setState({ devices, microphones });
     };
 
@@ -78,7 +78,6 @@ const DEFAULTS = {
   number_out: undefined,
   numbers: [],
 
-  // settingsUri: undefined,
   sipUri: undefined,
   sipUser: undefined,
   sipPassword: undefined,
@@ -115,13 +114,12 @@ export const useStore = create(
             contactsDialerFilter: '',
             cdrs: [],
             webhooks: [],
-            settingsUri: undefined,
+            settingsUri: undefined
           }));
 
           initializeStore();
         },
         setSettings: settings => {
-          console.log(settings);
           const { settingsUri, logout } = get();
 
           set(() => ({ ...settings }));

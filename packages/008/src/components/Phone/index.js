@@ -35,7 +35,7 @@ class Phone extends React.Component {
       sessiont: null,
 
       show_transfer: false,
-      show_blindTransfer: false,
+      show_blindTransfer: false
     };
 
     this.state = {
@@ -119,13 +119,11 @@ class Phone extends React.Component {
   };
 
   set_ua_daemon = () => {
-
     if (this.ua) {
-    this.ua.stop();
-    clearInterval(this.connWatcher);
-    clearInterval(this.networkWatcher);
+      this.ua.stop();
+      clearInterval(this.connWatcher);
+      clearInterval(this.networkWatcher);
     }
-
 
     this.set_ua();
 
@@ -148,14 +146,14 @@ class Phone extends React.Component {
       wsUri,
       status,
       userAgent = '008 Softphone',
-      speaker = 'default'
+      microphone
     } = this.state;
 
     this.ua?.stop();
 
     if (!wsUri?.length) return;
 
-        const register = status !== 'offline';
+    const register = status !== 'offline';
     const ua = new UA({
       uri: sipUri,
       authorizationUser: sipUser,
@@ -169,12 +167,6 @@ class Phone extends React.Component {
         connectionTimeout: 5,
         reconnectionTimeout: 5,
         maxReconnectionAttempts: 0
-      },
-      sessionDescriptionHandlerFactoryOptions: {
-        constraints: {
-          audio: true,
-          video: true
-        }
       }
     });
 
@@ -241,12 +233,17 @@ class Phone extends React.Component {
   };
 
   answer = async () => {
-    const { session } = this.state;
+    const { session, microphone } = this.state;
     if (session?.hasAnswer) return;
 
     const video = session.request?.body?.includes('m=video');
     session?.accept({
-      sessionDescriptionHandlerOptions: { constraints: { video } }
+      sessionDescriptionHandlerOptions: {
+        constraints: {
+          audio: { deviceId: { ideal: microphone } },
+          video
+        }
+      }
     });
   };
 
@@ -268,10 +265,12 @@ class Phone extends React.Component {
       const target = cleanPhoneNumber(number);
       const session = this.ua.invite(target, {
         extraHeaders: [...indentityHeaders, ...extraHeaders],
-        sessionDescriptionHandlerOptions: { constraints: { 
-          audio: { deviceId: { ideal: microphone }},
-          video 
-        }}
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
+          }
+        }
       });
 
       this.processRecording({ session });
@@ -308,7 +307,8 @@ class Phone extends React.Component {
   };
 
   transfer = (opts = {}) => {
-    const { session, dialer_number, show_blindTransfer, microphone } = this.state;
+    const { session, dialer_number, show_blindTransfer, microphone } =
+      this.state;
 
     const {
       number = dialer_number,
@@ -320,10 +320,12 @@ class Phone extends React.Component {
     const target = cleanPhoneNumber(number);
     const payload = {
       extraHeaders,
-      sessionDescriptionHandlerOptions: { constraints: {
-        audio: { deviceId: { ideal: microphone }}, 
-        video 
-      }}
+      sessionDescriptionHandlerOptions: {
+        constraints: {
+          audio: { deviceId: { ideal: microphone } },
+          video
+        }
+      }
     };
 
     if (blind) {
