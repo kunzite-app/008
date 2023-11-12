@@ -9,6 +9,7 @@ import { FormRow, InputRow } from '../components/Forms';
 import {
   AnchorIcon,
   LogOutIcon,
+  TrashIcon,
   UnanchorIcon,
   XIcon
 } from '../components/Icons';

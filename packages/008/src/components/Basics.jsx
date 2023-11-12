@@ -93,18 +93,56 @@ export const Select = ({ value, options, onChange, style, ...props }) => {
   )
 }
 
-export const Button = ({ children, color, style, onClick }) => {
+export const Button = ({ children, color, style, onClick, fullWidth }) => {
   const calculatedColor = COLORS[color] || color;
+
+  let stylex = { minWidth: 100, height: 40, borderRadius: 5, backgroundColor: calculatedColor, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', color: 'white' }
+  if ( fullWidth ) stylex = { ...stylex, flex:1 }
+  
   return (
     <TouchableOpacity 
-      style={[
-        { minWidth: 100, height: 40, borderRadius: 5, backgroundColor: calculatedColor, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', color: 'white' },
-        style
-      ]}
+      style={[ stylex, style ]}
       onPress={onClick} 
     >
       {children}
     </TouchableOpacity>
+  )
+};
+
+
+export const ButtonIcon = ({ children, icon, iconType, onClick, style }) => {
+  const iconn = () => {
+    if (icon === 'phoneForwarded') return <PhoneForwardedIcon />;
+    if (icon === 'micOff') return <MicOffIcon />;
+    if (icon === 'play') return <PlayIcon />;
+    if (icon === 'pause') return <PauseIcon />;
+    if (icon === 'grid') return <GridIcon />;
+    if (icon === 'clock') return <ClockIcon />;
+    if (icon === 'users') return <UsersIcon />;
+    if (icon === 'user') return <UserIcon />;
+    if (icon === 'settings') return <SettingsIcon />;
+    if (icon === 'headphones') return <HeadphonesIcon />;
+    if (icon === 'phone') return <PhoneIcon />;
+    if (icon === 'delete') return <DeleteIcon />;
+    if (icon === 'trash') return <TrashIcon />;
+    if (icon === 'share2') return <Share2Icon />;
+    if (icon === 'plus') return <PlusIcon />;
+    if (icon === 'video') return <VideoIcon />;
+
+    return iconType;
+  }
+  return (
+    <TouchableOpacity
+      onPress={onClick}
+      style={[
+        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 1 },
+        style
+      ]}
+    >
+      {iconn()}
+      {children}
+    </TouchableOpacity>
+
   )
 };
 
@@ -147,7 +185,8 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
 
         flexDirection: 'row',
         justifyContent: 'space-around',
-        alignItems: 'center'
+        alignItems: 'center',
+        flex: 1
       }}
     >
       {onCancel && (
@@ -180,39 +219,3 @@ export const Avatar = ({ imageUrl, name, size = 35 }) => (
     )}
   </View>
 );
-
-export const ButtonIcon = ({ children, icon, iconType, onClick, style }) => {
-  const iconn = () => {
-    if (icon === 'phoneForwarded') return <PhoneForwardedIcon />;
-    if (icon === 'micOff') return <MicOffIcon />;
-    if (icon === 'play') return <PlayIcon />;
-    if (icon === 'pause') return <PauseIcon />;
-    if (icon === 'grid') return <GridIcon />;
-    if (icon === 'clock') return <ClockIcon />;
-    if (icon === 'users') return <UsersIcon />;
-    if (icon === 'user') return <UserIcon />;
-    if (icon === 'settings') return <SettingsIcon />;
-    if (icon === 'headphones') return <HeadphonesIcon />;
-    if (icon === 'phone') return <PhoneIcon />;
-    if (icon === 'delete') return <DeleteIcon />;
-    if (icon === 'trash') return <TrashIcon />;
-    if (icon === 'share2') return <Share2Icon />;
-    if (icon === 'plus') return <PlusIcon />;
-    if (icon === 'video') return <VideoIcon />;
-
-    return iconType;
-  }
-  return (
-    <TouchableOpacity
-      onPress={onClick}
-      style={[
-        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 1 },
-        style
-      ]}
-    >
-      {iconn()}
-      {children}
-    </TouchableOpacity>
-
-  )
-};
