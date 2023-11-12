@@ -52,7 +52,7 @@ const RowLink = ({ onClick, text, iconSize = 15 }) => {
         paddingVertical: 15
       }}
     >
-      {icons[text.toLowerCase()]}
+      <div>{icons[text.toLowerCase()]}</div>
       <Text style={{ paddingLeft: 5 }} onClick={onClick}>
         {text}
       </Text>
@@ -110,7 +110,7 @@ export const DangerZone = ({ style }) => {
         color='danger' 
         onClick={clear}
       >
-        Clear all
+        <Text style={{ color: 'white' }}>Clear all</Text>
       </Button>
     </View>
   )
@@ -389,7 +389,7 @@ export const SettingsScreen = () => {
   };
 
   const SettingsButton = ({ icon, option }) => (
-    <View style={{ paddingBottom: 15 }}>
+    <View style={{ padding: 15, paddingBottom: 15 }}>
       <ButtonIcon icon={icon} onClick={() => setOption(option)} />
     </View>
   );

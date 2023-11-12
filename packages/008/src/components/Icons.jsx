@@ -1,4 +1,3 @@
-import { EuiIcon } from '@elastic/eui';
 import {
   FiUser as UserIcon,
   FiUsers as UsersIcon,
@@ -28,8 +27,12 @@ import {
   FiVideo as VideoIcon,
 } from 'react-icons/fi';
 
-import IconUnanchor from '../../web/assets/icons/unanchor.svg';
-const UnanchorIcon = () => <EuiIcon type={IconUnanchor} />;
+export const Icon = ({ icon, size = 16, color = 'black' }) => {
+  if (icon === 'unanchor') 
+    return <img width={size} height={size} src="assets/icons/unanchor.svg" />
+} 
+
+const UnanchorIcon = () => <Icon icon="unanchor" />;
 
 export {
   UserIcon,

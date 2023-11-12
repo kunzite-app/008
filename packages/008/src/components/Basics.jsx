@@ -183,7 +183,6 @@ export const Avatar = ({ imageUrl, name, size = 35 }) => (
 
 export const ButtonIcon = ({ children, icon, iconType, onClick, style }) => {
   const iconn = () => {
-    console.log(iconType)
     if (icon === 'phoneForwarded') return <PhoneForwardedIcon />;
     if (icon === 'micOff') return <MicOffIcon />;
     if (icon === 'play') return <PlayIcon />;
