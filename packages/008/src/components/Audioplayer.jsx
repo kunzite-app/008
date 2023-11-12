@@ -5,7 +5,6 @@ export const AudioPlayer = ({ session, speaker }) => {
   const ref = useRef(null);
 
   useEffect(() => {
-    console.error(speaker);
     session?.on('accepted', () => {
       const stream = session.getStream();
       const elem = ref.current;
