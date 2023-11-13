@@ -45,8 +45,9 @@ const COLORS = {
 }
 
 const defaultStyle = { 
-  padding: 8, 
-  backgroundColor: BACKCOLOR, 
+  padding: 5,
+  height: 40,
+  // backgroundColor: BACKCOLOR, 
   borderColor: BORDERCOLOR, 
   borderWidth: 1,
   fontFamily
@@ -58,8 +59,8 @@ export const Text = ({ children, style, ...props }) => (
   </RNText>
 )
 
-export const TextInput = ({ style, ...props }) =>
-  <RNTextInput style={[{ fontFamily, outlineStyle: 'none' }, style ]} {...props} />
+export const TextInput = ({ style, disabled, ...props }) =>
+  <RNTextInput style={[{ fontFamily, outlineStyle: 'none' }, disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} disabled {...props} />
 
 export const TextField = ({
   onChange,
