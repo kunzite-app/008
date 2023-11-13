@@ -4,13 +4,12 @@ import { FiEyeOff, FiFile, FiSearch } from 'react-icons/fi';
 import {
   ActivityIndicator,
   View,
-  TextInput,
   TouchableOpacity,
   FlatList
 } from 'react-native';
 
 import { ContactAvatar } from './Avatars';
-import { ButtonIcon, Text } from './Basics';
+import { ButtonIcon, Text, TextInput } from './Basics';
 import { CallIcon } from './Phone/Components';
 import { VideoIcon } from './Icons';
 
@@ -153,7 +152,7 @@ const SearchInput = ({ onChange, value, style }) => (
     </View>
 
     <TextInput
-      style={{ flex: 1, borderBottomWidth: 1 }}
+      style={{ flex: 1, borderBottomWidth: 1, paddingBottom:5 }}
       onChangeText={text => onChange?.(text)}
       value={value}
     />

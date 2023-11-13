@@ -33,8 +33,9 @@ const LoginForm = ({ onSubmit, loading }) => {
 
       <FormRow>
         <Button
+          color='primary'
           tabIndex="-1"
-          isLoading={loading}
+          disabled={loading}
           onClick={() => onSubmit?.(values)}
         >
           <LoginIcon />
