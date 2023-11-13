@@ -1,6 +1,6 @@
-import { TouchableOpacity, Modal, View } from 'react-native';
+import { View } from 'react-native';
 
-import { XIcon } from '../components/Icons';
+import { ButtonIcon } from '../components/Basics';
 
 export const Screen = ({
   children,
@@ -19,12 +19,7 @@ export const Screen = ({
       <View style={[{ flex: 1, backgroundColor: color }]}>
         {closeable && (
           <View style={[{ direction: 'RTL', height: 30 }, headerStyle]}>
-            <TouchableOpacity
-              style={{ width: 32, padding: 5 }}
-              onPress={() => onClose?.()}
-            >
-              <XIcon />
-            </TouchableOpacity>
+            <ButtonIcon  style={{ width: 30, padding: 5 }} onClick={() => onClose?.()} icon='x' size={20} />
           </View>
         )}
 

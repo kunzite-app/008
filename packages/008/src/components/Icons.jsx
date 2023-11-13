@@ -27,7 +27,7 @@ import {
   FiVideo as VideoIcon,
 } from 'react-icons/fi';
 
-export const Icon = ({ icon, size = 16, color = 'black' }) => {
+export const Icon = ({ icon, size = 16 }) => {
   if (icon === 'unanchor') 
     return <img width={size} height={size} src="assets/icons/unanchor.svg" />
 } 

@@ -110,24 +110,26 @@ export const Button = ({ children, color, style, onClick, fullWidth }) => {
 };
 
 
-export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18 }) => {
+export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color = 'black' }) => {
+  const styling = { size, color }
   const Icon = () => {
-    if (icon === 'phoneForwarded') return <PhoneForwardedIcon size={size} />;
-    if (icon === 'micOff') return <MicOffIcon size={size} />;
-    if (icon === 'play') return <PlayIcon size={size} />;
-    if (icon === 'pause') return <PauseIcon size={size} />;
-    if (icon === 'grid') return <GridIcon size={size} />;
-    if (icon === 'clock') return <ClockIcon size={size} />;
-    if (icon === 'users') return <UsersIcon size={size} />;
-    if (icon === 'user') return <UserIcon size={size} />;
+    if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
+    if (icon === 'micOff') return <MicOffIcon { ...styling } />;
+    if (icon === 'play') return <PlayIcon { ...styling } />;
+    if (icon === 'pause') return <PauseIcon { ...styling } />;
+    if (icon === 'grid') return <GridIcon { ...styling } />;
+    if (icon === 'clock') return <ClockIcon { ...styling } />;
+    if (icon === 'users') return <UsersIcon { ...styling } />;
+    if (icon === 'user') return <UserIcon { ...styling } />;
     if (icon === 'settings') return <SettingsIcon />;
-    if (icon === 'headphones') return <HeadphonesIcon size={size}/>;
-    if (icon === 'phone') return <PhoneIcon size={size} />;
-    if (icon === 'delete') return <DeleteIcon size={size} />;
-    if (icon === 'trash') return <TrashIcon size={size} />;
-    if (icon === 'share2') return <Share2Icon size={size} />;
-    if (icon === 'plus') return <PlusIcon size={size} />;
-    if (icon === 'video') return <VideoIcon size={size} />;
+    if (icon === 'headphones') return <HeadphonesIcon { ...styling }/>;
+    if (icon === 'phone') return <PhoneIcon { ...styling } />;
+    if (icon === 'delete') return <DeleteIcon { ...styling } />;
+    if (icon === 'trash') return <TrashIcon { ...styling } />;
+    if (icon === 'share2') return <Share2Icon { ...styling } />;
+    if (icon === 'plus') return <PlusIcon { ...styling } />;
+    if (icon === 'video') return <VideoIcon { ...styling } />;
+    if (icon === 'x') return <XIcon { ...styling } />;
 
     return iconType;
   }
