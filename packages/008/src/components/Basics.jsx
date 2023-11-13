@@ -58,7 +58,7 @@ export const Text = ({ children, style, ...props }) => (
 )
 
 export const TextInput = ({ style, ...props }) =>
-  <RNTextInput style={[{ fontFamily }, style ]} {...props} />
+  <RNTextInput style={[{ fontFamily, outlineStyle: 'none' }, style ]} {...props} />
 
 export const TextField = ({
   onChange,
@@ -110,24 +110,24 @@ export const Button = ({ children, color, style, onClick, fullWidth }) => {
 };
 
 
-export const ButtonIcon = ({ children, icon, iconType, onClick, style }) => {
-  const iconn = () => {
-    if (icon === 'phoneForwarded') return <PhoneForwardedIcon />;
-    if (icon === 'micOff') return <MicOffIcon />;
-    if (icon === 'play') return <PlayIcon />;
-    if (icon === 'pause') return <PauseIcon />;
-    if (icon === 'grid') return <GridIcon />;
-    if (icon === 'clock') return <ClockIcon />;
-    if (icon === 'users') return <UsersIcon />;
-    if (icon === 'user') return <UserIcon />;
+export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18 }) => {
+  const Icon = () => {
+    if (icon === 'phoneForwarded') return <PhoneForwardedIcon size={size} />;
+    if (icon === 'micOff') return <MicOffIcon size={size} />;
+    if (icon === 'play') return <PlayIcon size={size} />;
+    if (icon === 'pause') return <PauseIcon size={size} />;
+    if (icon === 'grid') return <GridIcon size={size} />;
+    if (icon === 'clock') return <ClockIcon size={size} />;
+    if (icon === 'users') return <UsersIcon size={size} />;
+    if (icon === 'user') return <UserIcon size={size} />;
     if (icon === 'settings') return <SettingsIcon />;
-    if (icon === 'headphones') return <HeadphonesIcon />;
-    if (icon === 'phone') return <PhoneIcon />;
-    if (icon === 'delete') return <DeleteIcon />;
-    if (icon === 'trash') return <TrashIcon />;
-    if (icon === 'share2') return <Share2Icon />;
-    if (icon === 'plus') return <PlusIcon />;
-    if (icon === 'video') return <VideoIcon />;
+    if (icon === 'headphones') return <HeadphonesIcon size={size}/>;
+    if (icon === 'phone') return <PhoneIcon size={size} />;
+    if (icon === 'delete') return <DeleteIcon size={size} />;
+    if (icon === 'trash') return <TrashIcon size={size} />;
+    if (icon === 'share2') return <Share2Icon size={size} />;
+    if (icon === 'plus') return <PlusIcon size={size} />;
+    if (icon === 'video') return <VideoIcon size={size} />;
 
     return iconType;
   }
@@ -135,11 +135,11 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style }) => {
     <TouchableOpacity
       onPress={onClick}
       style={[
-        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', padding: 1 },
+        { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
         style
       ]}
     >
-      {iconn()}
+      <Icon />
       {children}
     </TouchableOpacity>
 

@@ -90,7 +90,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
         <View style={{ flex: 1 }}>
           <TextInput
             style={{
