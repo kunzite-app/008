@@ -137,7 +137,7 @@ export const Button = ({ children, color, style, onClick, fullWidth }) => {
 
 
 export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color = 'black' }) => {
-  const styling = { size, color }
+  const styling = { size, color: COLORS[color] || color }
   const Icon = () => {
     if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
     if (icon === 'micOff') return <MicOffIcon { ...styling } />;
