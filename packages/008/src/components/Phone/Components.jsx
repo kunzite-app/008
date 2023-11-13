@@ -1,7 +1,7 @@
 import { TouchableOpacity, View } from 'react-native';
 
 import { ContactAvatar, UserAvatar } from '../Avatars';
-import { Link, Select, Text } from '../Basics';
+import { COLORS, Link, Select, Text } from '../Basics';
 import { FormRow } from '../Forms';
 import { PhoneIncomingIcon, PhoneOutgoingIcon } from '../Icons';
 import Timer from '../Timer';
@@ -26,8 +26,8 @@ export const Numbers = ({ numbers, number, onChange }) => {
       value={value}
       onChange={onChange}
       style={{ borderWidth: 0 }}
-      buttonStyle={{ borderWidth: 0 }}
-      buttonTextStyle={{ textAlign: 'center', fontSize: 18 }}
+      buttonStyle={{ borderWidth: 0, height: 30 }}
+      buttonTextStyle={{ textAlign: 'center', color: COLORS.primary, fontSize: 16 }}
       // rowTextStyle={{ textAlign: 'center' }}
       renderDropdownIcon={() => {}}
     />
@@ -124,6 +124,8 @@ export const Header = ({
   status_color
 }) => (
   <View style={{ flexDirection: 'row', paddingBottom: 5 }}>
+    <View style={{ flex: 1 }}>
+  </View>
     <View style={{ flex: 4 }}>
       <Numbers
         numbers={numbers}

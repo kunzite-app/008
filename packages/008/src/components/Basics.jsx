@@ -36,7 +36,7 @@ const fontFamily = 'Roboto Flex';
 
 const BORDERCOLOR = '#E2E6F0';
 const BACKCOLOR = '#efefef';
-const COLORS = {
+export const COLORS = {
   primary: '#0061a6',
   warning: '#fec514',
   danger: '#b4251d',
@@ -59,8 +59,8 @@ export const Text = ({ children, style, ...props }) => (
   </RNText>
 )
 
-export const TextInput = ({ style, disabled, ...props }) =>
-  <RNTextInput style={[{ fontFamily, outlineStyle: 'none' }, disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} disabled {...props} />
+export const TextInput = ({ style, ...props }) =>
+  <RNTextInput style={[{ fontFamily, outlineStyle: 'none' }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} {...props} />
 
 export const TextField = ({
   onChange,
@@ -147,7 +147,7 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
     if (icon === 'clock') return <ClockIcon { ...styling } />;
     if (icon === 'users') return <UsersIcon { ...styling } />;
     if (icon === 'user') return <UserIcon { ...styling } />;
-    if (icon === 'settings') return <SettingsIcon />;
+    if (icon === 'settings') return <SettingsIcon { ...styling } />;
     if (icon === 'headphones') return <HeadphonesIcon { ...styling }/>;
     if (icon === 'phone') return <PhoneIcon { ...styling } />;
     if (icon === 'delete') return <DeleteIcon { ...styling } />;

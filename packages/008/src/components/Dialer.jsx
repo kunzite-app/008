@@ -91,10 +91,11 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer }) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1 }}></View>
+        <View style={{ flex: 6 }}>
           <TextInput
             style={{
-              fontSize: 18,
+              fontSize: 20,
               textAlign: 'center',
               padding: 10
             }}
@@ -104,6 +105,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer }) => {
         </View>
 
         <ButtonIcon icon="delete" onClick={onPressDelete} />
+        <View style={{ flex: 1 }}></View>
       </View>
 
       <DialGrid onPress={onPressDialer} onLongPress={onPressDialer} />
