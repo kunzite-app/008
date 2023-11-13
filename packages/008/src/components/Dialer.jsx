@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { TouchableOpacity, View, Text, TextInput } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
-import { Button, ButtonIcon } from './Basics';
+import { Button, ButtonIcon, Text, TextInput } from './Basics';
 import { PhoneForwardedIcon, PhoneIcon, VideoIcon } from './Icons';
 import Sound from '../Sound';
 import { CdrsList, ContactsList } from './Lists';
@@ -27,8 +27,6 @@ keys.forEach(async ({ keypad }) => {
   tones[keypad] = new Sound({ media: `dtmf/dtmf-${key}` });
 });
 
-const fontFamily = 'Roboto Flex';
-
 const DialButton = ({ keypad, sub, onPress, onLongPress }) => {
   return (
     <TouchableOpacity
@@ -52,12 +50,12 @@ const DialButton = ({ keypad, sub, onPress, onLongPress }) => {
       <Text
         focusable={false}
         tabIndex="-1"
-        style={{ fontSize: 18, fontFamily }}
+        style={{ fontSize: 18 }}
       >
         {keypad}
       </Text>
 
-      <Text focusable={false} tabIndex="-1" style={{ fontSize: 9, fontFamily }}>
+      <Text focusable={false} tabIndex="-1" style={{ fontSize: 9 }}>
         {sub}
       </Text>
     </TouchableOpacity>
@@ -92,12 +90,11 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <View style={{ flexDirection: 'row' }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
         <View style={{ flex: 1 }}>
           <TextInput
             style={{
               fontSize: 18,
-              fontFamily,
               textAlign: 'center',
               padding: 10
             }}

@@ -13,6 +13,11 @@
     />
     <title>%WEB_TITLE%</title>
     <style>
+      @font-face {
+        font-family: 'Roboto Flex';
+        src: local('Roboto Flex'), url('assets/fonts/Roboto-Flex.ttf');
+      }
+
       /**
        * Extend the react-native-web reset:
        * https://github.com/necolas/react-native-web/blob/master/packages/react-native-web/src/exports/StyleSheet/initialRules.js
@@ -27,6 +32,7 @@
         padding: 0px;
         /* Allows content to fill the viewport and go beyond the bottom */
         min-height: 100%;
+        font: 'Roboto Flex';
       }
       #root {
         flex-shrink: 0;

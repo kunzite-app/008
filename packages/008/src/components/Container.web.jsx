@@ -17,7 +17,6 @@ export const Container = ({ children }) => {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#1a0324'
       }}
     >
       <View style={{ width, height, backgroundColor: '#fff' }}>

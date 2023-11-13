@@ -131,7 +131,6 @@ export const SessionScreen = ({
             </Round>
             }
             
-
             <Round>
               <ButtonIcon
                 icon={hold ? 'play' : 'pause'}
@@ -161,12 +160,11 @@ export const SessionScreen = ({
           </View>
         )}
 
-        <View>
-          <CancelAccept 
-            onAccept={onAccept} 
-            onCancel={onCancel}
-          />
-        </View>
+        <CancelAccept 
+          onAccept={onAccept} 
+          onCancel={onCancel}
+        />
+        
       </View>
     </Screen>
   );

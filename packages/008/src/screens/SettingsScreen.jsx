@@ -1,14 +1,15 @@
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, TouchableOpacity } from 'react-native';
 
 import { Screen } from './Screen';
 import { Status } from '../components/Avatars';
-import { ButtonIcon, HRule, Select, CancelAccept, Button } from '../components/Basics';
+import { ButtonIcon, HRule, Select, CancelAccept, Button, Text } from '../components/Basics';
 import { FormRow, InputRow } from '../components/Forms';
 import {
   AnchorIcon,
   LogOutIcon,
+  TrashIcon,
   UnanchorIcon,
   XIcon
 } from '../components/Icons';
@@ -25,7 +26,7 @@ const SelectDevice = ({ devices, deviceId, onChange }) => (
       return { value: deviceId, text: label };
     })}
     value={deviceId}
-    onChange={e => onChange?.(e.target.value)}
+    onChange={onChange}
   />
 )
 
@@ -52,7 +53,7 @@ const RowLink = ({ onClick, text, iconSize = 15 }) => {
         paddingVertical: 15
       }}
     >
-      {icons[text.toLowerCase()]}
+      <div>{icons[text.toLowerCase()]}</div>
       <Text style={{ paddingLeft: 5 }} onClick={onClick}>
         {text}
       </Text>
@@ -110,7 +111,7 @@ export const DangerZone = ({ style }) => {
         color='danger' 
         onClick={clear}
       >
-        Clear all
+        <Text style={{ color: 'white' }}>Clear all</Text>
       </Button>
     </View>
   )
@@ -389,7 +390,7 @@ export const SettingsScreen = () => {
   };
 
   const SettingsButton = ({ icon, option }) => (
-    <View style={{ paddingBottom: 15 }}>
+    <View style={{ padding: 15, paddingBottom: 15 }}>
       <ButtonIcon icon={icon} onClick={() => setOption(option)} />
     </View>
   );

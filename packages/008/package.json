@@ -22,11 +22,10 @@
     "lint": "eslint ./"
   },
   "dependencies": {
-    "@elastic/datemath": "^5.0.3",
-    "@elastic/eui": "^30.5.1",
     "@expo/webpack-config": "^18.0.1",
     "@microsoft/applicationinsights-react-js": "^17.0.1",
     "@microsoft/applicationinsights-web": "^3.0.3",
+    "@react-native-picker/picker": "^2.5.1",
     "base-64": "^1.0.0",
     "crypto-js": "^4.1.1",
     "elasticlunr": "^0.9.5",

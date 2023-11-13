@@ -1,7 +1,7 @@
-import { View, Text } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
 
 import { ContactAvatar, UserAvatar } from '../Avatars';
-import { ButtonIcon, Combobox, Link, Panel } from '../Basics';
+import { ButtonIcon, Link, Select, Text } from '../Basics';
 import { FormRow } from '../Forms';
 import { PhoneIncomingIcon, PhoneOutgoingIcon } from '../Icons';
 import Timer from '../Timer';
@@ -15,76 +15,61 @@ export const Numbers = ({ numbers, number, onChange }) => {
   });
 
   const needle = number || numbers[0]?.number;
-  const selectedOptions = options.filter(({ value }) => value === needle);
+  const selected = options.find(({ value }) => value === needle);
 
   if (!numbers?.length) return null;
 
   return (
-    <Combobox
-      autoFocus={false}
-      prepend={
-        <View
-          focusable={false}
-          tabIndex="-1"
-          style={{
-            paddingLeft: 10,
-            paddingTop: 12,
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: '#808080'
-          }}
-        >
-          <PhoneOutgoingIcon />
-        </View>
-      }
+    <Select
+      tabIndex="-1"
       options={options}
-      selectedOptions={selectedOptions}
+      value={selected}
       onChange={onChange}
-      isClearable={false}
-      singleSelection
+      style={{ borderWidth: 0 }}
+      itemStyle = {{ fontSize: 20 }}
     />
-  );
+  )
 };
 
 export const CallInfo = ({ inbound, number = '', timer = false }) => {
   const [extension] = number.split('@');
 
   return (
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: 5,
-            backgroundColor: '#ffffff80',
-            
-            boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.25)",
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 5,
+        backgroundColor: '#ffffff80',
+        
+        boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.25)",
 
-            // iOS shadow properties
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
+        // iOS shadow properties
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
 
-            // Android shadow property
-            elevation: 5,
-          }}
-        >
-          <Text style={{ fontSize: 16, paddingTop: 5, paddingRight: 10 }}>
-            {inbound ? <PhoneIncomingIcon /> : <PhoneOutgoingIcon />}
-          </Text>
+        // Android shadow property
+        elevation: 5,
+      }}
+    >
+      <Text style={{ fontSize: 16, paddingTop: 5, paddingRight: 10 }}>
+        {inbound ? <PhoneIncomingIcon /> : <PhoneOutgoingIcon />}
+      </Text>
 
-          <Text numberOfLines={1} style={{ fontSize: 16 }}>
-            {extension}
-          </Text>
+      <Text numberOfLines={1} style={{ fontSize: 16 }}>
+        {extension}
+      </Text>
 
-          <View style={{ justifyContent: 'flex-end', minWidth: 60 }}>
-            {timer && <Timer />}
-          </View>
-        </View>
+      <View style={{ justifyContent: 'flex-end', minWidth: 60 }}>
+        {timer && <Timer />}
+      </View>
+    </View>
   );
 };
 
@@ -95,19 +80,19 @@ export const ContactDetails = ({ contact = {}, number, onClick }) => {
       style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
     >
       <FormRow style={{ alignItems: 'center' }}>
-        <ContactAvatar size="xl" contact={contact} />
+        <ContactAvatar size={100} contact={contact} />
       </FormRow>
 
       {contact?.name &&
       <FormRow style={{ alignItems: 'center' }}>
-          <Link onClick={() => onClick?.(contact)} style={{ fontSize: 22, paddingVertical: 10 }}>
-            {contact.name}
-          </Link>
+        <Link onClick={() => onClick?.(contact)} style={{ fontSize: 22, paddingVertical: 10 }}>
+          {contact.name}
+        </Link>
       </FormRow>
       } 
 
       <FormRow style={{ alignItems: 'center' }}>
-        <Text>{number || contact?.phones?.[0] || ''}</Text>
+        <Text style={{ fontSize: 20 }}>{number || contact?.phones?.[0] || ''}</Text>
       </FormRow>
     </View>
   );
@@ -148,10 +133,11 @@ export const Header = ({
       tabIndex="-1"
       style={{ flex: 1, justifyContent: 'center', alignItems: 'flex-end' }}
     >
-      <ButtonIcon
-        onClick={onSettingsClick}
-        iconType={() => <UserAvatar avatar={avatar} color={status_color} />}
-      />
+      <TouchableOpacity
+        onPress={onSettingsClick}
+      >
+        <UserAvatar avatar={avatar} color={status_color} />
+    </TouchableOpacity>
     </View>
   </View>
 );

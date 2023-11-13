@@ -1,6 +1,6 @@
-import { View, Text } from 'react-native';
+import { View } from 'react-native';
 
-import { FieldText } from './Basics';
+import { TextField, Text } from './Basics';
 
 export const FormRow = ({ children, label, style = {} }) => (
   <View style={{ width: '100%', paddingVertical: 10, ...style }}>
@@ -15,6 +15,6 @@ export const FormRow = ({ children, label, style = {} }) => (
 
 export const InputRow = ({ label, ...rest }) => (
   <FormRow label={label}>
-    <FieldText {...rest} />
+    <TextField {...rest} />
   </FormRow>
 );

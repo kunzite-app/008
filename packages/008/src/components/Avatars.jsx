@@ -16,7 +16,7 @@ export const Status = ({ color, size = 10, style }) => {
 export const UserAvatar = ({
   color,
   avatar,
-  size = 'm',
+  size = 35,
   defaultImageUrl = 'avatar.png'
 }) => {
   return (
@@ -33,7 +33,7 @@ export const UserAvatar = ({
 
 export const ContactAvatar = ({
   contact = {},
-  size = 'm',
+  size = 35,
   defaultImageUrl = 'avatar.png'
 }) => {
   const { name, avatar } = contact;
