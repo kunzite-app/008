@@ -231,18 +231,35 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
   );
 };
 
-export const Avatar = ({ imageUrl, name, size = 35 }) => (
-  <View style={{
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#eeffee',
-    width: size, height: size, borderRadius: size / 2 
-  }}>
+export const Avatar = ({ imageUrl, name, size = 35 }) => {
+  const letters = name.split(/\s+/g).map(chunk => chunk[0]).join('').substring(0, 3).toUpperCase();
+  
+  const stringToHslColor = (str, s, l) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+  
+    const h = hash % 360;
+    return 'hsl('+h+', '+s+'%, '+l+'%)';
+  }
 
-    {imageUrl ? (
-      <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: 25 }} />
-    ) : (
-      <Text style={{ fontfontSize: size * 0.4 }}>{name?.[0]}</Text>
-    )}
-  </View>
-);
+  return (
+    <View style={{
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: stringToHslColor(name, 30, 80),
+      width: size, height: size, borderRadius: size / 2 
+    }}>
+
+      {imageUrl ? (
+        <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: 25 }} />
+      ) : (
+        <Text   
+          numberOfLines={1} 
+          ellipsizeMode='tail' 
+          style={{ fontfontSize: size * 0.4 }}>{letters}</Text>
+      )}
+    </View>
+    )
+};

@@ -47,18 +47,18 @@ class CdrCell extends React.Component {
 
     return (
       <TouchableOpacity
-        style={{ flexDirection: 'row', height: 40, paddingBottom: 10 }}
+        style={{ flexDirection: 'row', height: 50, paddingBottom: 10 }}
         onPress={() => onClick?.(destination, video)}
       >
-        <View style={{ justifyContent: 'center', paddingRight: 10 }}>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
           <CallIcon call={cdr} />
         </View>
 
-        <View style={{ justifyContent: 'center', paddingRight: 10 }}>
+        <View style={{ flex: 2, justifyContent: 'center' }}>
           <ContactAvatar contact={cdr.contact} />
         </View>
 
-        <View style={{ justifyContent: 'space-evenly' }}>
+        <View style={{ flex: 7, justifyContent: 'space-evenly' }}>
           <Text
             style={{ textAlign: 'left', fontSize: 12, color: '#353741' }}
             numberOfLines={1}
@@ -89,7 +89,7 @@ class ContactCell extends React.Component {
     const isLocal = id.startsWith('cvf-');
     return (
       <TouchableOpacity
-        style={{ flexDirection: 'row', height: 40, paddingBottom: 10 }}
+        style={{ flexDirection: 'row', height: 50, paddingBottom: 10 }}
         onPress={() => onClick?.(contact)}
       >
         <View style={{ flex: 1, justifyContent: 'center' }}>
