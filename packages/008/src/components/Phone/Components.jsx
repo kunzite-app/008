@@ -1,32 +1,35 @@
 import { TouchableOpacity, View } from 'react-native';
 
 import { ContactAvatar, UserAvatar } from '../Avatars';
-import { ButtonIcon, Link, Select, Text } from '../Basics';
+import { Link, Select, Text } from '../Basics';
 import { FormRow } from '../Forms';
 import { PhoneIncomingIcon, PhoneOutgoingIcon } from '../Icons';
 import Timer from '../Timer';
 
 export const Numbers = ({ numbers, number, onChange }) => {
+  if (!numbers.length) return
+
   const options = numbers.map(({ number, tags = [] }) => {
     return {
-      label: `${number} ${tags.join(' ')}`,
+      label: number,
       value: number
     };
   });
 
-  const needle = number || numbers[0]?.number;
-  const selected = options.find(({ value }) => value === needle);
-
-  if (!numbers?.length) return null;
+  const needle = number || numbers[0].number;
+  const { value } = options.find(({ value }) => value === needle);
 
   return (
     <Select
       tabIndex="-1"
       options={options}
-      value={selected}
+      value={value}
       onChange={onChange}
       style={{ borderWidth: 0 }}
-      itemStyle = {{ fontSize: 20 }}
+      buttonStyle={{ borderWidth: 0 }}
+      buttonTextStyle={{ textAlign: 'center', fontSize: 18 }}
+      // rowTextStyle={{ textAlign: 'center' }}
+      renderDropdownIcon={() => {}}
     />
   )
 };

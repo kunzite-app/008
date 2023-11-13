@@ -8,8 +8,6 @@ import {
   View, 
 } from 'react-native';
 
-import { Picker } from '@react-native-picker/picker';
-
 import {
   CheckIcon,
   ClockIcon,
@@ -28,13 +26,16 @@ import {
   TrashIcon,
   Share2Icon,
   PlusIcon,
-  VideoIcon
+  VideoIcon,
+  ChevronIcon
 } from './Icons';
+
+import SelectDropdown from 'react-native-select-dropdown';
 
 const fontFamily = 'Roboto Flex';
 
 const BORDERCOLOR = '#E2E6F0';
-const BACKCOLOR = '#fbfcfd';
+const BACKCOLOR = '#efefef';
 const COLORS = {
   primary: '#0061a6',
   warning: '#fec514',
@@ -79,17 +80,41 @@ export const TextField = ({
   );
 };
 
-export const Select = ({ value, options, onChange, style, ...props }) => {
+export const Select = ({ 
+    value, 
+    options, 
+    onChange, 
+    buttonStyle,
+    buttonTextStyle,
+    rowStyle,
+    rowTextStyle,
+    dropdownStyle,
+    renderDropdownIcon,
+    iconStyle
+  }) => {
   return (
-    <Picker 
-      { ...props }
-      selectedValue={value} 
-      onValueChange={onChange} 
-      style={[{ ...defaultStyle }, style]}
-      itemStyle = {{ fontSize: 20 }}
-    >
-      {options.map(({ label, text, value }) => <Picker.Item label={label || text} value={value} key={value} />)}
-    </Picker>
+    <SelectDropdown
+      data={options}
+      defaultValueByIndex={options.findIndex((item) => item.value === value ) || 0}
+      onSelect={(item) => onChange?.(item.value)}
+      buttonTextAfterSelection={({ label, text }) => label || text}
+      rowTextForSelection={({ label, text }) => label || text}
+      buttonStyle={{
+        height: 40,
+        width: '100%',
+        backgroundColor: '#fff',
+        borderRadius: 5,
+        borderWidth: 1,
+        borderColor: BORDERCOLOR,
+        ...buttonStyle
+      }}
+      buttonTextStyle={{ color: '#000', textAlign: 'left', fontSize: 16, fontFamily, ...buttonTextStyle }}
+      rowStyle={{ padding: 5, paddingVertical: 15, borderBottomColor: BORDERCOLOR, ...rowStyle }}
+      rowTextStyle={{ textAlign: 'left', fontSize: 16, fontFamily, ...rowTextStyle }}
+      dropdownStyle={{ height: options.length * 50, borderBottomColor: BORDERCOLOR, ...dropdownStyle }}
+      renderDropdownIcon={(opened) => renderDropdownIcon ? renderDropdownIcon(opened) : <ChevronIcon { ...iconStyle }/>}
+    />
+
   )
 }
 

@@ -154,7 +154,7 @@ export const SettingsForm = (props) => {
             }
             options={statuses}
             value={status}
-            onChange={e => setValue('status', e.target.value)}
+            onChange={val => setValue('status', val)}
           />
         </FormRow>
       )}
