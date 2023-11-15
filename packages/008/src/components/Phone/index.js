@@ -180,7 +180,7 @@ class Phone extends React.Component {
     });
 
     ua.on('invite', async session => {
-      if (this.state.session) {
+      if (this.state.session?.id) {
         session.terminate();
         return;
       }
@@ -207,6 +207,7 @@ class Phone extends React.Component {
       });
 
       session.on('failed', ev => {
+        console.error('failed', ev);
         play_failure();
       });
 

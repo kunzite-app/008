@@ -107,6 +107,7 @@ export const SessionScreen = ({
           >
             <Round>
               <ButtonIcon
+                color="primary"
                 icon={showDialer ? 'user' : 'grid'}
                 onClick={() => setShowDialer(!showDialer)}
               />
@@ -133,6 +134,7 @@ export const SessionScreen = ({
             
             <Round>
               <ButtonIcon
+                color="primary"
                 icon={hold ? 'play' : 'pause'}
                 onClick={() => holdHandler(!hold)}
               />
@@ -142,7 +144,11 @@ export const SessionScreen = ({
               <View style={{ flexDirection: 'row' }}>
                 {transferAllowed && (
                   <Round>
-                    <ButtonIcon icon="phoneForwarded" onClick={onTransfer} />
+                    <ButtonIcon
+                      color="primary" 
+                      icon="phoneForwarded" 
+                      onClick={onTransfer} 
+                    />
                   </Round>
                 )}
 
