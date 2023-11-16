@@ -34,23 +34,27 @@ import SelectDropdown from 'react-native-select-dropdown';
 
 const fontFamily = 'Roboto Flex';
 
-const BORDERCOLOR = '#E2E6F0';
-const BACKCOLOR = '#efefef';
 export const COLORS = {
   primary: '#0061a6',
   warning: '#fec514',
   danger: '#b4251d',
   success: '#00726b',
-  secondary: '#00726b'
+  secondary: '#00726b',
+  borderColor: '#E2E6F0',
+  backColor: '#F7F7F7',
+  app: '#fff'
 }
 
+export const BORDERCOLOR = COLORS.borderColor;
+export const BACKCOLOR = COLORS.backColor;
+
 const defaultStyle = { 
-  padding: 5,
+  padding: 10,
   height: 40,
-  // backgroundColor: BACKCOLOR, 
   borderColor: BORDERCOLOR, 
   borderWidth: 1,
-  fontFamily
+  fontFamily,
+  borderRadius: 5
 };
 
 export const Text = ({ children, style, ...props }) => (
@@ -87,6 +91,7 @@ export const Select = ({
     onChange, 
     buttonStyle,
     buttonTextStyle,
+    renderCustomizedButtonChild,
     rowStyle,
     rowTextStyle,
     dropdownStyle,
@@ -101,18 +106,20 @@ export const Select = ({
       buttonTextAfterSelection={({ label, text }) => label || text}
       rowTextForSelection={({ label, text }) => label || text}
       buttonStyle={{
+        // flex: 1,
         height: 40,
         width: '100%',
-        backgroundColor: '#fff',
-        borderRadius: 5,
+        backgroundColor: COLORS.app,
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: BORDERCOLOR,
         ...buttonStyle
       }}
-      buttonTextStyle={{ color: '#000', textAlign: 'left', fontSize: 16, fontFamily, ...buttonTextStyle }}
-      rowStyle={{ padding: 5, paddingVertical: 15, borderBottomColor: BORDERCOLOR, ...rowStyle }}
-      rowTextStyle={{ textAlign: 'left', fontSize: 16, fontFamily, ...rowTextStyle }}
-      dropdownStyle={{ height: options.length * 50, borderBottomColor: BORDERCOLOR, ...dropdownStyle }}
+      buttonTextStyle={{ color: '#000', textAlign: 'left', fontSize: 14, fontFamily, ...buttonTextStyle }}
+      renderCustomizedButtonChild={renderCustomizedButtonChild}
+      rowStyle={{ padding: 5, paddingVertical: 10, borderBottomColor: BORDERCOLOR, ...rowStyle }}
+      rowTextStyle={{ textAlign: 'left', fontSize: 14, fontFamily, ...rowTextStyle }}
+      dropdownStyle={{ height: options.length * 38, ...dropdownStyle }}
       renderDropdownIcon={(opened) => renderDropdownIcon ? renderDropdownIcon(opened) : <ChevronIcon { ...iconStyle }/>}
     />
 
@@ -134,7 +141,6 @@ export const Button = ({ children, color, style, onClick, fullWidth }) => {
     </TouchableOpacity>
   )
 };
-
 
 export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color = 'black' }) => {
   const styling = { size, color: COLORS[color] || color }
@@ -263,4 +269,15 @@ export const Avatar = ({ imageUrl, name, size = 35 }) => {
       )}
     </View>
     )
+};
+
+export const Status = ({ color, size = 10, style }) => {
+  const roundstyle = {
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    backgroundColor: color || 'black'
+  };
+
+  return <View style={{ ...style, ...roundstyle }} />;
 };

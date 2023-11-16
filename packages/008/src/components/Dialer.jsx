@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 
-import { Button, ButtonIcon, Text, TextInput } from './Basics';
-import { PhoneForwardedIcon, PhoneIcon, VideoIcon } from './Icons';
 import Sound from '../Sound';
+import { ButtonIcon, COLORS, Text, TextInput } from './Basics';
 import { CdrsList, ContactsList } from './Lists';
 
 const keys = [
@@ -27,18 +26,17 @@ keys.forEach(async ({ keypad }) => {
   tones[keypad] = new Sound({ media: `dtmf/dtmf-${key}` });
 });
 
-const DialButton = ({ keypad, sub, onPress, onLongPress }) => {
+const DialButton = ({ style, item, onPress, onLongPress }) => {
+  const { keypad, sub } = item;
   return (
     <TouchableOpacity
       key={keypad}
       focusable={false}
       tabIndex="-1"
-      style={{
-        flexDirection: 'column',
+      style={[{
         justifyContent: 'center',
         alignItems: 'center',
-        width: '33%'
-      }}
+      }, style]}
       onPress={() => {
         tones[keypad].play?.();
         onPress?.(keypad);
@@ -47,38 +45,28 @@ const DialButton = ({ keypad, sub, onPress, onLongPress }) => {
         if (sub.length === 1) onLongPress?.(sub);
       }}
     >
-      <Text
-        focusable={false}
-        tabIndex="-1"
-        style={{ fontSize: 18 }}
-      >
-        {keypad}
-      </Text>
-
-      <Text focusable={false} tabIndex="-1" style={{ fontSize: 9 }}>
-        {sub}
-      </Text>
+      <Text style={{ fontSize: 18 }}>{keypad}</Text>
+      <Text style={{ fontSize: 9 }}>{sub}</Text>
     </TouchableOpacity>
   );
 };
 
-export const DialGrid = props => (
+export const DialGrid = ({ style, buttonStyle, ...events }) => (
   <View
     style={[{
-      width: '100%',
       flex: 1,
       flexDirection: 'row',
       flexWrap: 'wrap',
       justifyContent: 'space-evenly'
-    }, props.style]}
+    }, style]}
   >
     {keys.map(item => (
-      <DialButton key={item.keypad} {...props} {...item} />
+      <DialButton item={item} {...events} style={[{ width: '33%' }, buttonStyle]} />
     ))}
   </View>
 );
 
-export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer }) => {
+export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style }) => {
   const [value, setValue] = useState(number);
 
   useEffect(() => {
@@ -87,40 +75,62 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer }) => {
 
   const onPressDialer = data => setValue(value + data);
   const onPressDelete = () => setValue(value.substring(0, value.length - 1));
+  
+  const iconSize = 20;
+  const buttonCallSize = 60;
+  const cameraCallSize = 50;
+  const appColor = COLORS.app;
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-        <View style={{ flex: 1 }}></View>
-        <View style={{ flex: 6 }}>
-          <TextInput
-            style={{
-              fontSize: 20,
-              textAlign: 'center',
-              padding: 10
-            }}
-            value={value}
-            onChangeText={text => setValue(text)}
-          />
-        </View>
-
+    <View style={[{ flex: 1 }, style]}>
+      <View 
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderColor: COLORS.borderColor, borderBottomWidth: 1 }}
+      >
+        <TextInput
+          style={{ flex: 1, fontSize: 18, textAlign: 'center' }}
+          value={value}
+          onChangeText={text => setValue(text)}
+        />
         <ButtonIcon icon="delete" onClick={onPressDelete} />
-        <View style={{ flex: 1 }}></View>
       </View>
 
       <DialGrid onPress={onPressDialer} onLongPress={onPressDialer} />
 
-      <View style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}>
-        <Button fill color="secondary" onClick={() => onClick?.(value)} style={{ flex: 3 }}>
-          {isTransfer ? <PhoneForwardedIcon /> : <PhoneIcon />}
-        </Button>
+      <View style={{ marginTop: 10 }}>
+        {!isTransfer &&
+          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+            <View>
+              <ButtonIcon
+                style={{ backgroundColor: COLORS.secondary, width: buttonCallSize, height: buttonCallSize, borderRadius: buttonCallSize / 2 }}
+                color="white"
+                icon="phone"
+                size={iconSize}
+                onClick={() => onClick?.(value)} 
+              />
 
-        {onClickVideo &&
-          <View style={{ paddingLeft: 5 }}>
-          <Button fill color="primary" onClick={() => onClickVideo?.(value)} style={{ flex: 1 }}>
-            <VideoIcon />
-          </Button>
+              {onClickVideo &&
+                <View style={{ alignItems: 'center', justifyContent: 'center', height: buttonCallSize, borderRadius: buttonCallSize / 2, position: 'absolute',  width: buttonCallSize - 5, left: buttonCallSize - 5, backgroundColor: appColor }}>
+                  <ButtonIcon
+                    style={{ backgroundColor: COLORS.primary, width: cameraCallSize, height: cameraCallSize, borderRadius: cameraCallSize / 2 }}
+                    color="white" 
+                    icon="video"
+                    size={iconSize}
+                    onClick={() => onClickVideo?.(value)} 
+                  />
+                </View>
+              }
+            </View>
           </View>
+        }
+
+        {isTransfer &&
+          <ButtonIcon
+            icon="PhoneForwarded"
+            size={iconSize}
+            style={{ backgroundColor: COLORS.secondary, width: 50, height: 50, borderRadius: 30 }}
+            color="white" 
+            onClick={() => onClick?.(value)} 
+          />
         }
       </View>
     </View>
@@ -143,7 +153,8 @@ export const Dialer = ({
 
   contacts = {},
   onContactClick,
-  onContactsFilterChange
+  onContactsFilterChange,
+  style
 }) => {
   const [tab, setTab] = useState('dialer');
   const [contactsFilter, setContactsFilter] = useState('');
@@ -154,20 +165,26 @@ export const Dialer = ({
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={[{ flex: 1 }, style]}>
       {tab === 'dialer' && (
-        <DialPad 
+        <DialPad
+          style={{ marginHorizontal: 40 }}
           onClick={onDialClick} 
           onClickVideo={onDialClickVideo} 
           number={number} />
       )}
 
       {tab === 'cdrs' && (
-        <CdrsList data={cdrs} onClick={(number, video) => onCdrClick?.(number, video)} />
+        <CdrsList 
+          style={{ marginHorizontal: 20 }}
+          data={cdrs} 
+          onClick={(number, video) => onCdrClick?.(number, video)} 
+        />
       )}
 
       {tab === 'contacts' && (
         <ContactsList
+          style={{ marginHorizontal: 20 }}
           filterVal={contactsFilter}
           onChangeFilter={contactsFilterChangeHandler}
           showFilter
@@ -179,14 +196,22 @@ export const Dialer = ({
 
       <View
         style={{
-          padding: 10,
           flexDirection: 'row',
           justifyContent: 'space-around',
-          alignItems: 'center'
+          alignItems: 'center',
+          borderTopWidth: 1,
+          borderColor: COLORS.borderColor,
+          marginTop: 10
         }}
       >
         {tabs.map(({ id, icon }) => (
-          <ButtonIcon key={id} icon={icon} onClick={() => setTab(id)} />
+          <ButtonIcon
+            style={{ height: 50, width: 50 }} 
+            key={id} 
+            color={tab === id ? COLORS.primary : null}
+            icon={icon} 
+            onClick={() => setTab(id)} 
+          />
         ))}
       </View>
     </View>

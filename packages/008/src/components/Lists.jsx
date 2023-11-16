@@ -1,250 +1,188 @@
 import moment from 'moment';
 import React from 'react';
-import { FiEyeOff, FiFile, FiSearch } from 'react-icons/fi';
+import { FiEyeOff, FiSearch } from 'react-icons/fi';
 import {
-  ActivityIndicator,
   View,
   TouchableOpacity,
   FlatList
 } from 'react-native';
 
 import { ContactAvatar } from './Avatars';
-import { ButtonIcon, Text, TextInput } from './Basics';
-import { CallIcon } from './Phone/Components';
-import { VideoIcon } from './Icons';
+import { BORDERCOLOR, ButtonIcon, Text, TextInput } from './Basics';
+import { PhoneIncomingIcon, PhoneOutgoingIcon, VideoIcon } from './Icons';
 
-class NothingToShow extends React.Component {
-  render() {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-      >
-        <FiEyeOff size="20px" color="gray" />
-      </View>
-    );
-  }
-}
+const PADDING = 10;
+const CELL_HEIGHT = 40;
+const SMALLFONT = 12;
 
-class CdrCell extends React.Component {
-  render = () => {
-    const { cdr = {}, onClick, lang = 'en' } = this.props;
-    const { direction, from, to, date, contact = {}, video } = cdr;
-    const destination = direction === 'inbound' ? from : to;
+const CallIcon = ({
+  call,
+  ...props
+}) => {
+  const { direction } = call;
+  const color = call.status === 'answered' ? undefined : '#af231e'
+  if (direction === 'inbound')
+    return <PhoneIncomingIcon {...props} color={color} />;
 
-    const { name } = contact;
-    const displayclient = name ? `${name} (${destination})` : destination;
-
-    const callDate = moment(date).locale(lang).calendar({
-      sameDay: 'LT',
-      lastDay: `[${moment(date).calendar().split(' ')[0]}]`,
-      lastWeek: 'dddd'
-    });
-
-    return (
-      <TouchableOpacity
-        style={{ flexDirection: 'row', height: 50, paddingBottom: 10 }}
-        onPress={() => onClick?.(destination, video)}
-      >
-        <View style={{ flex: 1, justifyContent: 'center' }}>
-          <CallIcon call={cdr} />
-        </View>
-
-        <View style={{ flex: 2, justifyContent: 'center' }}>
-          <ContactAvatar contact={cdr.contact} />
-        </View>
-
-        <View style={{ flex: 7, justifyContent: 'space-evenly' }}>
-          <Text
-            style={{ textAlign: 'left', fontSize: 12, color: '#353741' }}
-            numberOfLines={1}
-          >
-            {displayclient}
-          </Text>
-
-          <Text style={{ textAlign: 'left', fontSize: 11, color: 'gray' }}>
-            {callDate}
-          </Text>
-        </View>
-
-        {video &&
-        <View style={{ flex: 1, justifyContent: 'center', paddingLeft: 10 }}>
-          <VideoIcon />
-        </View>
-        }
-      </TouchableOpacity>
-    );
-  };
-}
-
-class ContactCell extends React.Component {
-  render() {
-    const { contact = {}, onClick } = this.props;
-    const { id, name } = contact;
-
-    const isLocal = id.startsWith('cvf-');
-    return (
-      <TouchableOpacity
-        style={{ flexDirection: 'row', height: 50, paddingBottom: 10 }}
-        onPress={() => onClick?.(contact)}
-      >
-        <View style={{ flex: 1, justifyContent: 'center' }}>
-          {isLocal && <FiFile size={11} />}
-        </View>
-
-        <View style={{ flex: 2, justifyContent: 'center' }}>
-          <ContactAvatar contact={contact} />
-        </View>
-
-        <View style={{ flex: 7, justifyContent: 'center' }}>
-          <Text
-            style={{ textAlign: 'left', fontSize: 12, color: '#353741' }}
-            numberOfLines={1}
-          >
-            {name}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  }
-}
-
-class WebhookCell extends React.Component {
-  render() {
-    const { webhook, onClick, onDeleteClick } = this.props;
-    const { label, endpoint } = webhook;
-
-    return (
-      <TouchableOpacity
-        style={{ flexDirection: 'row', minHeight: 40, paddingBottom: 10 }}
-        onPress={() => onClick?.(webhook)}
-      >
-        <View style={{ flex: 7, justifyContent: 'space-evenly' }}>
-          <Text
-            style={{ textAlign: 'left', fontSize: 12, color: '#353741' }}
-            numberOfLines={1}
-          >
-            {label}
-          </Text>
-
-          <Text style={{ textAlign: 'left', fontSize: 11, color: 'gray' }}>
-            {endpoint}
-          </Text>
-        </View>
-
-        <ButtonIcon
-          icon="trash"
-          color="danger"
-          onClick={() => onDeleteClick?.(webhook)}
-        />
-      </TouchableOpacity>
-    );
-  }
-}
+  return <PhoneOutgoingIcon {...props} color={color} />;
+};
 
 const SearchInput = ({ onChange, value, style }) => (
-  <View style={{ flexDirection: 'row', alignItems: 'bottom', ...style }}>
-    <View style={{ borderBottomWidth: 1, width: 30 }}>
-      <FiSearch />
-    </View>
+  <View style={[
+    { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: BORDERCOLOR, paddingBottom: PADDING, marginBottom: PADDING }, 
+    style 
+  ]}>
+    <FiSearch />
 
     <TextInput
-      style={{ flex: 1, borderBottomWidth: 1, paddingBottom:5 }}
+      style={{ flex: 1 }}
       onChangeText={text => onChange?.(text)}
       value={value}
     />
   </View>
 );
 
-class List extends React.Component {
-  state = {};
-
-  render_cell({ item }) {
-    throw new Error('Not yet implemented');
-  }
-
-  render() {
-    const {
-      data = [],
-      showFilter,
-      onChangeFilter,
-      filterVal,
-      maxItems = 500,
-      total,
-      loading
-    } = this.props;
-
-    return (
-      <View style={{ flex: 1, padding: 10 }}>
-        {showFilter && (
-          <SearchInput
-            value={filterVal}
-            style={{ paddingVertical: 10 }}
-            onChange={onChangeFilter}
-          />
-        )}
-
-        {data?.length > 0 && (
-          <FlatList
-            style={{ flex: 1 }}
-            data={data.slice(0, maxItems)}
-            renderItem={this.render_cell.bind(this)}
-            keyExtractor={item => item.id || item.name}
-            contentContainerStyle={{ paddingTop: 10, paddingLeft: 5 }}
-          />
-        )}
-
-        {!data?.length && <NothingToShow />}
-
-        <View
-          style={{ paddingTop: 10, flexDirection: 'row', alignItems: 'bottom' }}
-        >
-          {loading && <ActivityIndicator />}
-
-          {data?.length > maxItems && (
-            <Text
-              style={{
-                flex: 1,
-                textAlign: 'right',
-                fontSize: 12,
-              }}
-            >
-              {maxItems} / {total || data.length}
-            </Text>
-          )}
-        </View>
-      </View>
-    );
-  }
-}
-
-export class CdrsList extends List {
-  render_cell({ item: cdr }) {
-    const { onClick } = this.props;
-    return <CdrCell cdr={cdr} onClick={onClick} key={cdr.id} />;
-  }
-}
-
-export class ContactsList extends List {
-  render_cell({ item: contact }) {
-    const { onClick } = this.props;
-    return <ContactCell contact={contact} onClick={onClick} key={contact.id} />;
-  }
-}
-
-export class WebhooksList extends List {
-  render_cell({ item: webhook }) {
-    const { onClick, onDeleteClick } = this.props;
-    return (
-      <WebhookCell
-        webhook={webhook}
-        onClick={onClick}
-        onDeleteClick={onDeleteClick}
-        key={webhook.id}
+const List = ({
+  data = [],
+  renderItem,
+  onChangeFilter,
+  showFilter,
+  filterVal,
+  total,
+  maxItems = 500,
+  style
+}) => (
+  <View style={[{ flex: 1 }, style ]}>
+    {showFilter && (
+      <SearchInput
+        value={filterVal}
+        onChange={onChangeFilter}
       />
-    );
-  }
+    )}
+
+    {data?.length > 0 ? (
+      <FlatList
+        style={{ flex: 1 }}
+        data={data.slice(0, maxItems)}
+        renderItem={renderItem}
+        keyExtractor={item => item.id || item.name}
+      />
+    ) : (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <FiEyeOff size="20px" />
+      </View>
+    )}
+
+    {data?.length > maxItems && (
+      <View
+        style={{ flexDirection: 'row', alignItems: 'bottom', paddingBottom: PADDING }}
+      >
+        <Text
+          style={{
+            flex: 1,
+            fontSize: SMALLFONT,
+            textAlign: 'right',
+          }}
+        >
+          {maxItems} / {total || data.length}
+        </Text>
+      </View>
+    )}
+  </View>
+)
+
+const CdrCell = ({ cdr = {}, onClick, lang = 'en' }) => {
+  const { direction, from, to, date, contact = {}, video } = cdr;
+  const destination = direction === 'inbound' ? from : to;
+  const { name } = contact;
+  const displayName = name? `${name || ''} (${destination})` : destination;
+
+  const callDate = moment(date).locale(lang).calendar({
+    sameDay: 'LT',
+    lastDay: `[${moment(date).calendar().split(' ')[0]}]`,
+    lastWeek: 'dddd'
+  });
+
+  const subcellStyle = { justifyContent: 'center', marginRight: PADDING }
+  return (
+    <TouchableOpacity
+      style={{ flexDirection: 'row', height: CELL_HEIGHT, marginVertical: PADDING / 2 }}
+      onPress={() => onClick?.(destination, video)}
+    >
+      <View style={subcellStyle}>
+        <ContactAvatar contact={cdr.contact} />
+      </View>
+
+      <View style={{ ...subcellStyle, flex: 1, justifyContent: 'space-evenly' }}>
+        <Text numberOfLines={1}>
+          {displayName}
+        </Text>
+
+        <Text style={{ fontSize: SMALLFONT }}>
+          {callDate}
+        </Text>
+      </View>
+
+      <View style={subcellStyle}>
+        <CallIcon call={cdr} />
+      </View>
+      
+      {video &&
+        <View style={{ justifyContent: 'center' }}>
+          <VideoIcon />
+        </View>
+      }
+    </TouchableOpacity>
+  );
 }
+
+const ContactCell = ({ contact = {}, onClick  }) => (
+  <TouchableOpacity
+    style={{ height: CELL_HEIGHT, marginVertical: PADDING / 2, flexDirection: 'row' }}
+    onPress={() => onClick?.(contact)}
+  >
+    <ContactAvatar contact={contact} />
+
+    <View style={{ flex: 1, justifyContent: 'center', paddingLeft: PADDING }}>
+      <Text numberOfLines={1} >{contact?.name}</Text>
+    </View>
+  </TouchableOpacity>
+)
+
+const WebhookCell = ({ webhook, onClick, onDeleteClick }) => {
+  const { label, endpoint } = webhook;
+
+  return (
+    <TouchableOpacity
+      style={{ flexDirection: 'row', height: CELL_HEIGHT, margingVertical: PADDING / 2 }}
+      onPress={() => onClick?.(webhook)}
+    >
+      <View style={{ flex: 1, justifyContent: 'space-evenly' }}>
+        <Text numberOfLines={1} >{label}</Text>
+
+        <Text style={{ fontSize: SMALLFONT }}>{endpoint}</Text>
+      </View>
+
+      <ButtonIcon
+        icon="trash"
+        color="danger"
+        onClick={() => onDeleteClick?.(webhook)}
+      />
+    </TouchableOpacity>
+  );
+}
+
+export const CdrsList = (props) => (
+  <List {...props} renderItem={({ item }) =>
+    <CdrCell cdr={item} onClick={props?.onClick} />} />
+)
+
+export const ContactsList = (props) => (
+  <List {...props} renderItem={({ item }) =>
+    <ContactCell contact={item} onClick={props?.onClick} />} />
+)
+
+export const WebhooksList = (props) => (
+  <List {...props} renderItem={({ item }) =>
+    <WebhookCell webhook={item} onClick={props?.onClick} />} />
+)

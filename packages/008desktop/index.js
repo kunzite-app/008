@@ -302,7 +302,7 @@ app.on('ready', async () => {
   try {
     await requestPermissions();
     await registerProtocolol();
-    await launchQ();
+    // await launchQ();
 
     ipcMain.on('show', display);
     ipcMain.on('quit', quit);

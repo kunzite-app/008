@@ -75,7 +75,7 @@ export const SessionScreen = ({
     <Screen closeable={closeable} visible={visible}>
       <AudioPlayer session={session} speaker={speaker} />
 
-      <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute', padding: 10 }}>
+      <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute' }}>
         <CallInfo
           number={inbound ? to : from}
           inbound={inbound}

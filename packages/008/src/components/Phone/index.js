@@ -496,6 +496,7 @@ class Phone extends React.Component {
         sipUser,
         sipPassword,
 
+        nickname,
         avatar,
 
         allowAutoanswer,
@@ -523,6 +524,8 @@ class Phone extends React.Component {
         sipUri,
         sipUser,
         sipPassword,
+
+        nickname,
         avatar,
 
         allowAutoanswer,
@@ -560,11 +563,10 @@ class Phone extends React.Component {
       numbers = [],
       number_out,
 
-      speaker,
-
       statuses = [],
       status,
       network,
+      nickname,
       avatar,
 
       transferAllowed,
@@ -612,17 +614,19 @@ class Phone extends React.Component {
 
     return (
       <View style={{ flex: 1 }}>
-        <View style={{ flex: 1, padding: 10 }}>
+        <View style={{ flex: 1, marginTop: 10 }}>
           <Header
             numbers={numbers}
             number_out={number_out}
             onChange={onNumberChangeHandler}
+            nickname={nickname}
             avatar={avatar}
             status_color={status_color}
             onSettingsClick={() => this.context.toggleShowSettings(true)}
           />
 
           <Dialer
+            style={{ marginTop: 25 }}
             key={session?.id}
             number={dialer_number}
             onDialClick={callHandler}

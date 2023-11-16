@@ -4,7 +4,7 @@ import { ScrollView, View, TouchableOpacity } from 'react-native';
 
 import { Screen } from './Screen';
 import { Status } from '../components/Avatars';
-import { ButtonIcon, HRule, Select, CancelAccept, Button, Text } from '../components/Basics';
+import { ButtonIcon, HRule, Select, CancelAccept, Button, Text, COLORS } from '../components/Basics';
 import { FormRow, InputRow } from '../components/Forms';
 import {
   AnchorIcon,
@@ -247,7 +247,7 @@ export const DevicesForm = (props) => {
     if (!_.isEqual(initialValues, values)) setValues(initialValues);
   }, [initialValues]);
 
-  const { statuses = [], devices = [], microphones = [], ringer, microphone, speaker } = values;
+  const { devices = [], microphones = [], ringer, microphone, speaker } = values;
   return (
     <View style={style}>
       <FormRow label={'Speakers'}>
@@ -261,8 +261,6 @@ export const DevicesForm = (props) => {
       <FormRow label={'Ringer'}>
         <SelectDevice devices={devices} deviceId={ringer} onChange={(val) => setValue('ringer', val)} />
       </FormRow>
-
-      <HRule />
     </View>
   );
 };
@@ -286,7 +284,7 @@ export const ContactsForm = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Title style={{ fontSize: 16 }}>VCF Import</Title>
+      <FormRow label={'Import VCF'}>
       <div
         draggable
         onDragOver={onDragOver}
@@ -296,16 +294,18 @@ export const ContactsForm = () => {
           justifyContent: 'center',
           alignItems: 'center',
           height: 100,
-          border: 1,
+          border: 2,
           borderStyle: 'dashed',
-          borderColor: 'grey',
+          borderColor: COLORS.borderColor,
+          backgroundColor: COLORS.backColor,
           padding: 5
         }}
       >
-        <Text style={{ fontSize: 14, textAlign: 'center' }}>
-          Drop here VCF file to add your contacts.
+        <Text style={{ textAlign: 'center' }}>
+          Drop here your VCF file to add your contacts
         </Text>
       </div>
+    </FormRow>
     </View>
   );
 };
@@ -389,19 +389,16 @@ export const SettingsScreen = () => {
     setConnection(input);
   };
 
-  const SettingsButton = ({ icon, option }) => (
-    <View style={{ padding: 15, paddingBottom: 15 }}>
-      <ButtonIcon icon={icon} onClick={() => setOption(option)} />
-    </View>
-  );
-
   const content = {
     user: (
       <View style={{ flex: 1 }}>
         <SettingsForm {...store} onChange={onChangeSettingsHandler} />
         <HRule/>
         <View style={{ flex: 1, justifyContent: 'space-between' }}>
-          <ExitForm />
+          <View>
+            <ExitForm />
+            <HRule/>
+          </View>
           <DangerZone />
         </View>
       </View>
@@ -433,9 +430,7 @@ export const SettingsScreen = () => {
     devices: (
       <View style={{ flex: 1 }}>
         <Title>Devices</Title>
-        <ScrollView style={{ flex: 1 }}>
-          <DevicesForm {...store} onChange={onChangeSettingsHandler} />
-        </ScrollView>
+        <DevicesForm {...store} onChange={onChangeSettingsHandler} />
       </View>
     ),
     contacts: (
@@ -447,12 +442,15 @@ export const SettingsScreen = () => {
     webhooks: (
       <View style={{ flex: 1 }}>
         <Title>Webhooks</Title>
+        
         <ButtonIcon
           style={{ width: 20 }}
           icon="plus"
           onClick={() => toggleShowWebhookForm(true)}
         />
+        
         <WebhooksList data={webhooks} onDeleteClick={webhookDelete} />
+        
         <Screen
           visible={showWebhookForm}
           closeable
@@ -469,23 +467,37 @@ export const SettingsScreen = () => {
     ),
   };
   
+  const opts = [
+    { option: 'user', icon: 'user' },
+    { option: 'connection', icon: 'settings' },
+    { option: 'devices', icon: 'headphones' },
+    { option: 'contacts', icon: 'users' },
+    { option: 'webhooks', icon: 'share2' }
+  ]
+
   return (
     <Screen
       closeable={true}
       visible={showSettings}
       onClose={toggleShowSettings}
-      style={{ padding: 10 }}
     >
-      <View style={{ flex: 1, flexDirection: 'row', paddingRight: 5  }}>
-        <View style={{ paddingRight: 15 }}>
-          <SettingsButton icon="user" option="user" />
-          <SettingsButton icon="settings" option="connection" />
-          <SettingsButton icon="headphones" option="devices" />
-          <SettingsButton icon="users" option="contacts" />
-          <SettingsButton icon="share2" option="webhooks" />
+      <View  style={{ flex: 1, flexDirection: 'row' }}>
+        <View key={option} style={{ backgroundColor: COLORS.backColor, paddingTop: 30 }}>
+          {opts.map((opt) => {
+            const selected = option === opt.option 
+            return (
+              <ButtonIcon
+                style={{ padding: 20, backgroundColor: selected ? COLORS.app : null }}
+                icon={opt.icon}
+                color={selected ? COLORS.primary : null}
+                onClick={() => setOption(opt.option)} 
+              />
+            )})}
         </View>
 
-        {content[option]}
+        <View style={{ flex: 1, flexDirection: 'row', margin: 10, marginTop: 30 }}>
+          {content[option]}
+        </View>
       </View>
     </Screen>
   );
