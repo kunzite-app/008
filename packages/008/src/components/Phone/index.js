@@ -390,16 +390,23 @@ class Phone extends React.Component {
   };
 
   processRecording = ({ session }) => {
+    const type = 'audio/webm';
+
     const chunksBlob = chunks => {
       if (!chunks.length) return;
 
       return blobToDataURL(new Blob(chunks, { type }));
     };
 
+    const chunksBlob2 = chunks => {
+      if (!chunks.length) return;
+
+      return new Uint8Array(new Blob(chunks, { type: 'audio/ogg' }));
+    };
+
     const streamIn = new MediaStream();
     const streamOut = new MediaStream();
 
-    const type = 'audio/webm';
 
     let recorder;
     const chunks = [];
@@ -440,8 +447,8 @@ class Phone extends React.Component {
         try {
           const { segments } = await tts({
             audio: {
-              remote: await chunksBlob(chunksIn),
-              local: await chunksBlob(chunksOut)
+              remote: await chunksBlob2(chunksIn),
+              local: await chunksBlob2(chunksOut)
             }
           });
 

@@ -45,6 +45,7 @@
     "react-native-web": "^0.19.8",
     "sip.js": "^0.15.11",
     "vcf": "^2.1.1",
+    "whisper-turbo": "^0.9.0",
     "zustand": "^4.4.1"
   },
   "devDependencies": {
