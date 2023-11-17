@@ -398,12 +398,6 @@ class Phone extends React.Component {
       return blobToDataURL(new Blob(chunks, { type }));
     };
 
-    const chunksBlob2 = chunks => {
-      if (!chunks.length) return;
-
-      return new Uint8Array(new Blob(chunks, { type: 'audio/ogg' }));
-    };
-
     const streamIn = new MediaStream();
     const streamOut = new MediaStream();
 
@@ -447,8 +441,8 @@ class Phone extends React.Component {
         try {
           const { segments } = await tts({
             audio: {
-              remote: await chunksBlob2(chunksIn),
-              local: await chunksBlob2(chunksOut)
+              remote: chunksIn,
+              local: chunksOut
             }
           });
 
