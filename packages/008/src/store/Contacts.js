@@ -131,7 +131,6 @@ export default class Contacts {
         document?.dispatchEvent(new Event('indexing:end'));
       }
     } catch (err) {
-      console.error(err);
       index({ users: [] });
     }
   }

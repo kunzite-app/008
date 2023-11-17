@@ -8,24 +8,12 @@ import {
 } from 'react-native';
 
 import { ContactAvatar } from './Avatars';
-import { BORDERCOLOR, ButtonIcon, Text, TextInput } from './Basics';
-import { PhoneIncomingIcon, PhoneOutgoingIcon, VideoIcon } from './Icons';
+import { BORDERCOLOR, ButtonIcon, COLORS, CallIcon, Text, TextInput } from './Basics';
+import { VideoIcon } from './Icons';
 
 const PADDING = 10;
 const CELL_HEIGHT = 40;
 const SMALLFONT = 12;
-
-const CallIcon = ({
-  call,
-  ...props
-}) => {
-  const { direction } = call;
-  const color = call.status === 'answered' ? undefined : '#af231e'
-  if (direction === 'inbound')
-    return <PhoneIncomingIcon {...props} color={color} />;
-
-  return <PhoneOutgoingIcon {...props} color={color} />;
-};
 
 const SearchInput = ({ onChange, value, style }) => (
   <View style={[
@@ -35,7 +23,7 @@ const SearchInput = ({ onChange, value, style }) => (
     <FiSearch />
 
     <TextInput
-      style={{ flex: 1 }}
+      style={{ flex: 1, marginLeft: 10 }}
       onChangeText={text => onChange?.(text)}
       value={value}
     />

@@ -207,7 +207,6 @@ class Phone extends React.Component {
       });
 
       session.on('failed', ev => {
-        console.error('failed', ev);
         play_failure();
       });
 
@@ -307,64 +306,72 @@ class Phone extends React.Component {
   };
 
   transfer = (opts = {}) => {
-    const { session, dialer_number, show_blindTransfer, microphone } =
-      this.state;
+    try {
+      const { session, dialer_number, show_blindTransfer, microphone, number_out } =
+        this.state;
 
-    const {
-      number = dialer_number,
-      blind = show_blindTransfer,
-      extraHeaders = [],
-      video = false
-    } = opts;
+      const {
+        number = dialer_number,
+        blind = show_blindTransfer,
+        extraHeaders = [],
+        video = false
+      } = opts;
 
-    const target = cleanPhoneNumber(number);
-    const payload = {
-      extraHeaders,
-      sessionDescriptionHandlerOptions: {
-        constraints: {
-          audio: { deviceId: { ideal: microphone } },
-          video
+      const indentityHeaders = number_out
+        ? [`P-Asserted-Identity:${number_out}`, `x-Number:${number_out}`]
+        : [];
+      
+      const target = cleanPhoneNumber(number);
+      const payload = {
+        extraHeaders: [...indentityHeaders, ...extraHeaders],
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
+          }
         }
+      };
+
+      if (blind) {
+        session.refer(target, payload);
+        return;
       }
-    };
 
-    if (blind) {
-      session.refer(target, payload);
-      return;
-    }
+      const sessiont = this.ua.invite(target, payload);
 
-    const sessiont = this.ua.invite(target, payload);
+      const cdr = new Cdr({ session: sessiont });
+      cdr.setContact(this.context.contacts().contact_by_phone({ phone: cdr.to }));
+      sessiont.cdr = cdr;
 
-    const cdr = new Cdr({ session: sessiont });
-    cdr.setContact(this.context.contacts().contact_by_phone({ phone: cdr.to }));
-    sessiont.cdr = cdr;
-
-    sessiont.on('progress', () => {
-      RING_BACK.play();
-    });
-
-    sessiont.on('accepted', () => {
-      RING_BACK.stop();
-      this.setState({ rand: genId() });
-    });
-
-    sessiont.on('terminated', (_, cause) => {
-      RING_BACK.stop();
-
-      this.setState({ sessiont: null }, () => {
-        try {
-          session?.unhold();
-        } catch (err) {
-          this.reset(cause);
-        }
+      sessiont.on('progress', () => {
+        RING_BACK.play();
       });
-    });
 
-    sessiont.on('failed', message => {
-      play_failure(message);
-    });
+      sessiont.on('accepted', () => {
+        RING_BACK.stop();
+        this.setState({ rand: genId() });
+      });
 
-    this.setState({ sessiont });
+      sessiont.on('terminated', (_, cause) => {
+        RING_BACK.stop();
+
+        this.setState({ sessiont: null }, () => {
+          try {
+            session?.unhold();
+          } catch (err) {
+            this.reset(cause);
+          }
+        });
+      });
+
+      sessiont.on('failed', message => {
+        play_failure(message);
+      });
+
+      this.setState({ sessiont });
+    } catch (err) {
+      play_failure();
+    }
   };
 
   reset = cause => {
@@ -582,18 +589,18 @@ class Phone extends React.Component {
       item => item.value === (noConnection ? 'offline' : status)
     )?.color;
 
-    const callHandler = (number, video) => {
-      this.call({ number, video });
+    const callHandler = async (number, video) => {
+      await this.call({ number, video });
     };
 
-    const showTransferDialerHandler = (blind = false) => {
-      session?.hold();
+    const showTransferDialerHandler = async (blind = false) => {
+      session?.hasAnswer && session?.hold();
       this.setState({ show_transfer: true, show_blindTransfer: blind });
     };
 
-    const transferOnCancelHandler = () => {
-      this.setState({ show_transfer: false }, () => {
-        sessiont?.terminate();
+    const transferOnCancelHandler = async () => {
+      this.setState({ show_transfer: false }, async () => {
+        try { sessiont?.terminate() } catch(err){};
         session?.unhold();
       });
     };
@@ -601,8 +608,8 @@ class Phone extends React.Component {
     const transferConfirmHandler = () => sessiont.refer(session);
 
     const onTransferHandler = number => {
-      this.setState({ show_transfer: false }, () => {
-        this.transfer({ number });
+      this.setState({ show_transfer: false }, async () => {
+        await this.transfer({ number });
       });
     };
 
@@ -665,15 +672,17 @@ class Phone extends React.Component {
           onAccept={sessiont?.hasAnswer && transferConfirmHandler}
           transferAllowed={false}
           blindTransferAllowed={false}
+          isTransfer={true}
         />
 
         <Screen
           visible={show_transfer}
           closeable
           onClose={transferOnCancelHandler}
-          style={{ padding: 10 }}
+          style={{ paddingTop: 30 }}
         >
           <Dialer
+            isTransfer={true}
             onDialClick={onTransferHandler}
             onCdrClick={onTransferHandler}
             onContactClick={(phones = []) => onTransferHandler(phones[0])}

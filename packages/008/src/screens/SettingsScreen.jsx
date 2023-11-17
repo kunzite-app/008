@@ -3,13 +3,12 @@ import { useEffect, useState } from 'react';
 import { ScrollView, View, TouchableOpacity } from 'react-native';
 
 import { Screen } from './Screen';
-import { Status } from '../components/Avatars';
+import { Status } from '../components/Basics';
 import { ButtonIcon, HRule, Select, CancelAccept, Button, Text, COLORS } from '../components/Basics';
 import { FormRow, InputRow } from '../components/Forms';
 import {
   AnchorIcon,
   LogOutIcon,
-  TrashIcon,
   UnanchorIcon,
   XIcon
 } from '../components/Icons';
@@ -117,6 +116,21 @@ export const DangerZone = ({ style }) => {
   )
 }
 
+const StatusText = ({ text, color } = {}) => (
+  <View style={{ flex: 1, flexDirection: 'row' }}>
+    <View
+      style={{
+        paddingHorizontal: 10,
+        justifyContent: 'center',
+        alignItems: 'center'
+      }}
+    >
+      <Status color={color} />
+    </View>
+    <Text>{text}</Text>
+  </View>
+)
+
 export const SettingsForm = (props) => {
   const { style, onChange, ...initialValues } = props
   const [values, setValues] = useState(initialValues);
@@ -140,7 +154,6 @@ export const SettingsForm = (props) => {
       {statuses?.length > 0 && (
         <FormRow label={'Status'}>
           <Select
-            tabIndex="-1"
             prepend={
               <View
                 style={{
@@ -154,6 +167,12 @@ export const SettingsForm = (props) => {
             }
             options={statuses}
             value={status}
+        
+            renderCustomizedButtonChild={(item) => {
+              const status = statuses.find(status => status.value === item?.value)
+              return <StatusText { ...status }/>
+            }}
+            renderCustomizedRowChild={(_, idx) => <StatusText { ...statuses[idx] } />}
             onChange={val => setValue('status', val)}
           />
         </FormRow>

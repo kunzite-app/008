@@ -27,7 +27,10 @@ import {
   Share2Icon,
   PlusIcon,
   VideoIcon,
-  ChevronIcon
+  ChevronIcon,
+  PhoneOffIcon,
+  PhoneIncomingIcon,
+  PhoneOutgoingIcon
 } from './Icons';
 
 import SelectDropdown from 'react-native-select-dropdown';
@@ -37,9 +40,9 @@ const fontFamily = 'Roboto Flex';
 export const COLORS = {
   primary: '#0061a6',
   warning: '#fec514',
-  danger: '#b4251d',
-  success: '#00726b',
-  secondary: '#00726b',
+  danger: '#C41818',
+  success: '#3CA82E',
+  secondary: '#3CA82E',
   borderColor: '#E2E6F0',
   backColor: '#F7F7F7',
   app: '#fff'
@@ -94,6 +97,7 @@ export const Select = ({
     renderCustomizedButtonChild,
     rowStyle,
     rowTextStyle,
+    renderCustomizedRowChild,
     dropdownStyle,
     renderDropdownIcon,
     iconStyle
@@ -119,6 +123,7 @@ export const Select = ({
       renderCustomizedButtonChild={renderCustomizedButtonChild}
       rowStyle={{ padding: 5, paddingVertical: 10, borderBottomColor: BORDERCOLOR, ...rowStyle }}
       rowTextStyle={{ textAlign: 'left', fontSize: 14, fontFamily, ...rowTextStyle }}
+      renderCustomizedRowChild={renderCustomizedRowChild}
       dropdownStyle={{ height: options.length * 38, ...dropdownStyle }}
       renderDropdownIcon={(opened) => renderDropdownIcon ? renderDropdownIcon(opened) : <ChevronIcon { ...iconStyle }/>}
     />
@@ -146,6 +151,7 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
   const styling = { size, color: COLORS[color] || color }
   const Icon = () => {
     if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
+    if (icon === 'hang') return <PhoneOffIcon { ...styling } />;
     if (icon === 'micOff') return <MicOffIcon { ...styling } />;
     if (icon === 'play') return <PlayIcon { ...styling } />;
     if (icon === 'pause') return <PauseIcon { ...styling } />;
@@ -161,6 +167,7 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
     if (icon === 'share2') return <Share2Icon { ...styling } />;
     if (icon === 'plus') return <PlusIcon { ...styling } />;
     if (icon === 'video') return <VideoIcon { ...styling } />;
+    if (icon === 'check') return <CheckIcon { ...styling } />;
     if (icon === 'x') return <XIcon { ...styling } />;
 
     return iconType;
@@ -215,8 +222,6 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
   return (
     <View
       style={{
-        paddingTop: 5,
-
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
@@ -224,15 +229,47 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
       }}
     >
       {onCancel && (
-        <Button fill color="danger" onClick={onCancel} fullWidth={!onAccept}>
+        <Button color="danger" onClick={onCancel} fullWidth={!onAccept}>
           <XIcon />
         </Button>
       )}
 
       {onAccept && (
-        <Button fill color="secondary" onClick={onAccept} fullWidth={!onCancel}>
+        <Button color="secondary" onClick={onAccept} fullWidth={!onCancel}>
           <CheckIcon />
         </Button>
+      )}
+    </View>
+  );
+};
+
+export const CancelAcceptCall = ({ onCancel, onAccept }) => {
+  const size = 50;
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        flex: 1
+      }}
+    >
+      {onCancel && (
+        <ButtonIcon
+          style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: COLORS.danger }}
+          color="white" 
+          icon="hang"
+          onClick={onCancel}
+        />
+      )}
+
+      {onAccept && (
+        <ButtonIcon
+          style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: COLORS.secondary }}
+          color="white" 
+          icon="phone"
+          onClick={onAccept}
+        />
       )}
     </View>
   );
@@ -265,7 +302,9 @@ export const Avatar = ({ imageUrl, name, size = 35 }) => {
         <Text   
           numberOfLines={1} 
           ellipsizeMode='tail' 
-          style={{ fontfontSize: size * 0.4 }}>{letters}</Text>
+          style={{ fontSize: size * 0.4 }}>
+            {letters}
+        </Text>
       )}
     </View>
     )
@@ -280,4 +319,16 @@ export const Status = ({ color, size = 10, style }) => {
   };
 
   return <View style={{ ...style, ...roundstyle }} />;
+};
+
+export const CallIcon = ({
+  call,
+  ...props
+}) => {
+  const { direction } = call;
+  const color = props.color ? props.color : call.status === 'answered' ? undefined : COLORS.danger
+  if (direction === 'inbound')
+    return <PhoneIncomingIcon {...props} color={color} />;
+
+  return <PhoneOutgoingIcon {...props} color={color} />;
 };

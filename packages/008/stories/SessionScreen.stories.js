@@ -1,3 +1,4 @@
+import { View } from 'react-native';
 import { SessionScreen } from '../src/screens/SessionScreen';
 
 export default {
@@ -9,49 +10,67 @@ export default {
 };
 
 const contact = { id: 'id1', name: 'John Doe', phones: ['+34666555444'] };
+const mockSession = {
+  unhold: () => console.log('calling unhold'),
+  hold: () => console.log('calling hold'),
+  mute: () => console.log('calling mute'),
+  dtmf: () => console.log('calling dftm'),
+  setMuted: () => console.log('muting...'),
+  setMutedVideo: () => console.log('muting video...'),
+  on: () => console.log('calling event'),
+  isVideo: () => false,
+  
+  isInbound: () => true,
+  cdr: {
+    contact,
+    from: 'agent1',
+    to: 'agent2',
+    direction: 'inbound'
+  }
+}
 
-export const Inbound = args => <SessionScreen {...args} />;
-Inbound.args = {
+const sharedArgs = {
   visible: true,
-
-  session: {
-    unhold: () => console.log('calling unhold'),
-    hold: () => console.log('calling hold'),
-    mute: () => console.log('calling mute'),
-    dtmf: () => console.log('calling dftm')
-  },
-
-  inbound: true,
   onAccept: () => console.log('accepting'),
   onCancel: () => console.log('canceling'),
+  onContactClick: () => console.log('contact click'),
+}
 
-  label: 'Lorem ipsum dolor',
-  call_number: '+34999999999',
-  contact,
-  onContactClick: console.log('contact click')
+const Template = (props) => (
+  <View style={{ width: 350, height: 500 }}>
+    <SessionScreen {...props} />
+  </View>
+)
+
+export const Inbound = args => <Template {...args} />;
+Inbound.args = {
+  ...sharedArgs,
+  session: {
+    ...mockSession,
+    isInbound: () => true,
+    cdr: {
+      contact,
+      from: 'agent1',
+      to: 'agent2',
+      direction: 'inbound'
+    }
+  },
 };
 
-export const InboundAnswered = args => <SessionScreen {...args} />;
+export const InboundAnswered = args => <Template {...args} />;
 InboundAnswered.args = {
-  visible: true,
-
+  ...sharedArgs,
   session: {
-    unhold: () => console.log('calling unhold'),
-    hold: () => console.log('calling hold'),
-    mute: () => console.log('calling mute'),
-    dtmf: () => console.log('calling dftm'),
-    hasAnswer: true
+    ...mockSession,
+    hasAnswer: true,
+    isInbound: () => true,
+    cdr: {
+      contact,
+      from: 'agent1',
+      to: 'agent2',
+      direction: 'inbound'
+    },
   },
-
-  inbound: true,
-  onCancel: () => console.log('canceling'),
-  onTransfer: () => console.log('calling transfer'),
-  onBlindTransfer: () => console.log('calling blind transfer'),
-
-  label: 'Lorem ipsum dolor',
-  call_number: '+34999999999',
-  contact,
-  onContactClick: console.log('contact click')
 };
 
 export const Outbound = args => <SessionScreen {...args} />;

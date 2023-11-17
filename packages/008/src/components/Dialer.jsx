@@ -97,8 +97,8 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
       <DialGrid onPress={onPressDialer} onLongPress={onPressDialer} />
 
       <View style={{ marginTop: 10 }}>
-        {!isTransfer &&
-          <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+          {!isTransfer &&
             <View>
               <ButtonIcon
                 style={{ backgroundColor: COLORS.secondary, width: buttonCallSize, height: buttonCallSize, borderRadius: buttonCallSize / 2 }}
@@ -120,18 +120,18 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
                 </View>
               }
             </View>
-          </View>
-        }
+          }
 
-        {isTransfer &&
-          <ButtonIcon
-            icon="PhoneForwarded"
-            size={iconSize}
-            style={{ backgroundColor: COLORS.secondary, width: 50, height: 50, borderRadius: 30 }}
-            color="white" 
-            onClick={() => onClick?.(value)} 
-          />
-        }
+          {isTransfer &&
+            <ButtonIcon
+              icon="phoneForwarded"
+              size={iconSize}
+              style={{ backgroundColor: COLORS.secondary, width: 50, height: 50, borderRadius: 30 }}
+              color="white" 
+              onClick={() => onClick?.(value)} 
+            />
+          }
+        </View>
       </View>
     </View>
   );
@@ -154,7 +154,8 @@ export const Dialer = ({
   contacts = {},
   onContactClick,
   onContactsFilterChange,
-  style
+  style,
+  isTransfer
 }) => {
   const [tab, setTab] = useState('dialer');
   const [contactsFilter, setContactsFilter] = useState('');
@@ -171,7 +172,9 @@ export const Dialer = ({
           style={{ marginHorizontal: 40 }}
           onClick={onDialClick} 
           onClickVideo={onDialClickVideo} 
-          number={number} />
+          number={number}
+          isTransfer={isTransfer}
+        />
       )}
 
       {tab === 'cdrs' && (
