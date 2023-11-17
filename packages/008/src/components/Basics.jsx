@@ -189,7 +189,7 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
 
 export const Link = ({ children, style = {}, onClick }) => (
   <TouchableOpacity onPress={() => onClick?.()}>
-    <Text style={{ textDecorationLine: 'underline', ...style }}>
+    <Text style={{ ...style }}>
       {children}
     </Text>
   </TouchableOpacity>
@@ -258,7 +258,7 @@ export const CancelAcceptCall = ({ onCancel, onAccept }) => {
         <ButtonIcon
           style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: COLORS.danger }}
           color="white" 
-          icon="hang"
+          icon="phone"
           onClick={onCancel}
         />
       )}
@@ -297,7 +297,7 @@ export const Avatar = ({ imageUrl, name, size = 35 }) => {
     }}>
 
       {imageUrl ? (
-        <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: 25 }} />
+        <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: size / 2 }} />
       ) : (
         <Text   
           numberOfLines={1} 

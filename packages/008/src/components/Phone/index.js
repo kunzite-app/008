@@ -423,7 +423,7 @@ class Phone extends React.Component {
           const src = audioContext.createMediaStreamSource(stream);
           src.connect(multi);
 
-          recorder = new MediaRecorder(stream, { mimeType: type });
+          recorder = new MediaRecorder(stream);
           recorder.ondataavailable = ({ data }) => chunks.push(data);
           recorder.start();
         });

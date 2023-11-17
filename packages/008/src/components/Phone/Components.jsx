@@ -43,20 +43,14 @@ export const Header = ({
   onChange,
 
   onSettingsClick,
-  nickname = '-',
-  avatar,
+  // nickname = '-',
+  // avatar,
   status_color
 }) => {
-  const numbers = [
-    {
-        "number": "+34917370224",
-        "tags": ["Main"]
-    },
-    {
-        "number": "+34917370225",
-        "tags": ["Secondary"]
-    }
-]
+  const numbers = []
+  const avatar  = '';
+  const nickname = '-';
+
   const hasNumbers = numbers.length >0;
   const avatarSize = 45;
   const numbersWidth = hasNumbers ? 200 : 0;

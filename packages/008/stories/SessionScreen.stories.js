@@ -9,7 +9,7 @@ export default {
   }
 };
 
-const contact = { id: 'id1', name: 'John Doe', phones: ['+34666555444'] };
+const contact = { id: 'id1', name: 'John Doe', phones: ['+34666555444'], avatar: 'https://avatars.githubusercontent.com/u/414967' };
 const mockSession = {
   unhold: () => console.log('calling unhold'),
   hold: () => console.log('calling hold'),

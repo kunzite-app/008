@@ -14,7 +14,7 @@
     "start": "APP_DEBUG=true APP_URL=http://localhost:19006/ electron .",
     "lint": "eslint ./",
     "format": "prettier --write",
-    "build": "yarn build-icons && electron-builder build -mwl -c.extraMetadata.main=index.js --publish never",
+    "build": "yarn build-icons && electron-builder build -w -c.extraMetadata.main=index.js --publish never",
     "build-icons": "yarn build-icons-mac && yarn build-icons-win",
     "build-icons-mac": "electron-icon-builder --input=assets/logo-round.png --output=./build",
     "build-icons-win": "electron-icon-builder --input=assets/logo.png --output=./build/win"
