@@ -57,11 +57,11 @@ jobs:
           AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "bin/008-desktop-win.exe"
 
       - name: Release
-          uses: softprops/action-gh-release@v1
-          draft: true
-          with:
-            files: |
-              bin/008-desktop-win.exe
+        uses: softprops/action-gh-release@v1
+        draft: true
+        with:
+          files: |
+            bin/008-desktop-win.exe
 
       - name: Upload agent008.ai
         run: |
