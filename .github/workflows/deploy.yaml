@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Upload agent008.ai
-        timeout-minutes: 5
+        timeout-minutes: 10
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
