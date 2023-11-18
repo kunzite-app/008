@@ -1,6 +1,5 @@
 import moment from 'moment';
 import React from 'react';
-import { FiEyeOff, FiSearch } from 'react-icons/fi';
 import {
   View,
   TouchableOpacity,
@@ -8,7 +7,7 @@ import {
 } from 'react-native';
 
 import { ContactAvatar } from './Avatars';
-import { BORDERCOLOR, ButtonIcon, COLORS, CallIcon, Text, TextInput } from './Basics';
+import { BORDERCOLOR, ButtonIcon, COLORS, CallIcon, Icon, Text, TextInput } from './Basics';
 import { VideoIcon } from './Icons';
 
 const PADDING = 10;
@@ -20,7 +19,7 @@ const SearchInput = ({ onChange, value, style }) => (
     { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: BORDERCOLOR, paddingBottom: PADDING, marginBottom: PADDING }, 
     style 
   ]}>
-    <FiSearch />
+    <Icon icon='search' color={COLORS.textSecondary} />
 
     <TextInput
       style={{ flex: 1, marginLeft: 10 }}
@@ -57,7 +56,7 @@ const List = ({
       />
     ) : (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <FiEyeOff size="20px" />
+        <Icon size={30} color={COLORS.textSecondary} icon='eye' />
       </View>
     )}
 
@@ -106,7 +105,7 @@ const CdrCell = ({ cdr = {}, onClick, lang = 'en' }) => {
           {displayName}
         </Text>
 
-        <Text style={{ fontSize: SMALLFONT }}>
+        <Text style={{ fontSize: SMALLFONT, color: COLORS.textSecondary }} >
           {callDate}
         </Text>
       </View>

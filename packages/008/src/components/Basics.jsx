@@ -30,7 +30,9 @@ import {
   ChevronIcon,
   PhoneOffIcon,
   PhoneIncomingIcon,
-  PhoneOutgoingIcon
+  PhoneOutgoingIcon,
+  SearchIcon,
+  EyeIcon
 } from './Icons';
 
 import SelectDropdown from 'react-native-select-dropdown';
@@ -173,6 +175,8 @@ export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
   if (icon === 'video') return <VideoIcon { ...styling } />;
   if (icon === 'check') return <CheckIcon { ...styling } />;
   if (icon === 'x') return <XIcon { ...styling } />;
+  if (icon === 'eye') return <EyeIcon { ...styling } />;
+  if (icon === 'search') return <SearchIcon { ...styling } />;
 }
 
 export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color }) => {
@@ -349,7 +353,7 @@ export const CallIcon = ({
   ...props
 }) => {
   const { direction } = call;
-  const color = props.color ? props.color : call.status === 'answered' ? undefined : COLORS.danger
+  const color = props.color ? props.color : call.status === 'answered' ? COLORS.textSecondary : COLORS.danger
   if (direction === 'inbound')
     return <PhoneIncomingIcon {...props} color={color} />;
 

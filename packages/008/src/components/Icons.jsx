@@ -25,7 +25,9 @@ import {
   FiShare2 as Share2Icon,
   FiPlus as PlusIcon,
   FiVideo as VideoIcon,
-  FiChevronDown as ChevronIcon
+  FiChevronDown as ChevronIcon,
+  FiEyeOff  as EyeIcon,
+  FiSearch as SearchIcon,
 } from 'react-icons/fi';
 
 export const Icon = ({ icon, size = 16 }) => {
@@ -63,5 +65,7 @@ export {
   Share2Icon,
   PlusIcon,
   VideoIcon,
-  ChevronIcon
+  ChevronIcon,
+  EyeIcon,
+  SearchIcon,
 };
