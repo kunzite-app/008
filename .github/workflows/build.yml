@@ -26,8 +26,8 @@ jobs:
 
       - name: Release
           uses: softprops/action-gh-release@v1
-          draft: true
           with:
+            draft: true
             files: |
               packages/008desktop/build/008-desktop-mac.dmg
               packages/008desktop/build/008-desktop-win.exe
