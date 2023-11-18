@@ -1,30 +1,29 @@
-import * as whisper from "whisper-webgpu";
+import * as whisper from 'whisper-webgpu';
 import toWav from 'audiobuffer-to-wav';
 
 const CACHE = {};
-export const infer = async ({
-  chunks, 
-  url, 
-  bin = 'medium-q8g16.bin',
-  data = 'tokenizer.json' }) => {
-
-  console.log(chunks)
-  const fetchBytes = async (url) => {
+export const ttsInfer = async ({
+  chunks,
+  url,
+  bin = 'models/tts.bin',
+  data = 'models/tts.json'
+}) => {
+  const fetchBytes = async url => {
     if (!CACHE[url]) {
       const response = await fetch(url);
       const buffer = await response.arrayBuffer();
       const bytes = new Uint8Array(buffer);
 
-      CACHE[url] = bytes
-      console.log(`loaded ${url}`)
+      CACHE[url] = bytes;
+      console.log(`loaded ${url}`);
     }
 
     return CACHE[url];
-  }
+  };
 
   const tokenizer = await fetchBytes(data);
   const model = await fetchBytes(bin);
-  
+
   // const audio = await fetchBytes(url);
 
   let arrayBuffer = await chunks[0].arrayBuffer();
@@ -37,10 +36,7 @@ export const infer = async ({
 
   await whisper.default();
   const builder = new whisper.SessionBuilder();
-  const session = await builder
-    .setModel(model)
-    .setTokenizer(tokenizer)
-    .build();
+  const session = await builder.setModel(model).setTokenizer(tokenizer).build();
 
   const { segments } = await session.run(audio);
 
@@ -54,15 +50,20 @@ export const infer = async ({
 
   session.free();
 
-  return segments
-}
+  return segments;
+};
 
 export const tts = async ({ audio }) => {
-  const remote = (await infer({ chunks: audio.remote })).map(item => ({ ...item, channel: 'remote' }));;
-  const local = (await infer({ chunks: audio.local })).map(item => ({ ...item, channel: 'local' }));
+  const remote = (await ttsInfer({ chunks: audio.remote })).map(item => ({
+    ...item,
+    channel: 'remote'
+  }));
+  const local = (await ttsInfer({ chunks: audio.local })).map(item => ({
+    ...item,
+    channel: 'local'
+  }));
   const merged = [...remote, ...local].sort((a, b) => a.start - b.start);
 
   console.log(merged);
   return merged;
 };
-

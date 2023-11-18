@@ -9,7 +9,12 @@ export default {
   }
 };
 
-const contact = { id: 'id1', name: 'John Doe', phones: ['+34666555444'], avatar: 'https://avatars.githubusercontent.com/u/414967' };
+const contact = {
+  id: 'id1',
+  name: 'John Doe',
+  phones: ['+34666555444'],
+  avatar: 'https://avatars.githubusercontent.com/u/414967'
+};
 const mockSession = {
   unhold: () => console.log('calling unhold'),
   hold: () => console.log('calling hold'),
@@ -19,7 +24,7 @@ const mockSession = {
   setMutedVideo: () => console.log('muting video...'),
   on: () => console.log('calling event'),
   isVideo: () => false,
-  
+
   isInbound: () => true,
   cdr: {
     contact,
@@ -27,20 +32,20 @@ const mockSession = {
     to: 'agent2',
     direction: 'inbound'
   }
-}
+};
 
 const sharedArgs = {
   visible: true,
   onAccept: () => console.log('accepting'),
   onCancel: () => console.log('canceling'),
-  onContactClick: () => console.log('contact click'),
-}
+  onContactClick: () => console.log('contact click')
+};
 
-const Template = (props) => (
+const Template = props => (
   <View style={{ width: 350, height: 500 }}>
     <SessionScreen {...props} />
   </View>
-)
+);
 
 export const Inbound = args => <Template {...args} />;
 Inbound.args = {
@@ -54,7 +59,7 @@ Inbound.args = {
       to: 'agent2',
       direction: 'inbound'
     }
-  },
+  }
 };
 
 export const InboundAnswered = args => <Template {...args} />;
@@ -69,8 +74,8 @@ InboundAnswered.args = {
       from: 'agent1',
       to: 'agent2',
       direction: 'inbound'
-    },
-  },
+    }
+  }
 };
 
 export const Outbound = args => <Template {...args} />;
@@ -83,9 +88,9 @@ Outbound.args = {
     cdr: {
       contact,
       from: 'agent1',
-      to: 'agent2',
-    },
-  },
+      to: 'agent2'
+    }
+  }
 };
 
 export const OutboundAnswered = args => <Template {...args} />;
@@ -98,9 +103,9 @@ OutboundAnswered.args = {
     cdr: {
       contact,
       from: 'agent1',
-      to: 'agent2',
-    },
-  },
+      to: 'agent2'
+    }
+  }
 };
 
 export const OutboundVideoAnswered = args => <Template {...args} />;
@@ -114,24 +119,23 @@ OutboundVideoAnswered.args = {
     cdr: {
       contact,
       from: 'agent1',
-      to: 'agent2',
-    },
-  },
+      to: 'agent2'
+    }
+  }
 };
 
 export const AttendedTransfer = args => <Template {...args} />;
 AttendedTransfer.args = {
   ...sharedArgs,
+  isTransfer: true,
   session: {
     ...mockSession,
-    isTransfer: true,
     hasAnswer: true,
     isInbound: () => false,
     cdr: {
       contact,
       from: 'agent1',
-      to: 'agent2',
-    },
-  },
+      to: 'agent2'
+    }
+  }
 };
-

@@ -38,14 +38,16 @@ import SelectDropdown from 'react-native-select-dropdown';
 const fontFamily = 'Roboto Flex';
 
 export const COLORS = {
-  primary: '#0061a6',
+  primary: '#2D69AF',
   warning: '#fec514',
   danger: '#C41818',
-  success: '#3CA82E',
-  secondary: '#3CA82E',
+  success: '#4DC418',
+  secondary: '#4DC418',
   borderColor: '#E2E6F0',
   backColor: '#F7F7F7',
-  app: '#ffffff'
+  app: '#ffffff',
+  textPrimary: '#313131',
+  textSecondary: '#6C6C6C'
 }
 
 export const BORDERCOLOR = COLORS.borderColor;
@@ -67,7 +69,9 @@ export const Text = ({ children, style, ...props }) => (
 )
 
 export const TextInput = ({ style, ...props }) =>
-  <RNTextInput style={[{ fontFamily, outlineStyle: 'none' }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} {...props} />
+  <RNTextInput 
+    style={[{ fontFamily, color: COLORS.textPrimary, outlineStyle: 'none' }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} {...props} 
+  />
 
 export const TextField = ({
   onChange,
@@ -147,31 +151,31 @@ export const Button = ({ children, color, style, onClick, fullWidth }) => {
   )
 };
 
-export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color = 'black' }) => {
+export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
   const styling = { size, color: COLORS[color] || color }
-  const Icon = () => {
-    if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
-    if (icon === 'hang') return <PhoneOffIcon { ...styling } />;
-    if (icon === 'micOff') return <MicOffIcon { ...styling } />;
-    if (icon === 'play') return <PlayIcon { ...styling } />;
-    if (icon === 'pause') return <PauseIcon { ...styling } />;
-    if (icon === 'grid') return <GridIcon { ...styling } />;
-    if (icon === 'clock') return <ClockIcon { ...styling } />;
-    if (icon === 'users') return <UsersIcon { ...styling } />;
-    if (icon === 'user') return <UserIcon { ...styling } />;
-    if (icon === 'settings') return <SettingsIcon { ...styling } />;
-    if (icon === 'headphones') return <HeadphonesIcon { ...styling }/>;
-    if (icon === 'phone') return <PhoneIcon { ...styling } />;
-    if (icon === 'delete') return <DeleteIcon { ...styling } />;
-    if (icon === 'trash') return <TrashIcon { ...styling } />;
-    if (icon === 'share2') return <Share2Icon { ...styling } />;
-    if (icon === 'plus') return <PlusIcon { ...styling } />;
-    if (icon === 'video') return <VideoIcon { ...styling } />;
-    if (icon === 'check') return <CheckIcon { ...styling } />;
-    if (icon === 'x') return <XIcon { ...styling } />;
 
-    return iconType;
-  }
+  if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
+  if (icon === 'hang') return <PhoneOffIcon { ...styling } />;
+  if (icon === 'micOff') return <MicOffIcon { ...styling } />;
+  if (icon === 'play') return <PlayIcon { ...styling } />;
+  if (icon === 'pause') return <PauseIcon { ...styling } />;
+  if (icon === 'grid') return <GridIcon { ...styling } />;
+  if (icon === 'clock') return <ClockIcon { ...styling } />;
+  if (icon === 'users') return <UsersIcon { ...styling } />;
+  if (icon === 'user') return <UserIcon { ...styling } />;
+  if (icon === 'settings') return <SettingsIcon { ...styling } />;
+  if (icon === 'headphones') return <HeadphonesIcon { ...styling }/>;
+  if (icon === 'phone') return <PhoneIcon { ...styling } />;
+  if (icon === 'delete') return <DeleteIcon { ...styling } />;
+  if (icon === 'trash') return <TrashIcon { ...styling } />;
+  if (icon === 'share2') return <Share2Icon { ...styling } />;
+  if (icon === 'plus') return <PlusIcon { ...styling } />;
+  if (icon === 'video') return <VideoIcon { ...styling } />;
+  if (icon === 'check') return <CheckIcon { ...styling } />;
+  if (icon === 'x') return <XIcon { ...styling } />;
+}
+
+export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color }) => {
   return (
     <TouchableOpacity
       onPress={onClick}
@@ -180,7 +184,7 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
         style
       ]}
     >
-      <Icon />
+      { icon ? <Icon {...{icon, size, color }} /> : iconType }
       {children}
     </TouchableOpacity>
 
@@ -189,15 +193,18 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
 
 export const RoundIconButton = ({ size = 30, color, icon, iconSize, iconColor, onClick, style }) => {
   return (
-  <View style={[{ 
-    width: size,
-    height: size,
-    borderRadius: size / 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: color}, style]}>
-    <ButtonIcon color={iconColor} icon={icon} size={iconSize} onClick={onClick} />
-  </View>
+    <ButtonIcon 
+      icon={icon} 
+      color={iconColor} 
+      size={iconSize} onClick={onClick} 
+      style={[{ 
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: color}, style]}
+    />
   )
 }
 

@@ -142,7 +142,7 @@ export const SessionScreen = ({
           />
 
           <CallButton
-            iconColor={muted ? 'danger' : null}
+            iconColor={muted ? 'danger' : undefined}
             icon="micOff"
             onClick={() => setMuted(!muted)}
           />
@@ -150,7 +150,7 @@ export const SessionScreen = ({
 
           {isVideo &&
             <CallButton
-              iconColor={mutedVideo ? 'danger' : null}
+              iconColor={mutedVideo ? 'danger' : undefined}
               icon="video"
               onClick={() => setMutedVideo(!mutedVideo)}
             />
@@ -162,7 +162,7 @@ export const SessionScreen = ({
           />
         </View>
 
-        {((session.hasAnswer) && (transferAllowed || blindTransferAllowed)) && (
+        {((session.hasAnswer && !isTransfer) && (transferAllowed || blindTransferAllowed)) && (
           <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
             {transferAllowed && (
               <CallButton

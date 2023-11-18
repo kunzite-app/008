@@ -31,7 +31,3 @@ packages/008desktop/binaries
 packages/008desktop/build/*
 !packages/008desktop/build/
 !packages/008desktop/build/entitlements.mac.plist
-
-**/*.webm
-**/web/*.bin
-**/web/*.wav

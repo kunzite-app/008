@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 
 import Sound from '../Sound';
-import { ButtonIcon, COLORS, Text, TextInput } from './Basics';
+import { ButtonIcon, COLORS, RoundIconButton, Text, TextInput } from './Basics';
 import { CdrsList, ContactsList } from './Lists';
 
 const keys = [
@@ -91,7 +91,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
           value={value}
           onChangeText={text => setValue(text)}
         />
-        <ButtonIcon icon="delete" onClick={onPressDelete} />
+        <ButtonIcon icon="delete" onClick={onPressDelete} color='textSecondary' />
       </View>
 
       <DialGrid onPress={onPressDialer} onLongPress={onPressDialer} />
@@ -100,21 +100,23 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
         <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
           {!isTransfer &&
             <View>
-              <ButtonIcon
-                style={{ backgroundColor: COLORS.secondary, width: buttonCallSize, height: buttonCallSize, borderRadius: buttonCallSize / 2 }}
-                color="white"
+              <RoundIconButton
+                size={buttonCallSize}
+                color={COLORS.secondary}
+                iconColor="white"
                 icon="phone"
-                size={iconSize}
+                iconSize={iconSize}
                 onClick={() => onClick?.(value)} 
               />
 
               {onClickVideo &&
-                <View style={{ alignItems: 'center', justifyContent: 'center', height: buttonCallSize, borderRadius: buttonCallSize / 2, position: 'absolute',  width: buttonCallSize - 5, left: buttonCallSize - 5, backgroundColor: appColor }}>
-                  <ButtonIcon
-                    style={{ backgroundColor: COLORS.primary, width: cameraCallSize, height: cameraCallSize, borderRadius: cameraCallSize / 2 }}
-                    color="white" 
+               <View style={{ alignItems: 'center', justifyContent: 'center', height: buttonCallSize, borderRadius: buttonCallSize / 2, position: 'absolute',  width: buttonCallSize - 5, left: buttonCallSize - 5, backgroundColor: appColor }}>
+                  <RoundIconButton
+                    size={cameraCallSize}
+                    color={COLORS.primary}
+                    iconColor="white"
                     icon="video"
-                    size={iconSize}
+                    iconSize={iconSize}
                     onClick={() => onClickVideo?.(value)} 
                   />
                 </View>
@@ -211,7 +213,7 @@ export const Dialer = ({
           <ButtonIcon
             style={{ height: 50, width: 50 }} 
             key={id} 
-            color={tab === id ? COLORS.primary : null}
+            color={tab === id ? COLORS.primary : COLORS.textPrimary}
             icon={icon} 
             onClick={() => setTab(id)} 
           />

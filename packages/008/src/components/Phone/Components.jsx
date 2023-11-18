@@ -17,18 +17,18 @@ export const UserAvatar = ({
 };
 
 export const Header = ({
-  // numbers = [],
+  numbers = [],
   number_out,
   onChange,
 
   onSettingsClick,
-  // nickname = '-',
-  // avatar,
+  nickname = '-',
+  avatar,
   status_color
 }) => {
-  const numbers = []
-  const avatar  = '';
-  const nickname = '-';
+  // const numbers = []
+  // const avatar  = '';
+  // const nickname = '-';
 
   const hasNumbers = numbers.length >0;
   const avatarSize = 45;
@@ -64,7 +64,7 @@ export const Header = ({
               renderCustomizedButtonChild={(item) =>
                 <View>
                   <Text style={{ fontSize: 16, flex: 1, textAlign: 'center' }}>{nickname}</Text>
-                  <Text style={{ ...itemFontStyle, color: '#BABABA', flex: 1, textAlign: 'center' }}>{item?.value}</Text>
+                  <Text style={{ ...itemFontStyle, color: COLORS.textSecondary, flex: 1, textAlign: 'center' }}>{item?.value}</Text>
                 </View>
               }
               rowTextStyle={{ ...itemFontStyle, textAlign: 'center', backgroundColor, borderRadius: 8, padding: 5 }}

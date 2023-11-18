@@ -247,9 +247,13 @@ class Phone extends React.Component {
   };
 
   hangup = async () => {
-    const { session } = this.state;
-    if (session?.endTime) return;
-    session.terminate();
+    try {
+      const { session } = this.state;
+      if (session?.endTime) return;
+      session.terminate();
+    } catch (err) {
+      this.reset();
+    }
   };
 
   call = async (opts = {}) => {
@@ -307,8 +311,13 @@ class Phone extends React.Component {
 
   transfer = (opts = {}) => {
     try {
-      const { session, dialer_number, show_blindTransfer, microphone, number_out } =
-        this.state;
+      const {
+        session,
+        dialer_number,
+        show_blindTransfer,
+        microphone,
+        number_out
+      } = this.state;
 
       const {
         number = dialer_number,
@@ -320,7 +329,7 @@ class Phone extends React.Component {
       const indentityHeaders = number_out
         ? [`P-Asserted-Identity:${number_out}`, `x-Number:${number_out}`]
         : [];
-      
+
       const target = cleanPhoneNumber(number);
       const payload = {
         extraHeaders: [...indentityHeaders, ...extraHeaders],
@@ -340,7 +349,9 @@ class Phone extends React.Component {
       const sessiont = this.ua.invite(target, payload);
 
       const cdr = new Cdr({ session: sessiont });
-      cdr.setContact(this.context.contacts().contact_by_phone({ phone: cdr.to }));
+      cdr.setContact(
+        this.context.contacts().contact_by_phone({ phone: cdr.to })
+      );
       sessiont.cdr = cdr;
 
       sessiont.on('progress', () => {
@@ -400,7 +411,6 @@ class Phone extends React.Component {
 
     const streamIn = new MediaStream();
     const streamOut = new MediaStream();
-
 
     let recorder;
     const chunks = [];
@@ -601,7 +611,9 @@ class Phone extends React.Component {
 
     const transferOnCancelHandler = async () => {
       this.setState({ show_transfer: false }, async () => {
-        try { sessiont?.terminate() } catch(err){};
+        try {
+          sessiont?.terminate();
+        } catch (err) {}
         session?.unhold();
       });
     };
@@ -668,9 +680,7 @@ class Phone extends React.Component {
           session={sessiont}
           visible={!_.isEmpty(sessiont)}
           onCancel={transferOnCancelHandler}
-          onAccept={sessiont?.hasAnswer && transferConfirmHandler}
-          transferAllowed={false}
-          blindTransferAllowed={false}
+          onAccept={transferConfirmHandler}
           isTransfer={true}
         />
 
