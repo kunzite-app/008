@@ -6,7 +6,6 @@ on:
 
 jobs:
   downloads:
-    needs: sign-win
     runs-on: ubuntu-latest
 
     steps:
