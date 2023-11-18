@@ -72,7 +72,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download --repo kunzite-app/008 --pattern '008-desktop*' --dir bin
+          # gh release download --repo kunzite-app/008 --pattern '008-desktop*' --dir bin
 
           echo "${{ secrets.SITE_SSH_KEY }}" > agent008.pem
           chmod 600 agent008.pem
