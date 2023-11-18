@@ -24,17 +24,24 @@ jobs:
           yarn install
           yarn run build-desktop
 
+      - name: Release
+          uses: softprops/action-gh-release@v1
+          draft: true
+          with:
+            files: |
+              packages/008desktop/build/008-desktop-mac.dmg
+              packages/008desktop/build/008-desktop-win.exe
+              packages/008desktop/build/008-desktop-linux.AppImage
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           path: |
-            packages/008desktop/build/008-desktop-mac.dmg
             packages/008desktop/build/008-desktop-win.exe
-            packages/008desktop/build/008-desktop-linux.AppImage
 
   sign-win:
     needs: build
-    runs-on: [self-hosted, M1]
+    runs-on: windows-latest
 
     steps:
       - name: Download artifacts
@@ -46,40 +53,20 @@ jobs:
       - name: Sign win
         shell: bash
         run: |
-          if [[ -z "${{ secrets.AZURE_CERT_NAME }}" ]]; then
-            echo "No cert available yet"
-            exit 1
-          fi
-
           dotnet tool install --global AzureSignTool 
           AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "bin/008-desktop-win.exe"
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: bin/008-desktop-win.exe
-
-  deploy:
-    permissions:
-      contents: write
-    needs: sign-win
-    runs-on: [self-hosted, M1]
-    if: always()
-
-    steps:
-      - name: Download binaries
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact
-          path: bin
-
       - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: bin/*
+          uses: softprops/action-gh-release@v1
+          draft: true
+          with:
+            files: |
+              bin/008-desktop-win.exe
 
       - name: Upload agent008.ai
         run: |
+          gh release download --pattern '008-desktop*' --dir bin
+
           echo "${{ secrets.SITE_SSH_KEY }}" > agent008.pem
           chmod 600 agent008.pem
 
