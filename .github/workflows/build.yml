@@ -26,7 +26,6 @@ jobs:
         with:
           draft: true
           files: |
-            packages/008desktop/build/008-desktop-mac.dmg
             packages/008desktop/build/008-desktop-win.exe
             packages/008desktop/build/008-desktop-linux.AppImage
 
