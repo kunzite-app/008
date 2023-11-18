@@ -68,7 +68,13 @@ jobs:
           files: |
             bin/008-desktop-win.exe
 
+  deploy:
+    needs: sign-win
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Upload agent008.ai
+        timeout-minutes: 1
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -77,4 +83,4 @@ jobs:
           echo "${{ secrets.SITE_SSH_KEY }}" > agent008.pem
           chmod 600 agent008.pem
 
-          # scp -P ${{ secrets.SITE_PORT }} -i agent008.pem -r bin ${{ secrets.SITE }}:~/public/
+          scp -P ${{ secrets.SITE_PORT }} -i agent008.pem -r bin ${{ secrets.SITE }}:~/public/
