@@ -655,9 +655,7 @@ class Phone extends React.Component {
           session={session}
           visible={!_.isEmpty(session)}
           onCancel={this.hangup}
-          onAccept={
-            session?.isInbound() && !session?.hasAnswer ? this.answer : null
-          }
+          onAccept={this.answer}
           onTransfer={() => showTransferDialerHandler(false)}
           onBlindTransfer={() => showTransferDialerHandler(true)}
           onContactClick={contactClickHandler}

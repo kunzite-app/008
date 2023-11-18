@@ -1,27 +1,6 @@
 import { TouchableOpacity, View } from 'react-native';
 
-import { ContactAvatar } from '../Avatars';
-import { Avatar, COLORS, Link, Select, Status, Text } from '../Basics';
-
-export const ContactDetails = ({ contact = {}, number, onClick }) => {
-  const displayedNumber = number || contact?.phones?.[0] || '';
-  
-  return (
-    <View
-      style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-      focusable={false}
-    >
-      <ContactAvatar size={100} contact={contact} />
-      {contact?.name &&
-        <Link onClick={() => onClick?.(contact)} style={{ fontSize: 22, paddingVertical: 10 }}>
-          {contact.name}
-        </Link>
-      } 
-
-      <Text style={{ fontSize: 20 }}>{displayedNumber}</Text>
-    </View>
-  );
-};
+import { Avatar, COLORS, Select, Status, Text } from '../Basics';
 
 export const UserAvatar = ({
   color,

@@ -45,7 +45,7 @@ export const COLORS = {
   secondary: '#3CA82E',
   borderColor: '#E2E6F0',
   backColor: '#F7F7F7',
-  app: '#fff'
+  app: '#ffffff'
 }
 
 export const BORDERCOLOR = COLORS.borderColor;
@@ -187,6 +187,20 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
   )
 };
 
+export const RoundIconButton = ({ size = 30, color, icon, iconSize, iconColor, onClick, style }) => {
+  return (
+  <View style={[{ 
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: color}, style]}>
+    <ButtonIcon color={iconColor} icon={icon} size={iconSize} onClick={onClick} />
+  </View>
+  )
+}
+
 export const Link = ({ children, style = {}, onClick }) => (
   <TouchableOpacity onPress={() => onClick?.()}>
     <Text style={{ ...style }}>
@@ -255,18 +269,20 @@ export const CancelAcceptCall = ({ onCancel, onAccept }) => {
       }}
     >
       {onCancel && (
-        <ButtonIcon
-          style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: COLORS.danger }}
-          color="white" 
+        <RoundIconButton
+          size={size}
+          color={COLORS.danger}
+          iconColor="white" 
           icon="phone"
           onClick={onCancel}
         />
       )}
 
       {onAccept && (
-        <ButtonIcon
-          style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: COLORS.secondary }}
-          color="white" 
+        <RoundIconButton
+          size={size}
+          color={COLORS.secondary}
+          iconColor="white" 
           icon="phone"
           onClick={onAccept}
         />

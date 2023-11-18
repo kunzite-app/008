@@ -15,58 +15,6 @@ import { ContextProvider, useStore } from './src/store/Context';
 
 import './src/SessionExtend';
 
-import * as whisper from "whisper-webgpu";
-
-
-const CACHE = {};
-const infer = async ({ 
-  url, 
-  bin = 'base-q8g16.bin',
-  data = 'tokenizer.json' }) => {
-
-  const fetchBytes = async (url) => {
-    if (!CACHE[url]) {
-      const response = await fetch(url);
-      const buffer = await response.arrayBuffer();
-      const bytes = new Uint8Array(buffer);
-
-      CACHE[url] = bytes
-      console.log(`loaded ${url}`)
-    }
-
-    return CACHE[url];
-  }
-
-  const tokenizer = await fetchBytes(data);
-  const model = await fetchBytes(bin);
-  const audio = await fetchBytes(url);
-
-  await whisper.default();
-  const builder = new whisper.SessionBuilder();
-  const session = await builder
-    .setModel(model)
-    .setTokenizer(tokenizer)
-    .build();
-
-  // const { segments } = await session.run(audio);
-
-  const segments = [];
-  await session.stream(audio, false, (segment) => {
-    console.log(segment);
-    segments.push(segments);
-  });
-
-  session.free();
-
-  return segments
-}
-
-const yy = async () => {
-  console.log(await infer({ url: 'carrental.wav' }));
-  // console.log(await infer({ url: 'carrental.wav' }));
-}
-// yy();
-
 const reactPlugin = new ReactPlugin();
 const appInsights = new ApplicationInsights({
   config: {

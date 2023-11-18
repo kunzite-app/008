@@ -3,26 +3,16 @@ import { View } from 'react-native';
 
 import { Screen } from './Screen';
 import { AudioPlayer } from '../components/Audioplayer';
-import { ButtonIcon, COLORS, CallIcon, CancelAccept, CancelAcceptCall, Text } from '../components/Basics';
+import { COLORS, CallIcon, CancelAccept, CancelAcceptCall, Link, RoundIconButton, Text } from '../components/Basics';
 import { DialGrid } from '../components/Dialer';
-import { ContactDetails } from '../components/Phone/Components';
 import { useStore } from '../store/Context';
 import Timer from '../components/Timer';
+import { ContactAvatar } from '../components/Avatars';
 
-const Round = ({ children }) => {
-  const size = 30;
-  return (
-  <View style={{ 
-    width: size,
-    height: size,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: size / 2,
-    backgroundColor: '#ffffff80'}}>
-    {children}
-  </View>
-  )
-}
+const CallButton = ({ style, size = 40, iconSize = 20, ...props }) => 
+  <RoundIconButton {...props} size={size} iconSize={iconSize}
+    style={{ backgroundColor: `${COLORS.app}90`,  ...style }} 
+  />
 
 export const SessionScreen = ({
   visible,
@@ -33,11 +23,11 @@ export const SessionScreen = ({
   onCancel,
   onContactClick,
 
+  isTransfer,
   transferAllowed = true,
   blindTransferAllowed = true,
   onTransfer,
   onBlindTransfer,
-  isTransfer
 }) => {
   
   const store = useStore();
@@ -93,7 +83,7 @@ export const SessionScreen = ({
 
   const { cdr: { from, to, contact } } = session;
   const isVideo = session.isVideo();
-  const inbound = session.isInbound();
+  const number = session.isInbound() ? from : to || contact?.phones?.[0] || '';
 
   return (
     <Screen closeable={false} visible={visible}>
@@ -105,8 +95,7 @@ export const SessionScreen = ({
             flexDirection: 'row',
             justifyContent: 'flex-end',
             alignItems: 'center',
-            padding: 5,
-            backgroundColor: '#ffffff80',
+            padding: 5
           }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignContent: 'center', width: 80, backgroundColor: COLORS.secondary, padding: 5, borderRadius: 15 }}>
@@ -122,15 +111,23 @@ export const SessionScreen = ({
           {showDialer ? (
             <DialGrid onPress={dialHandler} style={{ backgroundColor: '#ffffff80', borderRadius: 30 }} />
           ) : (!isVideo &&
-            <ContactDetails
-              number={inbound ? from : to}
-              contact={contact}
-              onClick={onContactClick}
-            />
+            <View
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+              focusable={false}
+            >
+              <ContactAvatar size={100} contact={contact} />
+
+              {contact?.name &&
+                <Link onClick={() => onContactClick?.(contact)} style={{ fontSize: 20, marginTop: 10 }}>
+                  {contact.name}
+                </Link>
+              } 
+
+              <Text style={{ fontSize: 20, marginTop: contact?.name ? 5 : 10 }}>{number}</Text>
+            </View>
           )}
         </View>
 
-       
         <View
           focusable={false}
           style={{
@@ -139,76 +136,65 @@ export const SessionScreen = ({
             justifyContent: 'space-around'
           }}
         >
-          <Round>
-            <ButtonIcon
-              color="primary"
-              icon={showDialer ? 'user' : 'grid'}
-              onClick={() => setShowDialer(!showDialer)}
-            />
-          </Round>
-          
-          <Round>
-            <ButtonIcon
-              color={muted ? 'danger' : 'primary'}
-              icon="micOff"
-              onClick={() => setMuted(!muted)}
-            />
-          </Round>
+          <CallButton 
+            icon={showDialer ? 'user' : 'grid'} 
+            onClick={() => setShowDialer(!showDialer)} 
+          />
 
+          <CallButton
+            iconColor={muted ? 'danger' : null}
+            icon="micOff"
+            onClick={() => setMuted(!muted)}
+          />
           
+
           {isVideo &&
-          <Round>
-            <ButtonIcon
-              color={mutedVideo ? 'danger' : 'primary'}
+            <CallButton
+              iconColor={mutedVideo ? 'danger' : null}
               icon="video"
               onClick={() => setMutedVideo(!mutedVideo)}
             />
-          </Round>
           }
           
-          <Round>
-            <ButtonIcon
-              color="primary"
-              icon={hold ? 'play' : 'pause'}
-              onClick={() => setHold(!hold)}
-            />
-          </Round>
-
-          {(transferAllowed || blindTransferAllowed) && (
-            <View style={{ flexDirection: 'row' }}>
-              {transferAllowed && (
-                <Round>
-                  <ButtonIcon
-                    color="primary" 
-                    icon="phoneForwarded" 
-                    onClick={onTransfer} 
-                  />
-                </Round>
-              )}
-
-              {blindTransferAllowed && (
-                <Round>
-                  <ButtonIcon
-                    color="danger"
-                    icon="phoneForwarded"
-                    onClick={onBlindTransfer}
-                  />
-                </Round>
-              )}
-            </View>
-          )}
-        </View>
-        
-        {isTransfer ?
-          <CancelAccept
-            onAccept={onAccept} 
-            onCancel={onCancel}
-          /> :
-           <CancelAcceptCall
-            onAccept={onAccept} 
-            onCancel={onCancel}
+          <CallButton
+            icon={hold ? 'play' : 'pause'}
+            onClick={() => setHold(!hold)}
           />
-        }
+        </View>
+
+        {((session.hasAnswer) && (transferAllowed || blindTransferAllowed)) && (
+          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
+            {transferAllowed && (
+              <CallButton
+                icon="phoneForwarded" 
+                onClick={onTransfer} 
+              />
+            )}
+
+            {blindTransferAllowed && (
+              <View style={{ marginLeft: 30, }}>
+                <CallButton
+                  iconColor="danger"
+                  icon="phoneForwarded"
+                  onClick={onBlindTransfer}
+                />
+              </View>
+            )}
+          </View>
+        )}
+        
+        <View style={{ marginBottom: 20 }} >
+          {isTransfer ?
+            <CancelAccept
+              onAccept={onAccept} 
+              onCancel={onCancel}
+            /> :
+            <CancelAcceptCall
+              onAccept={session?.isInbound() && !session?.hasAnswer ? onAccept : null} 
+              onCancel={onCancel}
+            />
+          }
+        </View>
       </View>
     </Screen>
   );

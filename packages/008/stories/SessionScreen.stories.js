@@ -73,93 +73,65 @@ InboundAnswered.args = {
   },
 };
 
-export const Outbound = args => <SessionScreen {...args} />;
+export const Outbound = args => <Template {...args} />;
 Outbound.args = {
-  visible: true,
-
+  ...sharedArgs,
   session: {
-    unhold: () => console.log('calling unhold'),
-    hold: () => console.log('calling hold'),
-    mute: () => console.log('calling mute'),
-    dtmf: () => console.log('calling dftm')
+    ...mockSession,
+    hasAnswer: false,
+    isInbound: () => false,
+    cdr: {
+      contact,
+      from: 'agent1',
+      to: 'agent2',
+    },
   },
-
-  inbound: false,
-  onCancel: () => console.log('canceling'),
-  onTransfer: () => console.log('calling transfer'),
-  onBlindTransfer: () => console.log('calling blind transfer'),
-
-  label: 'Lorem ipsum dolor',
-  call_number: '+34999999999',
-  contact,
-  onContactClick: console.log('contact click')
 };
 
-export const OutboundAnswered = args => <SessionScreen {...args} />;
+export const OutboundAnswered = args => <Template {...args} />;
 OutboundAnswered.args = {
-  visible: true,
-
+  ...sharedArgs,
   session: {
-    unhold: () => console.log('calling unhold'),
-    hold: () => console.log('calling hold'),
-    mute: () => console.log('calling mute'),
-    dtmf: () => console.log('calling dftm'),
-    hasAnswer: true
+    ...mockSession,
+    hasAnswer: true,
+    isInbound: () => true,
+    cdr: {
+      contact,
+      from: 'agent1',
+      to: 'agent2',
+    },
   },
-
-  inbound: false,
-  onCancel: () => console.log('canceling'),
-  onTransfer: () => console.log('calling transfer'),
-  onBlindTransfer: () => console.log('calling blind transfer'),
-
-  label: 'Lorem ipsum dolor',
-  call_number: '+34999999999',
-  contact,
-  onContactClick: console.log('contact click')
 };
 
-export const Transfer = args => <SessionScreen {...args} />;
-Transfer.args = {
-  visible: true,
-
+export const OutboundVideoAnswered = args => <Template {...args} />;
+OutboundVideoAnswered.args = {
+  ...sharedArgs,
   session: {
-    unhold: () => console.log('calling unhold'),
-    hold: () => console.log('calling hold'),
-    mute: () => console.log('calling mute'),
-    dtmf: () => console.log('calling dftm')
+    ...mockSession,
+    hasAnswer: true,
+    isInbound: () => true,
+    isVideo: () => true,
+    cdr: {
+      contact,
+      from: 'agent1',
+      to: 'agent2',
+    },
   },
-
-  inbound: false,
-  onCancel: () => console.log('canceling'),
-  transferAllowed: false,
-  blindTransferAllowed: false,
-
-  label: 'Lorem ipsum dolor',
-  call_number: '+34999999999',
-  contact,
-  onContactClick: console.log('contact click')
 };
 
-export const TransferAnswered = args => <SessionScreen {...args} />;
-TransferAnswered.args = {
-  visible: true,
-
+export const AttendedTransfer = args => <Template {...args} />;
+AttendedTransfer.args = {
+  ...sharedArgs,
   session: {
-    unhold: () => console.log('calling unhold'),
-    hold: () => console.log('calling hold'),
-    mute: () => console.log('calling mute'),
-    dtmf: () => console.log('calling dftm'),
-    hasAnswer: true
+    ...mockSession,
+    isTransfer: true,
+    hasAnswer: true,
+    isInbound: () => false,
+    cdr: {
+      contact,
+      from: 'agent1',
+      to: 'agent2',
+    },
   },
-
-  inbound: false,
-  onAccept: () => console.log('accepting'),
-  onCancel: () => console.log('canceling'),
-  transferAllowed: false,
-  blindTransferAllowed: false,
-
-  label: 'Lorem ipsum dolor',
-  call_number: '+34999999999',
-  contact,
-  onContactClick: console.log('contact click')
 };
+
