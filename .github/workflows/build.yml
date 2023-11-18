@@ -33,7 +33,7 @@ jobs:
         with:
           draft: true
           files: |
-            packages/008desktop/build/008-desktop-win.exe
+            packages/008desktop/build/008-desktop-mac.dmg
             packages/008desktop/build/008-desktop-linux.AppImage
 
       - name: Upload artifacts
@@ -69,8 +69,10 @@ jobs:
             bin/008-desktop-win.exe
 
       - name: Upload agent008.ai
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download --pattern '008-desktop*' --dir bin
+          gh release download --repo kunzite-app/008 --pattern '008-desktop*' --dir bin
 
           echo "${{ secrets.SITE_SSH_KEY }}" > agent008.pem
           chmod 600 agent008.pem
