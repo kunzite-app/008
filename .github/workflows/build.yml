@@ -1,4 +1,5 @@
 name: build
+
 on:
   push:
     tags:
@@ -7,6 +8,9 @@ on:
 jobs:
   build:
     runs-on: [self-hosted, M1]
+    permissions:
+      contents: write
+      
     steps:
       - uses: actions/checkout@v2
 
@@ -27,14 +31,17 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
+          retention-days: 1
           path: |
-            packages/008desktop/build/008-desktop-mac.dmg
             packages/008desktop/build/008-desktop-win.exe
+            packages/008desktop/build/008-desktop-mac.dmg
             packages/008desktop/build/008-desktop-linux.AppImage
 
   sign-win:
     needs: build
-    runs-on: [self-hosted, M1]
+    runs-on: windows-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Download artifacts
@@ -46,41 +53,12 @@ jobs:
       - name: Sign win
         shell: bash
         run: |
-          if [[ -z "${{ secrets.AZURE_CERT_NAME }}" ]]; then
-            echo "No cert available yet"
-            exit 1
-          fi
-
           dotnet tool install --global AzureSignTool 
           AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "bin/008-desktop-win.exe"
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          path: bin/008-desktop-win.exe
-
-  deploy:
-    permissions:
-      contents: write
-    needs: sign-win
-    runs-on: [self-hosted, M1]
-    if: always()
-
-    steps:
-      - name: Download binaries
-        uses: actions/download-artifact@v2
-        with:
-          name: artifact
-          path: bin
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: bin/*
-
-      - name: Upload agent008.ai
-        run: |
-          echo "${{ secrets.SITE_SSH_KEY }}" > agent008.pem
-          chmod 600 agent008.pem
-
-          scp -P ${{ secrets.SITE_PORT }} -i agent008.pem -r bin ${{ secrets.SITE }}:~/public/
+          draft: true
+          files: |
+            bin/008-desktop*
