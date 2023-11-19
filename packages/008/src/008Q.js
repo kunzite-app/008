@@ -48,14 +48,6 @@ export const ttsInfer = async ({
 
   const { segments } = await session.run(audio);
 
-  /*
-  const segments = [];
-  await session.stream(audioUint8Array, false, (segment) => {
-    console.log(segment);
-    segments.push(segments);
-  });
-  */
-
   session.free();
 
   return segments;
