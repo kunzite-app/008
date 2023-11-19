@@ -179,7 +179,7 @@ export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
   if (icon === 'search') return <SearchIcon { ...styling } />;
 }
 
-export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color }) => {
+export const ButtonIcon = ({ children, icon, onClick, style, size = 18, color }) => {
   return (
     <TouchableOpacity
       onPress={onClick}
@@ -188,7 +188,7 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
         style
       ]}
     >
-      { icon ? <Icon {...{icon, size, color }} /> : iconType }
+      { icon && <Icon {...{icon, size, color }} />}
       {children}
     </TouchableOpacity>
 
@@ -302,7 +302,7 @@ export const CancelAcceptCall = ({ onCancel, onAccept }) => {
   );
 };
 
-export const Avatar = ({ imageUrl, name, size = 35 }) => {
+export const Avatar = ({ imageUrl, name = '', size = 35 }) => {
   const letters = name.split(/\s+/g).map(chunk => chunk[0]).join('').substring(0, 3).toUpperCase();
   
   const stringToHslColor = (str, s, l) => {
@@ -323,7 +323,7 @@ export const Avatar = ({ imageUrl, name, size = 35 }) => {
       width: size, height: size, borderRadius: size / 2 
     }}>
 
-      {imageUrl ? (
+      {imageUrl || !name.length ? (
         <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: size / 2 }} />
       ) : (
         <Text   

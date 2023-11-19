@@ -20,7 +20,7 @@ import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { tts } from '../../008Q';
+import { tts, wavBytes } from '../../008Q';
 
 import { name as packageName } from '../../../package.json';
 
@@ -45,6 +45,17 @@ class Phone extends React.Component {
 
       ...props
     };
+
+    /*
+    this.qworker = new Worker(new URL('../../008QWorker.js', import.meta.url), {
+      type: 'module',
+    });
+
+    this.qworker.addEventListener('message', ({ data }) => {
+      console.log(data)
+      this.emit({ type: 'phone:transcript', data })
+    });
+    */
   }
 
   emit = ({ type, data = {} }) => {
@@ -451,8 +462,8 @@ class Phone extends React.Component {
         try {
           const { segments } = await tts({
             audio: {
-              remote: chunksIn,
-              local: chunksOut
+              remote: await wavBytes({ chunks: chunksIn }),
+              local: await wavBytes({ chunks: chunksOut })
             }
           });
 
@@ -463,6 +474,13 @@ class Phone extends React.Component {
         } catch (err) {
           console.error(err);
         }
+
+        /*
+        this.qworker.postMessage({ id, audio: { 
+          remote: await wavBytes({ chunks: chunksIn }), 
+          local: await wavBytes({ chunks: chunksOut }), 
+        }});
+        */
       };
 
       recorder.start();
@@ -584,6 +602,9 @@ class Phone extends React.Component {
       statuses = [],
       status,
       network,
+
+      sipUser,
+      sipUri = '',
       nickname,
       avatar,
 
@@ -632,6 +653,9 @@ class Phone extends React.Component {
     const contactClickHandler = contact =>
       this.emit({ type: 'contact:click', data: { contact } });
 
+    const [sipUriName] = sipUri.replace('sip:', '').split('@');
+    const displayName = nickname || sipUser || sipUriName || '';
+
     return (
       <View style={{ flex: 1 }}>
         <View style={{ flex: 1, marginTop: 10 }}>
@@ -639,7 +663,7 @@ class Phone extends React.Component {
             numbers={numbers}
             number_out={number_out}
             onChange={onNumberChangeHandler}
-            nickname={nickname}
+            name={displayName}
             avatar={avatar}
             status_color={status_color}
             onSettingsClick={() => this.context.toggleShowSettings(true)}

@@ -2,9 +2,23 @@ import * as whisper from 'whisper-webgpu';
 import toWav from 'audiobuffer-to-wav';
 
 const CACHE = {};
+
+export const wavBytes = async ({ chunks }) => {
+  // TODO: flatten 2 channels
+  let arrayBuffer = await chunks[0].arrayBuffer();
+  const audioContext = new AudioContext();
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  const wavBlob = new Blob([toWav(audioBuffer)], { type: 'audio/wav' });
+
+  arrayBuffer = await wavBlob.arrayBuffer();
+
+  return new Uint8Array(arrayBuffer);
+};
+
 export const ttsInfer = async ({
   chunks,
   url,
+  audio = [],
   bin = 'models/tts.bin',
   data = 'models/tts.json'
 }) => {
@@ -24,15 +38,8 @@ export const ttsInfer = async ({
   const tokenizer = await fetchBytes(data);
   const model = await fetchBytes(bin);
 
-  // const audio = await fetchBytes(url);
-
-  let arrayBuffer = await chunks[0].arrayBuffer();
-  const audioContext = new AudioContext();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-  const wavBlob = new Blob([toWav(audioBuffer)], { type: 'audio/wav' });
-
-  arrayBuffer = await wavBlob.arrayBuffer();
-  const audio = new Uint8Array(arrayBuffer);
+  if (url) audio = await fetchBytes(url);
+  if (chunks) audio = await wavBytes({ chunks });
 
   await whisper.default();
   const builder = new whisper.SessionBuilder();
@@ -54,16 +61,15 @@ export const ttsInfer = async ({
 };
 
 export const tts = async ({ audio }) => {
-  const remote = (await ttsInfer({ chunks: audio.remote })).map(item => ({
+  const remote = (await ttsInfer({ audio: audio.remote })).map(item => ({
     ...item,
     channel: 'remote'
   }));
-  const local = (await ttsInfer({ chunks: audio.local })).map(item => ({
+  const local = (await ttsInfer({ audio: audio.local })).map(item => ({
     ...item,
     channel: 'local'
   }));
   const merged = [...remote, ...local].sort((a, b) => a.start - b.start);
 
-  console.log(merged);
   return merged;
 };

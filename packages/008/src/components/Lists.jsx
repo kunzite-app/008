@@ -131,7 +131,7 @@ const ContactCell = ({ contact = {}, onClick  }) => (
     <ContactAvatar contact={contact} />
 
     <View style={{ flex: 1, justifyContent: 'center', paddingLeft: PADDING }}>
-      <Text numberOfLines={1} >{contact?.name}</Text>
+      <Text numberOfLines={1} >{contact?.name || contact?.phones?.[0]}</Text>
     </View>
   </TouchableOpacity>
 )

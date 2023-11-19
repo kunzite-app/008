@@ -90,7 +90,7 @@ const DEFAULTS = {
   avatar: undefined,
   nickname: undefined,
 
-  size: { width: 360, height: 500 }
+  size: { width: 340, height: 460 }
 };
 
 export const useStore = create(

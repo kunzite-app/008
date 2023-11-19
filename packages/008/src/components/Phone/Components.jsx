@@ -21,18 +21,14 @@ export const Header = ({
   number_out,
   onChange,
 
-  onSettingsClick,
-  nickname = '-',
+  name = 'sdsdsd',
   avatar,
-  status_color
+  status_color,
+  onSettingsClick,
 }) => {
-  // const numbers = []
-  // const avatar  = '';
-  // const nickname = '-';
-
-  const hasNumbers = numbers.length >0;
+  const hasNumbers = numbers.length > 0;
   const avatarSize = 45;
-  const numbersWidth = hasNumbers ? 200 : 0;
+  const numbersWidth = 200;
 
   const options = numbers.map(({ number }) => {
     return {
@@ -53,6 +49,10 @@ export const Header = ({
           <UserAvatar avatar={avatar} color={status_color} size={avatarSize} />
         </TouchableOpacity>
 
+        {!hasNumbers &&
+          <Text numberOfLines={1} style={{ fontSize: 16, flex: 1, textAlign: 'center', paddingHorizontal: 5 }}>{name}</Text>
+        }
+
         {hasNumbers &&
           <View style={{ justifyContent: 'center',  alignItems: 'center' }}>
             <Select
@@ -63,8 +63,8 @@ export const Header = ({
               buttonStyle={{ borderWidth: 0, backgroundColor: '#0000', width: numbersWidth }}
               renderCustomizedButtonChild={(item) =>
                 <View>
-                  <Text style={{ fontSize: 16, flex: 1, textAlign: 'center' }}>{nickname}</Text>
-                  <Text style={{ ...itemFontStyle, color: COLORS.textSecondary, flex: 1, textAlign: 'center' }}>{item?.value}</Text>
+                  <Text numberOfLines={1} style={{ fontSize: 16, flex: 1, textAlign: 'center', paddingHorizontal: 5 }}>{name}</Text>
+                  <Text numberOfLines={1} style={{ ...itemFontStyle, color: COLORS.textSecondary, flex: 1, textAlign: 'center' }}>{item?.value}</Text>
                 </View>
               }
               rowTextStyle={{ ...itemFontStyle, textAlign: 'center', backgroundColor, borderRadius: 8, padding: 5 }}

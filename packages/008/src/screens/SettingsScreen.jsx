@@ -507,7 +507,7 @@ export const SettingsScreen = () => {
               <ButtonIcon
                 style={{ padding: 20, backgroundColor: selected ? COLORS.app : null }}
                 icon={opt.icon}
-                color={selected ? COLORS.primary : null}
+                color={selected ? COLORS.primary : undefined}
                 onClick={() => setOption(opt.option)} 
               />
             )})}
