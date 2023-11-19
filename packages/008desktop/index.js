@@ -18,7 +18,6 @@ const log = require('electron-log');
 
 const pjson = require('./package.json');
 
-app.commandLine.appendSwitch('enable-unsafe-webgpu');
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'file',

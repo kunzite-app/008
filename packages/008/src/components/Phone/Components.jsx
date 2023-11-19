@@ -21,7 +21,7 @@ export const Header = ({
   number_out,
   onChange,
 
-  name = 'sdsdsd',
+  name,
   avatar,
   status_color,
   onSettingsClick,

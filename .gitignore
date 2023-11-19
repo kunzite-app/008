@@ -5,7 +5,6 @@ build/
 lib/
 dist/
 node_modules/
-node_modules_backup/
 storybook-static/
 
 /.pnp/

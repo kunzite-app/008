@@ -456,24 +456,6 @@ class Phone extends React.Component {
         const blob = await chunksBlob(chunks);
         this.emit({ type: 'phone:recording', data: { audio: { id, blob } } });
 
-        /*
-        try {
-          const segments = await tts({
-            audio: {
-              remote: await wavBytes({ chunks: chunksIn }),
-              local: await wavBytes({ chunks: chunksOut })
-            }
-          });
-
-          this.emit({
-            type: 'phone:transcript',
-            data: { transcript: { id, segments } }
-          });
-        } catch (err) {
-          console.error(err);
-        }
-        */
-
         this.qworker.postMessage({
           id,
           audio: {
