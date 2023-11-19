@@ -309,7 +309,7 @@ We offer a commercial version that incorporates embedded AI models and provides 
 | Mobile Softphone                  | sources        | :green_circle:       |
 | Events                            | :green_circle: | :green_circle:       |
 | Integrations                      | :red_circle:   | :green_circle:       |
-| AI Speech2Text                    | `english`      | `multilanguage`      |
+| AI Speech2Text                    | :green_circle: | :green_circle:       |
 | AI Summarization                  | :red_circle:   | :green_circle:       |
 | AI Sentiment Analysis             | :red_circle:   | :green_circle:       |
 | AI KPI insights                   | :red_circle:   | :green_circle:       |

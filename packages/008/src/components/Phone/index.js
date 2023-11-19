@@ -46,16 +46,13 @@ class Phone extends React.Component {
       ...props
     };
 
-    /*
     this.qworker = new Worker(new URL('../../008QWorker.js', import.meta.url), {
-      type: 'module',
+      type: 'module'
     });
 
     this.qworker.addEventListener('message', ({ data }) => {
-      console.log(data)
-      this.emit({ type: 'phone:transcript', data })
+      this.emit({ type: 'phone:transcript', data });
     });
-    */
   }
 
   emit = ({ type, data = {} }) => {
@@ -459,8 +456,9 @@ class Phone extends React.Component {
         const blob = await chunksBlob(chunks);
         this.emit({ type: 'phone:recording', data: { audio: { id, blob } } });
 
+        /*
         try {
-          const { segments } = await tts({
+          const segments = await tts({
             audio: {
               remote: await wavBytes({ chunks: chunksIn }),
               local: await wavBytes({ chunks: chunksOut })
@@ -474,13 +472,15 @@ class Phone extends React.Component {
         } catch (err) {
           console.error(err);
         }
-
-        /*
-        this.qworker.postMessage({ id, audio: { 
-          remote: await wavBytes({ chunks: chunksIn }), 
-          local: await wavBytes({ chunks: chunksOut }), 
-        }});
         */
+
+        this.qworker.postMessage({
+          id,
+          audio: {
+            remote: await wavBytes({ chunks: chunksIn }),
+            local: await wavBytes({ chunks: chunksOut })
+          }
+        });
       };
 
       recorder.start();

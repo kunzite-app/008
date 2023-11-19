@@ -4,36 +4,30 @@ let BUSY = false;
 const QUEUE = [];
 
 const process = async () => {
-  console.log('[AI] Processing...');
+  console.log('[008Q] Processing...');
   if (BUSY || !QUEUE.length) return;
 
   try {
     BUSY = true;
 
-    console.log('[AI] Transcribing...');
-
     const [data] = QUEUE;
     const { id, audio } = data;
 
-    console.log(audio);
+    console.log('[008Q] Transcribing...');
     const transcript = await tts({ audio });
 
-    console.log(transcript);
-
     self.postMessage({ id, transcript });
-    QUEUE.shift();
   } catch (err) {
-    console.log(err);
-    QUEUE.shift();
+    console.error(err);
   } finally {
+    QUEUE.shift();
     BUSY = false;
     process();
   }
 };
 
 self.addEventListener('message', async ({ data }) => {
-  console.log(`[AI] Queuing job ${data.id}`);
+  console.log(`[008Q] Queuing job ${data.id}`);
   QUEUE.push(data);
-  console.log(`[AI] about`);
   process();
 });

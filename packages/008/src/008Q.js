@@ -2,6 +2,7 @@ import * as whisper from 'whisper-webgpu';
 import toWav from 'audiobuffer-to-wav';
 
 const CACHE = {};
+const S3Q = 'https://kunziteq.s3.gra.perf.cloud.ovh.net';
 
 export const wavBytes = async ({ chunks }) => {
   // TODO: flatten 2 channels
@@ -19,8 +20,8 @@ export const ttsInfer = async ({
   chunks,
   url,
   audio = [],
-  bin = 'models/tts.bin',
-  data = 'models/tts.json'
+  bin = `${S3Q}/ttsb.bin`,
+  data = `${S3Q}/tts.json`
 }) => {
   const fetchBytes = async url => {
     if (!CACHE[url]) {

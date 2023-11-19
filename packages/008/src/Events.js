@@ -1,7 +1,6 @@
-import PQueue from 'p-queue';
-
 import { Platform } from 'react-native';
 
+import PQueue from 'p-queue';
 import _ from 'lodash';
 
 import { useStore } from './store/Context';
@@ -42,6 +41,7 @@ export const emit = async ({ type, data: payload }) => {
 
   const data = { ...payload, context };
 
+  console.error(type, data);
   document?.dispatchEvent?.(new CustomEvent(type, { detail: data }));
   window?.parent?.postMessage?.({ type, data }, '*');
   WEBHOOKS.addJob({ event: { type, data } });
