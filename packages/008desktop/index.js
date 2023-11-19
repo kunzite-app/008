@@ -1,7 +1,4 @@
 const path = require('path');
-const os = require('os');
-const fs = require('fs');
-const { spawn } = require('child_process');
 const url = require('url');
 const {
   app,
@@ -20,7 +17,6 @@ const regedit = require('rage-edit');
 const log = require('electron-log');
 
 const pjson = require('./package.json');
-const { download } = require('./utils');
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -37,9 +33,6 @@ const {
   }),
   APP_DEBUG = false
 } = process.env;
-
-const APP_Q_PORT = 13003;
-const APP_Q_TIMEOUT = 2 * 60 * 1000;
 
 const WINDOWS_MAGICAL_MARGIN = 23;
 const margin_y = process.platform === 'win32' ? WINDOWS_MAGICAL_MARGIN : null;
@@ -223,55 +216,6 @@ const requestPermissions = async () => {
   });
 };
 
-const launchQ = async () => {
-  const isDev = process.defaultApp;
-  const qpath = path.join(
-    isDev ? __dirname : process.resourcesPath,
-    'binaries',
-    '008Q'
-  );
-
-  let bin = '008Q-ubuntu';
-  if (process.platform === 'win32') bin = '008Q-windows.exe';
-  else if (process.platform === 'darwin') {
-    bin = '008Q-macos';
-    if (os.arch() === 'arm64') bin = '008Q-macos-arm64';
-  }
-
-  const url = `https://kunziteq.s3.gra.perf.cloud.ovh.net/${bin}`;
-  await download({ url, destination: qpath });
-
-  log.info(`Launching Q at ${qpath}`);
-  return new Promise((resolve, reject) => {
-    fs.chmod(qpath, '755', () => {});
-
-    const qproc = spawn(qpath, ['--port', APP_Q_PORT]);
-    const watcher = setTimeout(
-      () => reject(new Error('Q startup timeout')),
-      APP_Q_TIMEOUT
-    );
-
-    qproc.stdout.on('data', data => {
-      log.info(data.toString());
-      if (data.includes('008Q')) {
-        clearTimeout(watcher);
-        resolve();
-      }
-    });
-
-    qproc.on('error', err => reject(new Error(err)));
-
-    qproc.on('close', code => {
-      if (!QUITTING) {
-        log.error(`Q closed unexpedtedly reopening...: ${code}`);
-        launchQ();
-      }
-    });
-
-    app.on('before-quit', () => qproc.kill());
-  });
-};
-
 !app.requestSingleInstanceLock() && quit();
 
 app.on('activate', display);
@@ -302,7 +246,6 @@ app.on('ready', async () => {
   try {
     await requestPermissions();
     await registerProtocolol();
-    await launchQ();
 
     ipcMain.on('show', display);
     ipcMain.on('quit', quit);

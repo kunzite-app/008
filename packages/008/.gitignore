@@ -43,3 +43,7 @@ yarn-error.*
 # @end @expo/electron-adapter
 
 /web/config*.json
+/web/*.webm
+/web/*.wav
+/web/*.ogg
+/web/*.mp3

@@ -8,8 +8,6 @@ import {
   View, 
 } from 'react-native';
 
-import { Picker } from '@react-native-picker/picker';
-
 import {
   CheckIcon,
   ClockIcon,
@@ -28,27 +26,42 @@ import {
   TrashIcon,
   Share2Icon,
   PlusIcon,
-  VideoIcon
+  VideoIcon,
+  ChevronIcon,
+  PhoneOffIcon,
+  PhoneIncomingIcon,
+  PhoneOutgoingIcon,
+  SearchIcon,
+  EyeIcon
 } from './Icons';
+
+import SelectDropdown from 'react-native-select-dropdown';
 
 const fontFamily = 'Roboto Flex';
 
-const BORDERCOLOR = '#E2E6F0';
-const BACKCOLOR = '#fbfcfd';
-const COLORS = {
-  primary: '#0061a6',
+export const COLORS = {
+  primary: '#2D69AF',
   warning: '#fec514',
-  danger: '#b4251d',
-  success: '#00726b',
-  secondary: '#00726b'
+  danger: '#C41818',
+  success: '#4DC418',
+  secondary: '#4DC418',
+  borderColor: '#E2E6F0',
+  backColor: '#F7F7F7',
+  app: '#ffffff',
+  textPrimary: '#313131',
+  textSecondary: '#6C6C6C'
 }
 
+export const BORDERCOLOR = COLORS.borderColor;
+export const BACKCOLOR = COLORS.backColor;
+
 const defaultStyle = { 
-  padding: 8, 
-  backgroundColor: BACKCOLOR, 
+  padding: 10,
+  height: 40,
   borderColor: BORDERCOLOR, 
   borderWidth: 1,
-  fontFamily
+  fontFamily,
+  borderRadius: 5
 };
 
 export const Text = ({ children, style, ...props }) => (
@@ -58,7 +71,9 @@ export const Text = ({ children, style, ...props }) => (
 )
 
 export const TextInput = ({ style, ...props }) =>
-  <RNTextInput style={[{ fontFamily, outlineStyle: 'none' }, style ]} {...props} />
+  <RNTextInput 
+    style={[{ fontFamily, color: COLORS.textPrimary, outlineStyle: 'none' }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} {...props} 
+  />
 
 export const TextField = ({
   onChange,
@@ -79,17 +94,46 @@ export const TextField = ({
   );
 };
 
-export const Select = ({ value, options, onChange, style, ...props }) => {
+export const Select = ({ 
+    value, 
+    options, 
+    onChange, 
+    buttonStyle,
+    buttonTextStyle,
+    renderCustomizedButtonChild,
+    rowStyle,
+    rowTextStyle,
+    renderCustomizedRowChild,
+    dropdownStyle,
+    renderDropdownIcon,
+    iconStyle
+  }) => {
   return (
-    <Picker 
-      { ...props }
-      selectedValue={value} 
-      onValueChange={onChange} 
-      style={[{ ...defaultStyle }, style]}
-      itemStyle = {{ fontSize: 20 }}
-    >
-      {options.map(({ label, text, value }) => <Picker.Item label={label || text} value={value} key={value} />)}
-    </Picker>
+    <SelectDropdown
+      data={options}
+      defaultValueByIndex={options.findIndex((item) => item.value === value ) || 0}
+      onSelect={(item) => onChange?.(item.value)}
+      buttonTextAfterSelection={({ label, text }) => label || text}
+      rowTextForSelection={({ label, text }) => label || text}
+      buttonStyle={{
+        // flex: 1,
+        height: 40,
+        width: '100%',
+        backgroundColor: COLORS.app,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: BORDERCOLOR,
+        ...buttonStyle
+      }}
+      buttonTextStyle={{ color: '#000', textAlign: 'left', fontSize: 14, fontFamily, ...buttonTextStyle }}
+      renderCustomizedButtonChild={renderCustomizedButtonChild}
+      rowStyle={{ padding: 5, paddingVertical: 10, borderBottomColor: BORDERCOLOR, ...rowStyle }}
+      rowTextStyle={{ textAlign: 'left', fontSize: 14, fontFamily, ...rowTextStyle }}
+      renderCustomizedRowChild={renderCustomizedRowChild}
+      dropdownStyle={{ height: options.length * 38, ...dropdownStyle }}
+      renderDropdownIcon={(opened) => renderDropdownIcon ? renderDropdownIcon(opened) : <ChevronIcon { ...iconStyle }/>}
+    />
+
   )
 }
 
@@ -109,30 +153,33 @@ export const Button = ({ children, color, style, onClick, fullWidth }) => {
   )
 };
 
+export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
+  const styling = { size, color: COLORS[color] || color }
 
-export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18, color = 'black' }) => {
-  const styling = { size, color }
-  const Icon = () => {
-    if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
-    if (icon === 'micOff') return <MicOffIcon { ...styling } />;
-    if (icon === 'play') return <PlayIcon { ...styling } />;
-    if (icon === 'pause') return <PauseIcon { ...styling } />;
-    if (icon === 'grid') return <GridIcon { ...styling } />;
-    if (icon === 'clock') return <ClockIcon { ...styling } />;
-    if (icon === 'users') return <UsersIcon { ...styling } />;
-    if (icon === 'user') return <UserIcon { ...styling } />;
-    if (icon === 'settings') return <SettingsIcon />;
-    if (icon === 'headphones') return <HeadphonesIcon { ...styling }/>;
-    if (icon === 'phone') return <PhoneIcon { ...styling } />;
-    if (icon === 'delete') return <DeleteIcon { ...styling } />;
-    if (icon === 'trash') return <TrashIcon { ...styling } />;
-    if (icon === 'share2') return <Share2Icon { ...styling } />;
-    if (icon === 'plus') return <PlusIcon { ...styling } />;
-    if (icon === 'video') return <VideoIcon { ...styling } />;
-    if (icon === 'x') return <XIcon { ...styling } />;
+  if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
+  if (icon === 'hang') return <PhoneOffIcon { ...styling } />;
+  if (icon === 'micOff') return <MicOffIcon { ...styling } />;
+  if (icon === 'play') return <PlayIcon { ...styling } />;
+  if (icon === 'pause') return <PauseIcon { ...styling } />;
+  if (icon === 'grid') return <GridIcon { ...styling } />;
+  if (icon === 'clock') return <ClockIcon { ...styling } />;
+  if (icon === 'users') return <UsersIcon { ...styling } />;
+  if (icon === 'user') return <UserIcon { ...styling } />;
+  if (icon === 'settings') return <SettingsIcon { ...styling } />;
+  if (icon === 'headphones') return <HeadphonesIcon { ...styling }/>;
+  if (icon === 'phone') return <PhoneIcon { ...styling } />;
+  if (icon === 'delete') return <DeleteIcon { ...styling } />;
+  if (icon === 'trash') return <TrashIcon { ...styling } />;
+  if (icon === 'share2') return <Share2Icon { ...styling } />;
+  if (icon === 'plus') return <PlusIcon { ...styling } />;
+  if (icon === 'video') return <VideoIcon { ...styling } />;
+  if (icon === 'check') return <CheckIcon { ...styling } />;
+  if (icon === 'x') return <XIcon { ...styling } />;
+  if (icon === 'eye') return <EyeIcon { ...styling } />;
+  if (icon === 'search') return <SearchIcon { ...styling } />;
+}
 
-    return iconType;
-  }
+export const ButtonIcon = ({ children, icon, onClick, style, size = 18, color }) => {
   return (
     <TouchableOpacity
       onPress={onClick}
@@ -141,16 +188,33 @@ export const ButtonIcon = ({ children, icon, iconType, onClick, style, size = 18
         style
       ]}
     >
-      <Icon />
+      { icon && <Icon {...{icon, size, color }} />}
       {children}
     </TouchableOpacity>
 
   )
 };
 
+export const RoundIconButton = ({ size = 30, color, icon, iconSize, iconColor, onClick, style }) => {
+  return (
+    <ButtonIcon 
+      icon={icon} 
+      color={iconColor} 
+      size={iconSize} onClick={onClick} 
+      style={[{ 
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: color}, style]}
+    />
+  )
+}
+
 export const Link = ({ children, style = {}, onClick }) => (
   <TouchableOpacity onPress={() => onClick?.()}>
-    <Text style={{ textDecorationLine: 'underline', ...style }}>
+    <Text style={{ ...style }}>
       {children}
     </Text>
   </TouchableOpacity>
@@ -183,8 +247,6 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
   return (
     <View
       style={{
-        paddingTop: 5,
-
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
@@ -192,13 +254,13 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
       }}
     >
       {onCancel && (
-        <Button fill color="danger" onClick={onCancel} fullWidth={!onAccept}>
+        <Button color="danger" onClick={onCancel} fullWidth={!onAccept}>
           <XIcon />
         </Button>
       )}
 
       {onAccept && (
-        <Button fill color="secondary" onClick={onAccept} fullWidth={!onCancel}>
+        <Button color="secondary" onClick={onAccept} fullWidth={!onCancel}>
           <CheckIcon />
         </Button>
       )}
@@ -206,18 +268,94 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
   );
 };
 
-export const Avatar = ({ imageUrl, name, size = 35 }) => (
-  <View style={{
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#eeffee',
-    width: size, height: size, borderRadius: size / 2 
-  }}>
+export const CancelAcceptCall = ({ onCancel, onAccept }) => {
+  const size = 50;
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        flex: 1
+      }}
+    >
+      {onCancel && (
+        <RoundIconButton
+          size={size}
+          color={COLORS.danger}
+          iconColor="white" 
+          icon="phone"
+          onClick={onCancel}
+        />
+      )}
 
-    {imageUrl ? (
-      <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: 25 }} />
-    ) : (
-      <Text style={{ fontfontSize: size * 0.4 }}>{name?.[0]}</Text>
-    )}
-  </View>
-);
+      {onAccept && (
+        <RoundIconButton
+          size={size}
+          color={COLORS.secondary}
+          iconColor="white" 
+          icon="phone"
+          onClick={onAccept}
+        />
+      )}
+    </View>
+  );
+};
+
+export const Avatar = ({ imageUrl, name = '', size = 35 }) => {
+  const letters = name.split(/\s+/g).map(chunk => chunk[0]).join('').substring(0, 3).toUpperCase();
+  
+  const stringToHslColor = (str, s, l) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+  
+    const h = hash % 360;
+    return 'hsl('+h+', '+s+'%, '+l+'%)';
+  }
+
+  return (
+    <View style={{
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: stringToHslColor(name, 30, 80),
+      width: size, height: size, borderRadius: size / 2 
+    }}>
+
+      {imageUrl || !name.length ? (
+        <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: size / 2 }} />
+      ) : (
+        <Text   
+          numberOfLines={1} 
+          ellipsizeMode='tail' 
+          style={{ fontSize: size * 0.4 }}>
+            {letters}
+        </Text>
+      )}
+    </View>
+    )
+};
+
+export const Status = ({ color, size = 10, style }) => {
+  const roundstyle = {
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    backgroundColor: color || 'black'
+  };
+
+  return <View style={{ ...style, ...roundstyle }} />;
+};
+
+export const CallIcon = ({
+  call,
+  ...props
+}) => {
+  const { direction } = call;
+  const color = props.color ? props.color : call.status === 'answered' ? COLORS.textSecondary : COLORS.danger
+  if (direction === 'inbound')
+    return <PhoneIncomingIcon {...props} color={color} />;
+
+  return <PhoneOutgoingIcon {...props} color={color} />;
+};

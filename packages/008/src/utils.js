@@ -15,6 +15,15 @@ export const readFileAsText = file => {
   });
 };
 
+export const blobToDataURL = blob => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 export const cleanPhoneNumber = number => number.replace(/[ ()]/g, '');
 
 export const isMobile = () => {
@@ -29,15 +38,6 @@ export const isMobile = () => {
 
 export const genId = () => {
   return new Date().getTime() + '.' + Math.random().toString().slice(2, 8);
-};
-
-export const blobToDataURL = blob => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 };
 
 export const request = async ({

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, View } from 'react-native';
 
 import { Screen } from '../src/screens/Screen';
+import { Text } from '../src/components/Basics';
 
 export default {
   title: 'Screens/Screen',
@@ -49,26 +50,27 @@ export const Closeable = () => {
   );
 };
 
-export const Overlay = () => {
-  const [isVisible, setIsVisible] = useState(false);
-
-  setInterval(() => setIsVisible(true), 5000);
+export const OverlayTest = () => {
+  const [isVisible, setIsVisible] = useState(true);
 
   return (
     <View
       style={{
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#eee'
+        width: 350,
+        height: 500,
       }}
     >
-      <Button title="Open" onPress={() => setIsVisible(true)} />
-      <Screen visible color="#00ff00" />
+      <Screen visible={true} color="#00ff00">
+        <Text>Im screen one. You found me!</Text>
+      </Screen>
+
       <Screen
         visible={isVisible}
         closeable
         onClose={() => setIsVisible(false)}
-      />
+      >
+        <Text>Close me</Text>
+      </Screen>
     </View>
   );
 };

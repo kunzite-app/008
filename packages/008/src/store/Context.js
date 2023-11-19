@@ -18,7 +18,7 @@ const contacts = new Contacts();
 const COOKIE_ID = 'KZS';
 const CONTACTS_ID = 'KZSC';
 
-const initializeStore = async () => {
+const initializeStore = async state => {
   const requestPermissions = async () => {
     await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -33,7 +33,7 @@ const initializeStore = async () => {
       const devices = await getSpeakers();
       const microphones = await getMicrophones();
 
-      useStore.setState({ devices, microphones });
+      state.setSettings({ devices, microphones });
     };
 
     if (Platform.OS === 'web') {
@@ -46,15 +46,13 @@ const initializeStore = async () => {
     if (Platform.OS === 'web') {
       document.addEventListener('indexing:end', async () => {
         const contactsDialer = contacts.query({ query: '' });
-        useStore.setState({ contactsDialer });
+        state.setSettings({ contactsDialer });
 
         contacts.save(CONTACTS_ID);
       });
     }
 
-    setTimeout(() => {
-      contacts.load(CONTACTS_ID);
-    }, 1000);
+    contacts.load(CONTACTS_ID);
   };
 
   await requestPermissions();
@@ -92,7 +90,7 @@ const DEFAULTS = {
   avatar: undefined,
   nickname: undefined,
 
-  size: { width: 360, height: 500 }
+  size: { width: 340, height: 460 }
 };
 
 export const useStore = create(
@@ -104,7 +102,7 @@ export const useStore = create(
         cdrs: [],
         webhooks: [],
 
-        clear: () => {
+        clear: state => {
           localStorage.clear();
           contacts.clear();
 
@@ -117,7 +115,7 @@ export const useStore = create(
             settingsUri: undefined
           }));
 
-          initializeStore();
+          initializeStore(get());
         },
         setSettings: settings => {
           const { settingsUri, logout } = get();
@@ -213,7 +211,7 @@ export const useStore = create(
     {
       name: COOKIE_ID,
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: state => initializeStore(),
+      onRehydrateStorage: state => initializeStore(state),
       partialize: ({
         doquit,
         devices,

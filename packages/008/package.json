@@ -25,7 +25,7 @@
     "@expo/webpack-config": "^18.0.1",
     "@microsoft/applicationinsights-react-js": "^17.0.1",
     "@microsoft/applicationinsights-web": "^3.0.3",
-    "@react-native-picker/picker": "^2.5.1",
+    "audiobuffer-to-wav": "^1.0.0",
     "base-64": "^1.0.0",
     "crypto-js": "^4.1.1",
     "elasticlunr": "^0.9.5",
@@ -42,9 +42,11 @@
     "react-dom": "18.2.0",
     "react-icons": "^3.10.0",
     "react-native": "0.71.8",
+    "react-native-select-dropdown": "^3.4.0",
     "react-native-web": "^0.19.8",
     "sip.js": "^0.15.11",
     "vcf": "^2.1.1",
+    "whisper-webgpu": "^0.8.0",
     "zustand": "^4.4.1"
   },
   "devDependencies": {

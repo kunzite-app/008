@@ -20,7 +20,7 @@ import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { tts } from '../../008Q';
+import { tts, wavBytes } from '../../008Q';
 
 import { name as packageName } from '../../../package.json';
 
@@ -45,6 +45,14 @@ class Phone extends React.Component {
 
       ...props
     };
+
+    this.qworker = new Worker(new URL('../../008QWorker.js', import.meta.url), {
+      type: 'module'
+    });
+
+    this.qworker.addEventListener('message', ({ data }) => {
+      this.emit({ type: 'phone:transcript', data });
+    });
   }
 
   emit = ({ type, data = {} }) => {
@@ -180,7 +188,7 @@ class Phone extends React.Component {
     });
 
     ua.on('invite', async session => {
-      if (this.state.session) {
+      if (this.state.session?.id) {
         session.terminate();
         return;
       }
@@ -247,9 +255,13 @@ class Phone extends React.Component {
   };
 
   hangup = async () => {
-    const { session } = this.state;
-    if (session?.endTime) return;
-    session.terminate();
+    try {
+      const { session } = this.state;
+      if (session?.endTime) return;
+      session.terminate();
+    } catch (err) {
+      this.reset();
+    }
   };
 
   call = async (opts = {}) => {
@@ -306,64 +318,79 @@ class Phone extends React.Component {
   };
 
   transfer = (opts = {}) => {
-    const { session, dialer_number, show_blindTransfer, microphone } =
-      this.state;
+    try {
+      const {
+        session,
+        dialer_number,
+        show_blindTransfer,
+        microphone,
+        number_out
+      } = this.state;
 
-    const {
-      number = dialer_number,
-      blind = show_blindTransfer,
-      extraHeaders = [],
-      video = false
-    } = opts;
+      const {
+        number = dialer_number,
+        blind = show_blindTransfer,
+        extraHeaders = [],
+        video = false
+      } = opts;
 
-    const target = cleanPhoneNumber(number);
-    const payload = {
-      extraHeaders,
-      sessionDescriptionHandlerOptions: {
-        constraints: {
-          audio: { deviceId: { ideal: microphone } },
-          video
+      const indentityHeaders = number_out
+        ? [`P-Asserted-Identity:${number_out}`, `x-Number:${number_out}`]
+        : [];
+
+      const target = cleanPhoneNumber(number);
+      const payload = {
+        extraHeaders: [...indentityHeaders, ...extraHeaders],
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
+          }
         }
+      };
+
+      if (blind) {
+        session.refer(target, payload);
+        return;
       }
-    };
 
-    if (blind) {
-      session.refer(target, payload);
-      return;
-    }
+      const sessiont = this.ua.invite(target, payload);
 
-    const sessiont = this.ua.invite(target, payload);
+      const cdr = new Cdr({ session: sessiont });
+      cdr.setContact(
+        this.context.contacts().contact_by_phone({ phone: cdr.to })
+      );
+      sessiont.cdr = cdr;
 
-    const cdr = new Cdr({ session: sessiont });
-    cdr.setContact(this.context.contacts().contact_by_phone({ phone: cdr.to }));
-    sessiont.cdr = cdr;
-
-    sessiont.on('progress', () => {
-      RING_BACK.play();
-    });
-
-    sessiont.on('accepted', () => {
-      RING_BACK.stop();
-      this.setState({ rand: genId() });
-    });
-
-    sessiont.on('terminated', (_, cause) => {
-      RING_BACK.stop();
-
-      this.setState({ sessiont: null }, () => {
-        try {
-          session?.unhold();
-        } catch (err) {
-          this.reset(cause);
-        }
+      sessiont.on('progress', () => {
+        RING_BACK.play();
       });
-    });
 
-    sessiont.on('failed', message => {
-      play_failure(message);
-    });
+      sessiont.on('accepted', () => {
+        RING_BACK.stop();
+        this.setState({ rand: genId() });
+      });
 
-    this.setState({ sessiont });
+      sessiont.on('terminated', (_, cause) => {
+        RING_BACK.stop();
+
+        this.setState({ sessiont: null }, () => {
+          try {
+            session?.unhold();
+          } catch (err) {
+            this.reset(cause);
+          }
+        });
+      });
+
+      sessiont.on('failed', message => {
+        play_failure(message);
+      });
+
+      this.setState({ sessiont });
+    } catch (err) {
+      play_failure();
+    }
   };
 
   reset = cause => {
@@ -382,6 +409,8 @@ class Phone extends React.Component {
   };
 
   processRecording = ({ session }) => {
+    const type = 'audio/webm';
+
     const chunksBlob = chunks => {
       if (!chunks.length) return;
 
@@ -390,8 +419,6 @@ class Phone extends React.Component {
 
     const streamIn = new MediaStream();
     const streamOut = new MediaStream();
-
-    const type = 'audio/webm';
 
     let recorder;
     const chunks = [];
@@ -414,7 +441,7 @@ class Phone extends React.Component {
           const src = audioContext.createMediaStreamSource(stream);
           src.connect(multi);
 
-          recorder = new MediaRecorder(stream, { mimeType: type });
+          recorder = new MediaRecorder(stream);
           recorder.ondataavailable = ({ data }) => chunks.push(data);
           recorder.start();
         });
@@ -429,21 +456,13 @@ class Phone extends React.Component {
         const blob = await chunksBlob(chunks);
         this.emit({ type: 'phone:recording', data: { audio: { id, blob } } });
 
-        try {
-          const { segments } = await tts({
-            audio: {
-              remote: await chunksBlob(chunksIn),
-              local: await chunksBlob(chunksOut)
-            }
-          });
-
-          this.emit({
-            type: 'phone:transcript',
-            data: { transcript: { id, segments } }
-          });
-        } catch (err) {
-          console.error(err);
-        }
+        this.qworker.postMessage({
+          id,
+          audio: {
+            remote: await wavBytes({ chunks: chunksIn }),
+            local: await wavBytes({ chunks: chunksOut })
+          }
+        });
       };
 
       recorder.start();
@@ -495,6 +514,7 @@ class Phone extends React.Component {
         sipUser,
         sipPassword,
 
+        nickname,
         avatar,
 
         allowAutoanswer,
@@ -522,6 +542,8 @@ class Phone extends React.Component {
         sipUri,
         sipUser,
         sipPassword,
+
+        nickname,
         avatar,
 
         allowAutoanswer,
@@ -559,11 +581,13 @@ class Phone extends React.Component {
       numbers = [],
       number_out,
 
-      speaker,
-
       statuses = [],
       status,
       network,
+
+      sipUser,
+      sipUri = '',
+      nickname,
       avatar,
 
       transferAllowed,
@@ -579,18 +603,20 @@ class Phone extends React.Component {
       item => item.value === (noConnection ? 'offline' : status)
     )?.color;
 
-    const callHandler = (number, video) => {
-      this.call({ number, video });
+    const callHandler = async (number, video) => {
+      await this.call({ number, video });
     };
 
-    const showTransferDialerHandler = (blind = false) => {
-      session?.hold();
+    const showTransferDialerHandler = async (blind = false) => {
+      session?.hasAnswer && session?.hold();
       this.setState({ show_transfer: true, show_blindTransfer: blind });
     };
 
-    const transferOnCancelHandler = () => {
-      this.setState({ show_transfer: false }, () => {
-        sessiont?.terminate();
+    const transferOnCancelHandler = async () => {
+      this.setState({ show_transfer: false }, async () => {
+        try {
+          sessiont?.terminate();
+        } catch (err) {}
         session?.unhold();
       });
     };
@@ -598,8 +624,8 @@ class Phone extends React.Component {
     const transferConfirmHandler = () => sessiont.refer(session);
 
     const onTransferHandler = number => {
-      this.setState({ show_transfer: false }, () => {
-        this.transfer({ number });
+      this.setState({ show_transfer: false }, async () => {
+        await this.transfer({ number });
       });
     };
 
@@ -609,19 +635,24 @@ class Phone extends React.Component {
     const contactClickHandler = contact =>
       this.emit({ type: 'contact:click', data: { contact } });
 
+    const [sipUriName] = sipUri.replace('sip:', '').split('@');
+    const displayName = nickname || sipUser || sipUriName || '';
+
     return (
       <View style={{ flex: 1 }}>
-        <View style={{ flex: 1, padding: 10 }}>
+        <View style={{ flex: 1, marginTop: 10 }}>
           <Header
             numbers={numbers}
             number_out={number_out}
             onChange={onNumberChangeHandler}
+            name={displayName}
             avatar={avatar}
             status_color={status_color}
             onSettingsClick={() => this.context.toggleShowSettings(true)}
           />
 
           <Dialer
+            style={{ marginTop: 25 }}
             key={session?.id}
             number={dialer_number}
             onDialClick={callHandler}
@@ -642,9 +673,7 @@ class Phone extends React.Component {
           session={session}
           visible={!_.isEmpty(session)}
           onCancel={this.hangup}
-          onAccept={
-            session?.isInbound() && !session?.hasAnswer ? this.answer : null
-          }
+          onAccept={this.answer}
           onTransfer={() => showTransferDialerHandler(false)}
           onBlindTransfer={() => showTransferDialerHandler(true)}
           onContactClick={contactClickHandler}
@@ -657,18 +686,18 @@ class Phone extends React.Component {
           session={sessiont}
           visible={!_.isEmpty(sessiont)}
           onCancel={transferOnCancelHandler}
-          onAccept={sessiont?.hasAnswer && transferConfirmHandler}
-          transferAllowed={false}
-          blindTransferAllowed={false}
+          onAccept={transferConfirmHandler}
+          isTransfer={true}
         />
 
         <Screen
           visible={show_transfer}
           closeable
           onClose={transferOnCancelHandler}
-          style={{ padding: 10 }}
+          style={{ paddingTop: 30 }}
         >
           <Dialer
+            isTransfer={true}
             onDialClick={onTransferHandler}
             onCdrClick={onTransferHandler}
             onContactClick={(phones = []) => onTransferHandler(phones[0])}

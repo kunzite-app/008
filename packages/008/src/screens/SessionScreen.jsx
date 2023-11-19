@@ -3,41 +3,33 @@ import { View } from 'react-native';
 
 import { Screen } from './Screen';
 import { AudioPlayer } from '../components/Audioplayer';
-import { ButtonIcon, CancelAccept } from '../components/Basics';
+import { COLORS, CallIcon, CancelAccept, CancelAcceptCall, Link, RoundIconButton, Text } from '../components/Basics';
 import { DialGrid } from '../components/Dialer';
-import { CallInfo, ContactDetails } from '../components/Phone/Components';
 import { useStore } from '../store/Context';
+import Timer from '../components/Timer';
+import { ContactAvatar } from '../components/Avatars';
 
-const Round = ({ children }) => {
-  const size = 30;
-  return (
-  <View style={{ 
-    width: size,
-    height: size,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: size / 2,
-    backgroundColor: '#ffffff80'}}>
-    {children}
-  </View>
-  )
-}
+const CallButton = ({ style, size = 40, iconSize = 20, ...props }) => 
+  <RoundIconButton {...props} size={size} iconSize={iconSize}
+    style={{ backgroundColor: `${COLORS.app}90`,  ...style }} 
+  />
 
 export const SessionScreen = ({
   visible,
-  closeable,
 
   session,
 
   onAccept,
   onCancel,
+  onContactClick,
 
+  isTransfer,
   transferAllowed = true,
   blindTransferAllowed = true,
   onTransfer,
   onBlindTransfer,
-  onContactClick
 }) => {
+  
   const store = useStore();
   const {
     speaker
@@ -50,37 +42,68 @@ export const SessionScreen = ({
 
   const dialHandler = key => session.dtmf(key);
 
-  const holdHandler = (ishold) => {
-    if (ishold) session?.hold();
-    else session?.unhold();
+  const holdHandler = () => {
+    try {
+      if (hold) session?.hold();
+      else session?.unhold();
+    } catch(err){ console.error(err) };
+  }
 
-    setHold(ishold);
+  const muteHandler = () => {
+    try { 
+      session?.setMuted(muted) 
+    } catch(err){ console.error(err) };
+  }
+
+  const muteVideoHandler = () => {
+    try { 
+      session?.setMutedVideo(mutedVideo) 
+    } catch(err){ console.error(err) };
   }
 
   useEffect(() => {
-    session?.setMuted(muted);
+    holdHandler();
+  }, [hold]);
+
+  useEffect(() => {
+    muteHandler();
   }, [muted]);
 
   useEffect(() => {
-    session?.setMutedVideo(mutedVideo);
+    muteVideoHandler();
   }, [mutedVideo]);
-
+  
   if (!session) return null;
+
+  session?.on('accepted', () => {
+    holdHandler();
+    muteHandler();
+    muteVideoHandler();
+  });
 
   const { cdr: { from, to, contact } } = session;
   const isVideo = session.isVideo();
-  const inbound = session.isInbound();
+  const number = session.isInbound() ? from : to || contact?.phones?.[0] || '';
 
   return (
-    <Screen closeable={closeable} visible={visible}>
+    <Screen closeable={false} visible={visible}>
       <AudioPlayer session={session} speaker={speaker} />
 
-      <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute', padding: 10 }}>
-        <CallInfo
-          number={inbound ? to : from}
-          inbound={inbound}
-          timer={session?.hasAnswer}
-        />
+      <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            padding: 5
+          }}
+        >
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignContent: 'center', width: 80, backgroundColor: COLORS.secondary, padding: 5, borderRadius: 15 }}>
+            <CallIcon call={session.cdr} color="white" size={12} />
+
+            {session?.hasAnswer && <Timer style={{ color: 'white' }} />}
+          </View>
+        </View>
 
         <View
           style={{ flex: 4, justifyContent: 'center', alignItems: 'center' }}
@@ -88,83 +111,90 @@ export const SessionScreen = ({
           {showDialer ? (
             <DialGrid onPress={dialHandler} style={{ backgroundColor: '#ffffff80', borderRadius: 30 }} />
           ) : (!isVideo &&
-            <ContactDetails
-              number={inbound ? from : to}
-              contact={contact}
-              onClick={onContactClick}
-            />
+            <View
+              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+              focusable={false}
+            >
+              <ContactAvatar size={100} contact={contact} />
+
+              {contact?.name &&
+                <Link onClick={() => onContactClick?.(contact)} style={{ fontSize: 20, marginTop: 10 }}>
+                  {contact.name}
+                </Link>
+              } 
+
+              <Text style={{ fontSize: 20, marginTop: contact?.name ? 5 : 10 }}>{number}</Text>
+            </View>
           )}
         </View>
 
-        {session?.hasAnswer && (
-          <View
-            focusable={false}
-            style={{
-              flex: 1,
-              flexDirection: 'row',
-              justifyContent: 'space-around'
-            }}
-          >
-            <Round>
-              <ButtonIcon
-                icon={showDialer ? 'user' : 'grid'}
-                onClick={() => setShowDialer(!showDialer)}
-              />
-            </Round>
-            
-            <Round>
-              <ButtonIcon
-                color={muted ? 'danger' : 'primary'}
-                icon="micOff"
-                onClick={() => setMuted(!muted)}
-              />
-            </Round>
+        <View
+          focusable={false}
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-around'
+          }}
+        >
+          <CallButton 
+            icon={showDialer ? 'user' : 'grid'} 
+            onClick={() => setShowDialer(!showDialer)} 
+          />
 
-           
-           {isVideo &&
-            <Round>
-              <ButtonIcon
-                color={mutedVideo ? 'danger' : 'primary'}
-                icon="video"
-                onClick={() => setMutedVideo(!mutedVideo)}
-              />
-            </Round>
-            }
-            
-            <Round>
-              <ButtonIcon
-                icon={hold ? 'play' : 'pause'}
-                onClick={() => holdHandler(!hold)}
-              />
-            </Round>
+          <CallButton
+            iconColor={muted ? 'danger' : undefined}
+            icon="micOff"
+            onClick={() => setMuted(!muted)}
+          />
+          
 
-            {(transferAllowed || blindTransferAllowed) && (
-              <View style={{ flexDirection: 'row' }}>
-                {transferAllowed && (
-                  <Round>
-                    <ButtonIcon icon="phoneForwarded" onClick={onTransfer} />
-                  </Round>
-                )}
+          {isVideo &&
+            <CallButton
+              iconColor={mutedVideo ? 'danger' : undefined}
+              icon="video"
+              onClick={() => setMutedVideo(!mutedVideo)}
+            />
+          }
+          
+          <CallButton
+            icon={hold ? 'play' : 'pause'}
+            onClick={() => setHold(!hold)}
+          />
+        </View>
 
-                {blindTransferAllowed && (
-                  <Round>
-                    <ButtonIcon
-                      color="danger"
-                      icon="phoneForwarded"
-                      onClick={onBlindTransfer}
-                    />
-                  </Round>
-                )}
+        {((session.hasAnswer && !isTransfer) && (transferAllowed || blindTransferAllowed)) && (
+          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
+            {transferAllowed && (
+              <CallButton
+                icon="phoneForwarded" 
+                onClick={onTransfer} 
+              />
+            )}
+
+            {blindTransferAllowed && (
+              <View style={{ marginLeft: 30, }}>
+                <CallButton
+                  iconColor="danger"
+                  icon="phoneForwarded"
+                  onClick={onBlindTransfer}
+                />
               </View>
             )}
           </View>
         )}
-
-        <CancelAccept 
-          onAccept={onAccept} 
-          onCancel={onCancel}
-        />
         
+        <View style={{ marginBottom: 20 }} >
+          {isTransfer ?
+            <CancelAccept
+              onAccept={onAccept} 
+              onCancel={onCancel}
+            /> :
+            <CancelAcceptCall
+              onAccept={session?.isInbound() && !session?.hasAnswer ? onAccept : null} 
+              onCancel={onCancel}
+            />
+          }
+        </View>
       </View>
     </Screen>
   );

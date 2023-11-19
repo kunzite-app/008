@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text } from 'react-native';
+import { Text } from './Basics';
 
 const format = (opts = {}) => {
   const { date_from = new Date().getTime(), date_to = new Date().getTime() } =
@@ -43,6 +43,6 @@ export default class Timer extends React.Component {
 
   render() {
     const { currentTime } = this.state;
-    return <Text style={{ fontSize: 12 }}>{currentTime}</Text>;
+    return <Text style={[{ fontSize: 12 }, this.props.style ]}>{currentTime}</Text>;
   }
 }

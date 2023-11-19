@@ -17,7 +17,7 @@ Default.args = {
   onContactClick: phones => console.log(phones),
   contacts: {
     hits: [
-      { id: 'id1', name: 'John Doe', phones: ['+34666555444'] },
+      { id: 'id1', name: '', phones: ['+34666555444'] },
       {
         id: 'id2',
         name: 'Jennifer Doe',
