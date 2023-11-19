@@ -32,7 +32,10 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           retention-days: 1
-          path: packages/008desktop/build/008-desktop*
+          path: |
+            packages/008desktop/build/008-desktop-win.exe
+            packages/008desktop/build/008-desktop-mac.dmg
+            packages/008desktop/build/008-desktop-linux.AppImage
 
   sign-win:
     needs: build
