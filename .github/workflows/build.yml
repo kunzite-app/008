@@ -28,20 +28,11 @@ jobs:
           yarn install
           yarn run build-desktop
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          draft: true
-          files: |
-            packages/008desktop/build/008-desktop-mac.dmg
-            packages/008desktop/build/008-desktop-linux.AppImage
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
           retention-days: 1
-          path: |
-            packages/008desktop/build/008-desktop-win.exe
+          path: packages/008desktop/build/008-desktop*
 
   sign-win:
     needs: build
@@ -65,6 +56,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          draft: false
+          draft: true
           files: |
-            bin/008-desktop-win.exe
+            bin/008-desktop*
