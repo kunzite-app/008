@@ -30,7 +30,6 @@ export const ttsInfer = async ({
       const bytes = new Uint8Array(buffer);
 
       CACHE[url] = bytes;
-      console.log(`loaded ${url}`);
     }
 
     return CACHE[url];
