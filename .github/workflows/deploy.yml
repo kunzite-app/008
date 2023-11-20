@@ -18,6 +18,8 @@ jobs:
           mkdir -p ~/.ssh/
           echo {{ secrets.SITE_HOST }} > ~/.ssh/known_hosts
 
+          cat ~/.ssh/known_hosts
+
           echo "${{ secrets.SITE_SSH_KEY }}" > private.key 
           chmod 600 private.key
 
