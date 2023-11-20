@@ -12,15 +12,16 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOST: ${{ secrets.SITE_HOST }}
         run: |
           gh release download --repo kunzite-app/008 --pattern '008-desktop*' --dir bin
 
           mkdir -p ~/.ssh/
-          echo "${{ secrets.SITE_HOST }}" > ~/.ssh/known_hosts
+          echo $HOST > ~/.ssh/known_hosts
 
           cat ~/.ssh/known_hosts
 
           echo "${{ secrets.SITE_SSH_KEY }}" > private.key 
           chmod 600 private.key
 
-          scp -P ${{ secrets.SITE_PORT }} -i private.key -r bin ${{ secrets.SITE_USER }}@${{ secrets.SITE_HOST }}:~/public
+          scp -P ${{ secrets.SITE_PORT }} -i private.key -r bin ${{ secrets.SITE_USER }}@$HOST:~/public
