@@ -6,27 +6,7 @@ import _ from 'lodash';
 import { useStore } from './store/Context';
 import { request } from './utils';
 
-export class Webhooks {
-  constructor({ concurrency = 1 } = {}) {
-    this.webhooks = [];
-    this.queue = new PQueue({ concurrency });
-  }
-
-  add({ endpoint }) {
-    this.endpoints.push({ endpoint });
-  }
-
-  async addJob({ event, retries = 5, qdelay = 30 }) {
-    for (const webhook of this.webhooks) {
-      const { endpoint } = webhook;
-      await this.queue.add(() =>
-        request({ endpoint, body: event, retries, qdelay })
-      );
-    }
-  }
-}
-
-const WEBHOOKS = new Webhooks();
+const QUEUE = new PQueue();
 
 export const emit = async ({ type, data: payload }) => {
   const store = useStore.getState();
@@ -36,15 +16,19 @@ export const emit = async ({ type, data: payload }) => {
     'sipUser',
     'language',
     'device',
-    'size'
+    'size',
+    'status'
   ]);
 
   const data = { ...payload, context };
 
-  console.error(type, data);
+  for (const idx in store.webhooks) {
+    const { endpoint } = store.webhooks[idx];
+    QUEUE.add(() => request({ endpoint, body: data, retries: 5, qdelay: 30 }));
+  }
+
   document?.dispatchEvent?.(new CustomEvent(type, { detail: data }));
   window?.parent?.postMessage?.({ type, data }, '*');
-  WEBHOOKS.addJob({ event: { type, data } });
 };
 
 export const init = () => {
@@ -54,14 +38,6 @@ export const init = () => {
     state => state.status,
     status => emit({ type: 'status:change', data: { status } })
   );
-
-  useStore.subscribe(
-    state => state.webhooks,
-    webhooks => {
-      WEBHOOKS.webhooks = webhooks;
-    }
-  );
-  WEBHOOKS.webhooks = store.webhooks;
 
   if (Platform.OS === 'web') {
     const events = ['contacts', 'settings', 'click2call', 'call', 'hangup'];
