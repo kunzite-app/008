@@ -16,7 +16,7 @@ jobs:
           gh release download --repo kunzite-app/008 --pattern '008-desktop*' --dir bin
 
           mkdir -p ~/.ssh/
-          echo "{{ secrets.SITE_HOST }}" > ~/.ssh/known_hosts
+          echo "${{ secrets.SITE_HOST }}" > ~/.ssh/known_hosts
 
           cat ~/.ssh/known_hosts
 
