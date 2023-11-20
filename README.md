@@ -23,11 +23,15 @@ This project is a WebRTC softphone, and communication is achieved via SIP over a
 
 ## Configuration
 
-The softphone is internally configured using a JSON definition. This configuration can either be generated from the UI (still in progress) or through a remote configuration by setting `settingsUri` (details below).
+The softphone is internally configured using a JSON definition (see details below). The configuration file can be loaded from either a server or a local file. 008 reads the file only once. To apply new settings, you must reload the configuration file as if it were new by clicking the green button in the configuration tab.
+To do so, follow these steps:
+
+1. Go to Settings -> Configuration (Gear Icon).
+2. Fill in the 'Settings' input and 'Basic Auth' fields if needed.
+3. Apply the changes by clicking the green button.
 
 ```json
 {
-  "settingsUri": "https://example.com/settings",
   "sipUri": "sip:johndoe@example.com",
   "sipPassword": "securepass",
   "sipUser": "JohnDoe",
@@ -66,12 +70,6 @@ The softphone is internally configured using a JSON definition. This configurati
   "nickname": "John Doe"
 }
 ```
-
-## Setup via remote configuration
-
-In Settings->Connections <img width="39" alt="image" src="https://user-images.githubusercontent.com/414967/271937507-a1c7cbd6-d642-4cec-9743-c6c9ddb2ef77.png"> you'll find the option to configure the Settings Uri.  
-Upon setting this up, the softphone will present a login screen. It will then perform a Basic Auth request to the specified URI, converting the username and password into an authentication token using the format Base64(user:pass).  
-Note: This configuration is only read once. To modify any parameters, you must first log out to fetch the configuration file again.
 
 ## Autoanswer
 
@@ -227,7 +225,7 @@ Triggered upon the recording is ready. It's sent as a base64 encoded webm file.
   "type": "phone:recording",
   "data": {
     "audio": {
-      "id": "uuid",
+      "id": "uuid", // the call id
       "blob": "base64 webm audio file"
     },
     "context": {}
@@ -247,7 +245,7 @@ Triggered upon the transcription is ready.
   "type": "phone:transcript",
   "data": {
     "trancript": {
-      "id": "uuid",
+      "id": "uuid", // the call id
       "segments": [
         {
           "channel": "remote|local",
