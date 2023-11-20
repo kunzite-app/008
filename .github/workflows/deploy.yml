@@ -15,6 +15,7 @@ jobs:
         run: |
           gh release download --repo kunzite-app/008 --pattern '008-desktop*' --dir bin
 
+          ls bin
           mkdir -p ~/.ssh
           ssh-keyscan -p ${{ secrets.SITE_PORT }} ${{ secrets.SITE_HOST }} >> ~/.ssh/known_hosts
 
