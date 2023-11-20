@@ -15,11 +15,7 @@ You can download the latest version from the [Releases](../../releases) page.
 
 # Setup
 
-Once downloaded, launch the installer. The simplest way to get started is to provide `sipUri`, `sipPassword` and `wsUri`.
-
-## WebRTC
-
-This project is a WebRTC softphone, and communication is achieved via SIP over a socket. Leading PBX systems like Asterisk or Freeswitch support socket connections. If your provider does not offer this feature, consider using a SIP proxy such as Kamailio, Opensip, or Routr.
+This project is a WebRTC softphone, and communication is achieved via SIP over a socket. Leading PBX systems like Asterisk or Freeswitch support socket connections. If your provider does not offer this feature, consider using a SIP proxy such as Kamailio, Opensip or Routr.
 
 ## Configuration
 
@@ -67,7 +63,7 @@ To do so, follow these steps:
     "height": 500
   },
   "avatar": "https://example.com/avatar.jpg",
-  "nickname": "John Doe"
+  "nickname": "John Doe" // used as Basic Auth user
 }
 ```
 
