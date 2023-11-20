@@ -96,7 +96,7 @@ export const TextField = ({
 
 export const Select = ({ 
     value, 
-    options, 
+    options = [], 
     onChange, 
     buttonStyle,
     buttonTextStyle,
@@ -130,7 +130,7 @@ export const Select = ({
       rowStyle={{ padding: 5, paddingVertical: 10, borderBottomColor: BORDERCOLOR, ...rowStyle }}
       rowTextStyle={{ textAlign: 'left', fontSize: 14, fontFamily, ...rowTextStyle }}
       renderCustomizedRowChild={renderCustomizedRowChild}
-      dropdownStyle={{ height: options.length * 38, ...dropdownStyle }}
+      dropdownStyle={{ height: 150, ...dropdownStyle }}
       renderDropdownIcon={(opened) => renderDropdownIcon ? renderDropdownIcon(opened) : <ChevronIcon { ...iconStyle }/>}
     />
 

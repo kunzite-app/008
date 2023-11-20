@@ -77,11 +77,11 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     alwaysOnTop: ANCHORED,
     frame: !ANCHORED,
+    skipTaskbar: ANCHORED,
     resizable: APP_DEBUG,
     maximizable: false,
     minimizable: false,
     show: false,
-    skipTaskbar: true,
     webPreferences: {
       webSecurity: false,
       nodeIntegration: true,
