@@ -1,7 +1,6 @@
 import {
   FiUser as UserIcon,
   FiUsers as UsersIcon,
-  FiLogOut as LogOutIcon,
   FiClock as ClockIcon,
   FiX as XIcon,
   FiAnchor as AnchorIcon,
@@ -42,7 +41,6 @@ const UnanchorIcon = () => <Icon icon="unanchor" />;
 export {
   UserIcon,
   UsersIcon,
-  LogOutIcon,
   ClockIcon,
   XIcon,
   AnchorIcon,

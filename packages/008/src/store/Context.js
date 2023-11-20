@@ -110,17 +110,10 @@ export const useStore = create(
         anchored: true,
         doquit: false,
 
-        clear: () => {
-          localStorage.clear();
-          contacts.clear();
-
-          set(() => ({ ...DEFAULTS }));
-
-          initializeStore(get());
-        },
         setSettings: settings => {
           set(() => ({ ...settings }));
         },
+
         login: async ({ settingsUri, nickname, password }) => {
           if (!settingsUri) throw new Error(`No settings uri available!`);
 
@@ -161,13 +154,6 @@ export const useStore = create(
             showSettings: false
           }));
         },
-        logout: () => {
-          set(() => ({
-            sipUri: undefined,
-            sipPassword: undefined,
-            wsUri: undefined
-          }));
-        },
 
         showSettings: false,
         settingsTab: null,
@@ -193,6 +179,15 @@ export const useStore = create(
           const { headers, ...rest } = cdr;
           cdrs.unshift(rest);
           set(() => ({ cdrs: cdrs.slice(0, 100) }));
+        },
+
+        clear: () => {
+          localStorage.clear();
+          contacts.clear();
+
+          set(() => ({ ...DEFAULTS }));
+
+          initializeStore(get());
         }
       };
     }),
