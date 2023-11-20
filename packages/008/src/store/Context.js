@@ -11,11 +11,10 @@ import _ from 'lodash';
 
 import { getMicrophones, getSpeakers } from '../Sound';
 import Contacts from './Contacts';
-import { genId } from '../utils';
 
 const contacts = new Contacts();
 
-const COOKIE_ID = 'KZS2';
+const COOKIE_ID = 'KZS';
 const CONTACTS_ID = 'KZSC';
 
 const initializeStore = async state => {

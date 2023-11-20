@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 
 import { Screen } from './Screen';
-import { COLORS, Status , ButtonIcon, HRule, Select, CancelAccept, Button, Text, Link } from '../components/Basics';
+import { COLORS, Status , ButtonIcon, HRule, Select, CancelAccept, Button, Text } from '../components/Basics';
 import { FormRow, InputRow } from '../components/Forms';
 import {
   AnchorIcon,
