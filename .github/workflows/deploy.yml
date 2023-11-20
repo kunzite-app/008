@@ -18,7 +18,7 @@ jobs:
           mkdir -p ~/.ssh/
           echo {{ secrets.SITE_HOST }} > ~/.ssh/known_hosts
 
-          echo "${{ secrets.SITE_SSH_KEY }}" > agent008.pem
-          chmod 600 agent008.pem
+          echo "${{ secrets.SITE_SSH_KEY }}" > private.key 
+          chmod 600 private.key
 
           scp -P ${{ secrets.SITE_PORT }} -i private.key -r bin ${{ secrets.SITE_USER }}@${{ secrets.SITE_HOST }}:~/public
