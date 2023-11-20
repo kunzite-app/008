@@ -269,6 +269,7 @@ All events come with a `context` field. This includes various account details th
   "sipUser": "JohnDoe",
   "language": "en",
   "device": "default",
+  "status": "online",
   "size": { "width": 360, "height": 500 }
 }
 ```
