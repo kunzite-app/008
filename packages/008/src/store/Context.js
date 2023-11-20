@@ -106,7 +106,11 @@ export const useStore = create(
       return {
         ...DEFAULTS,
 
-        clear: state => {
+        electron: false,
+        anchored: true,
+        doquit: false,
+
+        clear: () => {
           localStorage.clear();
           contacts.clear();
 
@@ -189,17 +193,7 @@ export const useStore = create(
           const { headers, ...rest } = cdr;
           cdrs.unshift(rest);
           set(() => ({ cdrs: cdrs.slice(0, 100) }));
-        },
-        toggleShowWebhookForm: value => {
-          set(state => ({
-            showWebhookForm: _.isNil(value) ? !state.showWebhookForm : value
-          }));
-        },
-        showWebhookForm: false,
-
-        electron: false,
-        anchored: true,
-        doquit: false
+        }
       };
     }),
     {
