@@ -11,12 +11,16 @@ jobs:
     steps:
       - name: Upload agent008.ai
         timeout-minutes: 10
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release download --repo kunzite-app/008 --pattern '008-desktop*' --dir bin
 
+          mkdir -p ~/.ssh/
+          echo {{ secrets.SITE_HOST }} > ~/.ssh/known_hosts
+
           echo "${{ secrets.SITE_SSH_KEY }}" > agent008.pem
           chmod 600 agent008.pem
 
-          scp -P ${{ secrets.SITE_PORT }} -i agent008.pem -r bin ${{ secrets.SITE_USER }}@${{ secrets.SITE_HOST }}:~/public
+          scp -P ${{ secrets.SITE_PORT }} -i private.key -r bin ${{ secrets.SITE_USER }}@${{ secrets.SITE_HOST }}:~/public
