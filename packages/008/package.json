@@ -1,7 +1,7 @@
 {
   "name": "@kunzite/008",
   "description": "Open-source event-driven AI powered Softphone",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "author": {
     "name": "Kunzite",
