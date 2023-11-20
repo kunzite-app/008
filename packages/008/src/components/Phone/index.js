@@ -519,8 +519,8 @@ class Phone extends React.Component {
 
         allowAutoanswer,
         autoanswer,
-        transferAllowed,
-        blindTransferAllowed,
+        allowTransfer,
+        allowBlindTransfer,
         allowVideo,
 
         contactsDialer: contacts,
@@ -548,8 +548,8 @@ class Phone extends React.Component {
 
         allowAutoanswer,
         autoanswer,
-        blindTransferAllowed,
-        transferAllowed,
+        allowBlindTransfer,
+        allowTransfer,
         allowVideo,
 
         contacts,
@@ -590,8 +590,8 @@ class Phone extends React.Component {
       nickname,
       avatar,
 
-      transferAllowed,
-      blindTransferAllowed,
+      allowTransfer,
+      allowBlindTransfer,
       allowVideo,
 
       contacts = {},
@@ -677,8 +677,8 @@ class Phone extends React.Component {
           onTransfer={() => showTransferDialerHandler(false)}
           onBlindTransfer={() => showTransferDialerHandler(true)}
           onContactClick={contactClickHandler}
-          transferAllowed={transferAllowed}
-          blindTransferAllowed={blindTransferAllowed}
+          allowTransfer={allowTransfer}
+          allowBlindTransfer={allowBlindTransfer}
         />
 
         <SessionScreen

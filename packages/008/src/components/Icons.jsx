@@ -1,7 +1,6 @@
 import {
   FiUser as UserIcon,
   FiUsers as UsersIcon,
-  FiLogOut as LogOutIcon,
   FiClock as ClockIcon,
   FiX as XIcon,
   FiAnchor as AnchorIcon,
@@ -28,6 +27,8 @@ import {
   FiChevronDown as ChevronIcon,
   FiEyeOff  as EyeIcon,
   FiSearch as SearchIcon,
+  FiChevronRight as ChevronRightIcon,
+  FiChevronDown as ChevronDownIcon,
 } from 'react-icons/fi';
 
 export const Icon = ({ icon, size = 16 }) => {
@@ -40,7 +41,6 @@ const UnanchorIcon = () => <Icon icon="unanchor" />;
 export {
   UserIcon,
   UsersIcon,
-  LogOutIcon,
   ClockIcon,
   XIcon,
   AnchorIcon,
@@ -68,4 +68,6 @@ export {
   ChevronIcon,
   EyeIcon,
   SearchIcon,
+  ChevronRightIcon,
+  ChevronDownIcon
 };

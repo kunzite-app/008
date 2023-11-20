@@ -60,8 +60,8 @@ export const DialGrid = ({ style, buttonStyle, ...events }) => (
       justifyContent: 'space-evenly'
     }, style]}
   >
-    {keys.map(item => (
-      <DialButton item={item} {...events} style={[{ width: '33%' }, buttonStyle]} />
+    {keys.map((item, idx) => (
+      <DialButton key={`dialbtn-${idx}`} item={item} {...events} style={[{ width: '33%' }, buttonStyle]} />
     ))}
   </View>
 );

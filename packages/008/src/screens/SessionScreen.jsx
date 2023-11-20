@@ -24,8 +24,8 @@ export const SessionScreen = ({
   onContactClick,
 
   isTransfer,
-  transferAllowed = true,
-  blindTransferAllowed = true,
+  allowTransfer = true,
+  allowBlindTransfer = true,
   onTransfer,
   onBlindTransfer,
 }) => {
@@ -99,22 +99,19 @@ export const SessionScreen = ({
           }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignContent: 'center', width: 80, backgroundColor: COLORS.secondary, padding: 5, borderRadius: 15 }}>
-            <CallIcon call={session.cdr} color="white" size={12} />
+            <CallIcon call={session.cdr} color="white" size={14} />
 
             {session?.hasAnswer && <Timer style={{ color: 'white' }} />}
           </View>
         </View>
 
         <View
-          style={{ flex: 4, justifyContent: 'center', alignItems: 'center' }}
+          style={{ flex: 2, justifyContent: 'center', alignItems: 'center' }}
         >
           {showDialer ? (
             <DialGrid onPress={dialHandler} style={{ backgroundColor: '#ffffff80', borderRadius: 30 }} />
           ) : (!isVideo &&
-            <View
-              style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-              focusable={false}
-            >
+            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} >
               <ContactAvatar size={100} contact={contact} />
 
               {contact?.name &&
@@ -128,60 +125,60 @@ export const SessionScreen = ({
           )}
         </View>
 
-        <View
-          focusable={false}
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'space-around'
-          }}
+        <View style={{ flex: 1 }}
         >
-          <CallButton 
-            icon={showDialer ? 'user' : 'grid'} 
-            onClick={() => setShowDialer(!showDialer)} 
-          />
-
-          <CallButton
-            iconColor={muted ? 'danger' : undefined}
-            icon="micOff"
-            onClick={() => setMuted(!muted)}
-          />
-          
-
-          {isVideo &&
-            <CallButton
-              iconColor={mutedVideo ? 'danger' : undefined}
-              icon="video"
-              onClick={() => setMutedVideo(!mutedVideo)}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-around'
+            }}
+          >
+            <CallButton 
+              icon={showDialer ? 'user' : 'grid'} 
+              onClick={() => setShowDialer(!showDialer)} 
             />
-          }
-          
-          <CallButton
-            icon={hold ? 'play' : 'pause'}
-            onClick={() => setHold(!hold)}
-          />
-        </View>
 
-        {((session.hasAnswer && !isTransfer) && (transferAllowed || blindTransferAllowed)) && (
-          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
-            {transferAllowed && (
+            <CallButton
+              iconColor={muted ? 'danger' : undefined}
+              icon="micOff"
+              onClick={() => setMuted(!muted)}
+            />
+            
+            {isVideo &&
               <CallButton
-                icon="phoneForwarded" 
-                onClick={onTransfer} 
+                iconColor={mutedVideo ? 'danger' : undefined}
+                icon="video"
+                onClick={() => setMutedVideo(!mutedVideo)}
               />
-            )}
-
-            {blindTransferAllowed && (
-              <View style={{ marginLeft: 30, }}>
-                <CallButton
-                  iconColor="danger"
-                  icon="phoneForwarded"
-                  onClick={onBlindTransfer}
-                />
-              </View>
-            )}
+            }
+            
+            <CallButton
+              icon={hold ? 'play' : 'pause'}
+              onClick={() => setHold(!hold)}
+            />
           </View>
-        )}
+
+          {((session.hasAnswer && !isTransfer) && (allowTransfer || allowBlindTransfer)) && (
+            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
+              {allowTransfer && (
+                <CallButton
+                  icon="phoneForwarded" 
+                  onClick={onTransfer} 
+                />
+              )}
+
+              {allowBlindTransfer && (
+                <View style={{ marginLeft: 30, }}>
+                  <CallButton
+                    iconColor="danger"
+                    icon="phoneForwarded"
+                    onClick={onBlindTransfer}
+                  />
+                </View>
+              )}
+            </View>
+          )}
+        </View>
         
         <View style={{ marginBottom: 20 }} >
           {isTransfer ?

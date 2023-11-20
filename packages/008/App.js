@@ -10,7 +10,7 @@ import {
 
 import { Button } from './src/components/Basics';
 import { Container } from './src/components/Container';
-import { LoginScreen, SettingsScreen, PhoneScreen } from './src/screens';
+import { SettingsScreen, PhoneScreen } from './src/screens';
 import { ContextProvider, useStore } from './src/store/Context';
 
 import './src/SessionExtend';
@@ -28,27 +28,13 @@ appInsights.trackPageView();
 
 export default function App() {
   const store = useStore();
-  const {
-    settingsUri,
-    wsUri,
-    sipUri,
-    sipPassword,
-    toggleShowLogin,
-    toggleShowSettings
-  } = store;
+  const { settingsUri, toggleShowSettings } = store;
 
   useEffect(() => {
-    const isOK = value => !_.isNil(value) && value.length;
-    const isLoggable = isOK(wsUri) && isOK(sipUri) && isOK(sipPassword);
-
-    const mustLogin = isOK(settingsUri) && !isLoggable;
-    if (mustLogin) toggleShowLogin(true);
-    else toggleShowLogin(false);
-
-    const mustSettings = !settingsUri && !isLoggable;
+    const mustSettings = !settingsUri;
     if (mustSettings) toggleShowSettings(true, 'connection');
     else toggleShowSettings(false);
-  }, [settingsUri, wsUri, sipUri, sipPassword]);
+  }, [settingsUri]);
 
   return (
     <AppInsightsErrorBoundary
@@ -66,7 +52,6 @@ export default function App() {
       <ContextProvider>
         <Container>
           <PhoneScreen />
-          <LoginScreen />
           <SettingsScreen />
         </Container>
       </ContextProvider>
