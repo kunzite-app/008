@@ -33,8 +33,8 @@ The softphone is internally configured using a JSON definition. This configurati
   "sipUser": "JohnDoe",
   "wsUri": "wss://example.com:8089/ws",
   "allowVideo": true,
-  "allowTransfers": true,
-  "allowBlindTransfers": true,
+  "allowTransfer": true,
+  "allowBlindTransfer": true,
   "allowAutoanswer": false,
   "autoanswer": 5,
   "statuses": [

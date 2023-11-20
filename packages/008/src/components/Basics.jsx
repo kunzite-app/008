@@ -214,9 +214,7 @@ export const RoundIconButton = ({ size = 30, color, icon, iconSize, iconColor, o
 
 export const Link = ({ children, style = {}, onClick }) => (
   <TouchableOpacity onPress={() => onClick?.()}>
-    <Text style={{ ...style }}>
-      {children}
-    </Text>
+    <Text style={{ ...style }}>{children}</Text>
   </TouchableOpacity>
 );
 
@@ -250,7 +248,6 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        flex: 1
       }}
     >
       {onCancel && (

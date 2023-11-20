@@ -1,13 +1,14 @@
 import _ from 'lodash';
 import { useEffect, useState } from 'react';
-import { ScrollView, View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 
 import { Screen } from './Screen';
-import { Status , ButtonIcon, HRule, Select, CancelAccept, Button, Text, COLORS } from '../components/Basics';
+import { COLORS, Status , ButtonIcon, HRule, Select, CancelAccept, Button, Text, Link } from '../components/Basics';
 import { FormRow, InputRow } from '../components/Forms';
 import {
   AnchorIcon,
-  LogOutIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
   UnanchorIcon,
   XIcon
 } from '../components/Icons';
@@ -41,7 +42,6 @@ const RowLink = ({ onClick, text, iconSize = 15 }) => {
     anchor: <AnchorIcon size={iconSize} />,
     unanchor: <UnanchorIcon size={iconSize} />,
     quit: <XIcon size={iconSize} />,
-    logout: <LogOutIcon size={iconSize} />
   };
   return (
     <TouchableOpacity
@@ -62,37 +62,21 @@ const RowLink = ({ onClick, text, iconSize = 15 }) => {
 export const ExitForm = () => {
   const {
     electron,
-    settingsUri,
-    wsUri,
-    sipUri,
-    sipPassword,
     setSettings,
-    logout,
     anchored
   } = useStore();
   
-  if (!electron && !settingsUri) return <View />;
-
-  const isLogout = settingsUri?.length && wsUri?.length && sipUri?.length && sipPassword?.length ;
+  if (!electron) return null;
 
   return (
     <View>
-      {electron && (
-        <View>
-          <RowLink
-            onClick={() => setSettings({ anchored: !anchored })}
-            text={!anchored ? 'Anchor' : 'Unanchor'}
-          />
-           <HRule />
-        </View>
-      )}
-      
-      {isLogout && <RowLink onClick={logout} text="Logout" />}
-      {electron && (
-        <View>
-           <RowLink onClick={() => setSettings({ doquit: true })} text="Quit" />
-        </View>
-      )}
+      <HRule />
+      <RowLink onClick={() => setSettings({ anchored: !anchored })}
+        text={!anchored ? 'Anchor' : 'Unanchor'}
+      />
+      <HRule />
+      <RowLink onClick={() => setSettings({ doquit: true })} text="Quit" />
+      <HRule />
     </View>
   );
 };
@@ -182,6 +166,7 @@ export const SettingsForm = (props) => {
 
 export const ConnectionForm = ({ onChange, ...initialValues }) => {
   const [values, setValues] = useState(initialValues);
+  const [isBasicAuthEnabled, setIsBasicAuthEnabled] = useState(false);
 
   const setValue = (field, value) => {
     const val = { ...values };
@@ -197,54 +182,46 @@ export const ConnectionForm = ({ onChange, ...initialValues }) => {
 
   const {
     settingsUri = '',
-    wsUri = '',
-    sipUri = '',
-    sipUser = '',
-    sipPassword = ''
+    nickname = '',
+    password = '',
   } = values;
 
   return (
     <View>
       <InputRow
-        label={'Settings Uri'}
+        label={'Settings'}
         placeholder="https://example.com/settings"
         value={settingsUri}
         onChange={val => setValue('settingsUri', val)}
       />
 
-      <HRule />
+      <TouchableOpacity
+        style={{ paddingVertical: 10, flexDirection: 'row', alignItems: 'center' }}
+        onPress={() => setIsBasicAuthEnabled(!isBasicAuthEnabled)}
+      >
+        <Text style={{ fontSize: 12 }}>Basic Auth</Text>
 
-      <InputRow
-        disabled={settingsUri.length}
-        label={'WS Uri'}
-        placeholder="wss://example.com/ws"
-        value={wsUri}
-        onChange={val => setValue('wsUri', val)}
-      />
+        {isBasicAuthEnabled ? < ChevronDownIcon /> : <ChevronRightIcon /> }
+      </TouchableOpacity>
+        
+      {isBasicAuthEnabled && (
+        <>
+          <InputRow
+            label={'User'}
+            placeholder="JohnDoe"
+            value={nickname}
+            onChange={val => setValue('nickname', val)}
+          />
 
-      <InputRow
-        disabled={settingsUri.length}
-        label={'Sip Uri'}
-        placeholder="https://example.com/sip"
-        value={sipUri}
-        onChange={val => setValue('sipUri', val)}
-      />
-
-      <InputRow
-        disabled={settingsUri.length}
-        label={'Sip user'}
-        placeholder="JohnDoe"
-        value={sipUser}
-        onChange={val => setValue('sipUser', val)}
-      />
-
-      <InputRow
-        disabled={settingsUri.length}
-        label={'Sip password'}
-        password
-        value={sipPassword}
-        onChange={val => setValue('sipPassword', val)}
-      />
+          <InputRow
+            label={'Password'}
+            secureTextEntry
+            placeholder="********"
+            value={password}
+            onChange={val => setValue('password', val)}
+          />
+        </>
+      )}
     </View>
   );
 };
@@ -328,67 +305,27 @@ export const ContactsForm = () => {
   );
 };
 
-export const WebhookForm = ({ onChange, onSubmit }) => {
-  const [values, setValues] = useState({});
-
-  const setValue = (field, value) => {
-    const val = { ...values };
-    val[field] = value;
-
-    setValues(val);
-    onChange?.(val);
-  };
-
-  const { label = '', endpoint = '' } = values;
-
-  return (
-    <View>
-      <InputRow
-        label={'Label'}
-        placeholder="Example"
-        value={label}
-        onChange={val => setValue('label', val)}
-      />
-
-      <InputRow
-        label={'Endpoint'}
-        placeholder="https://example.com/webhook"
-        value={endpoint}
-        onChange={val => setValue('endpoint', val)}
-      />
-
-      <CancelAccept onAccept={() => onSubmit?.(values)} />
-    </View>
-  );
-};
-
 export const SettingsScreen = () => {
   const store = useStore();
   const {
     settingsUri,
-    wsUri,
-    sipUri,
-    sipPassword,
+    nickname,
+    password,
+    login,
 
     showSettings,
     toggleShowSettings,
     settingsTab = 'user',
-    setSettings,
 
     webhooks,
-    webhookDelete,
-    webhookAdd,
-    toggleShowWebhookForm,
-    showWebhookForm
   } = store;
 
   const [option, setOption] = useState(settingsTab);
 
   const [connection, setConnection] = useState({
     settingsUri,
-    wsUri,
-    sipUri,
-    sipPassword,
+    nickname,
+    password,
   });
 
   useEffect(() => {
@@ -396,11 +333,11 @@ export const SettingsScreen = () => {
   }, [settingsTab]);
 
   useEffect(() => {
-    setConnection({ settingsUri, wsUri, sipUri, sipPassword });
-  }, [settingsUri, wsUri, sipUri, sipPassword]);
+    setConnection({ settingsUri, nickname, password });
+  }, [settingsUri, nickname, password]);
 
   const onChangeSettingsHandler = input => {
-    setSettings(input);
+    login(input);
   };
 
   const onChangeConnectionHandler = input => {
@@ -411,12 +348,8 @@ export const SettingsScreen = () => {
     user: (
       <View style={{ flex: 1 }}>
         <SettingsForm {...store} onChange={onChangeSettingsHandler} />
-        <HRule/>
-        <View style={{ flex: 1, justifyContent: 'space-between' }}>
-          <View>
-            <ExitForm />
-            <HRule/>
-          </View>
+        <ExitForm />
+        <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <DangerZone />
         </View>
       </View>
@@ -424,25 +357,31 @@ export const SettingsScreen = () => {
     connection: (
       <View style={{ flex: 1 }}>
         <Title>Connection</Title>
-        <ScrollView style={{ flex: 1 }}>
-          <ConnectionForm
-            {...store}
-            {...connection}
-            onChange={onChangeConnectionHandler}
-          />
+        <View style={{ flex: 1 }}>
+            <ConnectionForm 
+              {...store}
+              {...connection}
+              onChange={onChangeConnectionHandler}
+            />
+          </View>
 
           <CancelAccept
             onCancel={() => {
               setConnection({
                 settingsUri,
-                wsUri,
-                sipUri,
-                sipPassword
+                nickname,
+                password
               });
             }}
-            onAccept={() => setSettings(connection)}
+            onAccept={() => {
+              try {
+                login(connection);
+              } catch(err) {
+                console.log(err);
+              }
+            }}
           />
-        </ScrollView>
+        
       </View>
     ),
     devices: (
@@ -460,27 +399,7 @@ export const SettingsScreen = () => {
     webhooks: (
       <View style={{ flex: 1 }}>
         <Title>Webhooks</Title>
-        
-        <ButtonIcon
-          style={{ width: 20 }}
-          icon="plus"
-          onClick={() => toggleShowWebhookForm(true)}
-        />
-        
-        <WebhooksList data={webhooks} onDeleteClick={webhookDelete} />
-        
-        <Screen
-          visible={showWebhookForm}
-          closeable
-          onClose={toggleShowWebhookForm}
-        >
-          <WebhookForm
-            onSubmit={webhook => {
-              webhookAdd(webhook);
-              toggleShowWebhookForm(false);
-            }}
-          />
-        </Screen>
+        <WebhooksList data={webhooks} />
       </View>
     ),
   };

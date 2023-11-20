@@ -15,7 +15,7 @@ import { genId } from '../utils';
 
 const contacts = new Contacts();
 
-const COOKIE_ID = 'KZS';
+const COOKIE_ID = 'KZS2';
 const CONTACTS_ID = 'KZSC';
 
 const initializeStore = async state => {
@@ -81,14 +81,21 @@ const DEFAULTS = {
   sipPassword: undefined,
   wsUri: undefined,
 
-  transferAllowed: true,
-  blindTransferAllowed: true,
+  allowTransfer: true,
+  allowBlindTransfer: true,
   allowVideo: true,
   allowAutoanswer: false,
   autoanswer: 5,
 
-  avatar: undefined,
+  settingsUri: undefined,
   nickname: undefined,
+  password: undefined,
+  avatar: undefined,
+
+  contactsDialer: {},
+  contactsDialerFilter: '',
+  cdrs: [],
+  webhooks: [],
 
   size: { width: 340, height: 460 }
 };
@@ -99,59 +106,56 @@ export const useStore = create(
       return {
         ...DEFAULTS,
 
-        cdrs: [],
-        webhooks: [],
-
         clear: state => {
           localStorage.clear();
           contacts.clear();
 
-          set(() => ({
-            ...DEFAULTS,
-            contactsDialer: {},
-            contactsDialerFilter: '',
-            cdrs: [],
-            webhooks: [],
-            settingsUri: undefined
-          }));
+          set(() => ({ ...DEFAULTS }));
 
           initializeStore(get());
         },
         setSettings: settings => {
-          const { settingsUri, logout } = get();
-
           set(() => ({ ...settings }));
-
-          if (
-            settingsUri &&
-            settingsUri !== settings.settingsUri &&
-            settings.settingsUri !== undefined
-          ) {
-            logout();
-          }
         },
-        showLogin: false,
-        toggleShowLogin: value =>
-          set(state => ({
-            showLogin: _.isNil(value) ? !state.showLogin : value
-          })),
-        login: async ({ user, password }) => {
-          const { settingsUri } = get();
+        login: async ({ settingsUri, nickname, password }) => {
+          if (!settingsUri) throw new Error(`No settings uri available!`);
 
           const headers = {
             'Content-Type': 'application/json',
-            Authorization: `Basic ${encode(`${user}:${password}`)}`
+            Authorization: `Basic ${encode(`${nickname}:${password}`)}`
           };
 
-          const response = await fetch(settingsUri, {
-            method: 'GET',
-            headers
-          });
+          let response;
 
-          if (!response.ok) throw new Error(`HTTP status: ${response.status}`);
+          if (!/^(https?|file):\/\//i.test(settingsUri)) {
+            try {
+              response = await fetch(`file://${settingsUri}`, {
+                method: 'GET',
+                headers
+              });
+            } catch (err) {
+              console.error(err);
+            }
+          }
+
+          if (!response?.ok) {
+            response = await fetch(settingsUri, {
+              method: 'GET',
+              headers
+            });
+
+            if (!response.ok)
+              throw new Error(`HTTP status: ${response.status}`);
+          }
 
           const settings = await response.json();
-          set(() => ({ ...DEFAULTS, ...settings }));
+          set(() => ({
+            nickname,
+            password,
+            ...settings,
+            settingsUri,
+            showSettings: false
+          }));
         },
         logout: () => {
           set(() => ({
@@ -186,16 +190,6 @@ export const useStore = create(
           cdrs.unshift(rest);
           set(() => ({ cdrs: cdrs.slice(0, 100) }));
         },
-
-        webhookAdd: ({ label, endpoint }) => {
-          const { webhooks } = get();
-          webhooks.push({ id: genId(), label, endpoint });
-          set(() => ({ webhooks }));
-        },
-        webhookDelete: webhook =>
-          set(() => ({
-            webhooks: get().webhooks.filter(({ id }) => id !== webhook.id)
-          })),
         toggleShowWebhookForm: value => {
           set(state => ({
             showWebhookForm: _.isNil(value) ? !state.showWebhookForm : value
@@ -217,7 +211,6 @@ export const useStore = create(
         devices,
         showSettings,
         settingsTab,
-        showLogin,
         showWebhookForm,
         ...rest
       }) => ({ ...rest })
@@ -227,8 +220,6 @@ export const useStore = create(
 
 export const Context = createContext();
 
-export const ContextProvider = ({ children }) => {
-  const store = useStore();
-
-  return <Context.Provider value={store}>{children}</Context.Provider>;
-};
+export const ContextProvider = ({ children }) => (
+  <Context.Provider value={useStore()}>{children}</Context.Provider>
+);

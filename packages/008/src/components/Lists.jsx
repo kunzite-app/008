@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 
 import { ContactAvatar } from './Avatars';
-import { BORDERCOLOR, ButtonIcon, COLORS, CallIcon, Icon, Text, TextInput } from './Basics';
+import { BORDERCOLOR, COLORS, CallIcon, Icon, Text, TextInput } from './Basics';
 import { VideoIcon } from './Icons';
 
 const PADDING = 10;
@@ -93,7 +93,7 @@ const CdrCell = ({ cdr = {}, onClick, lang = 'en' }) => {
   const subcellStyle = { justifyContent: 'center', marginRight: PADDING }
   return (
     <TouchableOpacity
-      style={{ flexDirection: 'row', height: CELL_HEIGHT, marginVertical: PADDING / 2 }}
+      style={{ height: CELL_HEIGHT, marginVertical: PADDING / 2, flexDirection: 'row' }}
       onPress={() => onClick?.(destination, video)}
     >
       <View style={subcellStyle}>
@@ -136,25 +136,19 @@ const ContactCell = ({ contact = {}, onClick  }) => (
   </TouchableOpacity>
 )
 
-const WebhookCell = ({ webhook, onClick, onDeleteClick }) => {
+const WebhookCell = ({ webhook, onClick }) => {
   const { label, endpoint } = webhook;
 
   return (
     <TouchableOpacity
-      style={{ flexDirection: 'row', height: CELL_HEIGHT, margingVertical: PADDING / 2 }}
+      style={{ height: CELL_HEIGHT, marginVertical: PADDING / 2, flexDirection: 'row' }}
       onPress={() => onClick?.(webhook)}
     >
       <View style={{ flex: 1, justifyContent: 'space-evenly' }}>
-        <Text numberOfLines={1} >{label}</Text>
+        <Text numberOfLines={1} >{label || endpoint}</Text>
 
-        <Text style={{ fontSize: SMALLFONT }}>{endpoint}</Text>
+        <Text style={{ fontSize: SMALLFONT, color: COLORS.textSecondary }}>{endpoint}</Text>
       </View>
-
-      <ButtonIcon
-        icon="trash"
-        color="danger"
-        onClick={() => onDeleteClick?.(webhook)}
-      />
     </TouchableOpacity>
   );
 }

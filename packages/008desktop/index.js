@@ -83,10 +83,10 @@ const createWindow = () => {
     show: false,
     skipTaskbar: true,
     webPreferences: {
+      webSecurity: false,
       nodeIntegration: true,
       contextIsolation: false,
-      preload: path.join(__dirname, 'loader.js'),
-      devTools: APP_DEBUG
+      preload: path.join(__dirname, 'loader.js')
     }
   });
 
@@ -96,7 +96,7 @@ const createWindow = () => {
   mainWindow.setMenuBarVisibility(false);
 
   mainWindow.webContents.on('did-fail-load', () => {
-    setTimeout(() => mainWindow.loadURL(APP_URL), 10 * 1000);
+    setTimeout(() => mainWindow.loadURL(APP_URL), 1 * 1000);
   });
 
   mainWindow.webContents.on('did-finish-load', () => {
