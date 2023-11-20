@@ -123,7 +123,7 @@ const CdrCell = ({ cdr = {}, onClick, lang = 'en' }) => {
   );
 }
 
-const ContactCell = ({ contact = {}, onClick  }) => (
+const ContactCell = ({ contact = {}, onClick }) => (
   <TouchableOpacity
     style={{ height: CELL_HEIGHT, marginVertical: PADDING / 2, flexDirection: 'row' }}
     onPress={() => onClick?.(contact)}

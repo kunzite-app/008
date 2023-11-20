@@ -20,7 +20,7 @@ import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { tts, wavBytes } from '../../008Q';
+import { wavBytes } from '../../008Q';
 
 import { name as packageName } from '../../../package.json';
 
