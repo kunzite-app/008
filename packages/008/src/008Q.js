@@ -1,6 +1,5 @@
 import * as whisper from 'whisper-webgpu';
 import toWav from 'audiobuffer-to-wav';
-import fixWebmDuration from 'fix-webm-duration';
 
 const CACHE = {};
 const S3Q = 'https://kunziteq.s3.gra.perf.cloud.ovh.net';
@@ -17,17 +16,6 @@ export const wavBytes = async ({ chunks }) => {
   });
   const resampled = await audioContext.decodeAudioData(arrayBuffer);
   return new Uint8Array(toWav(resampled));
-
-  // return new Uint8Array(resampled.getChannelData(0).buffer);
-};
-
-export const webmBytes = async ({ chunks, duration }) => {
-  let glob = new Blob(chunks, { type: 'audio/webm' });
-  glob = await fixWebmDuration(glob, duration, { logger: false });
-
-  const buffer = await glob.arrayBuffer();
-
-  return new Uint8Array(buffer);
 };
 
 export const ttsInfer = async ({

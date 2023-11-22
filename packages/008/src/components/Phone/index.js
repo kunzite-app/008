@@ -1,6 +1,7 @@
-import _ from 'lodash';
 import React from 'react';
 import { View } from 'react-native';
+
+import _ from 'lodash';
 import { UA } from 'sip.js';
 
 import {
@@ -480,9 +481,6 @@ class Phone extends React.Component {
               this.qworker.postMessage({
                 id,
                 audio: {
-                  // remote: await webmBytes({ chunks: chunksIn, duration }),
-                  // local: await webmBytes({ chunks: chunksOut, duration })
-
                   remote: await wavBytes({ chunks: chunksIn }),
                   local: await wavBytes({ chunks: chunksOut })
                 }

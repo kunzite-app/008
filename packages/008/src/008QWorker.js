@@ -5,7 +5,7 @@ const QUEUE = [];
 
 const process = async () => {
   // TODO: put back busy check once error handling is fixed
-  if (/*BUSY ||*/ !QUEUE.length) return;
+  if (!QUEUE.length) return;
 
   try {
     BUSY = true;
