@@ -5,8 +5,8 @@ const CACHE = {};
 const S3Q = 'https://kunziteq.s3.gra.perf.cloud.ovh.net';
 
 export const wavBytes = async ({ chunks }) => {
-  // TODO: flatten 2 channels
-  let arrayBuffer = await chunks[0].arrayBuffer();
+  const buffer = await new Blob(chunks).arrayBuffer();
+
   const audioContext = new AudioContext({
     sampleRate: 16000,
     channelCount: 1,
@@ -14,7 +14,8 @@ export const wavBytes = async ({ chunks }) => {
     autoGainControl: true,
     noiseSuppression: true
   });
-  const resampled = await audioContext.decodeAudioData(arrayBuffer);
+
+  const resampled = await audioContext.decodeAudioData(buffer);
   return new Uint8Array(toWav(resampled));
 };
 
