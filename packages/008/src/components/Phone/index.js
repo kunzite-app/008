@@ -423,8 +423,6 @@ class Phone extends React.Component {
     const streamIn = new MediaStream();
     const streamOut = new MediaStream();
 
-    let tsStart;
-    let duration;
     let recorder;
     const chunks = [];
 
@@ -492,12 +490,9 @@ class Phone extends React.Component {
         };
 
         recorder.start();
-        tsStart = Date.now();
 
         session.on('terminated', () => {
           recorder.stop();
-          duration = Date.now() - tsStart;
-
           recorderIn.stop();
           recorderOut.stop();
         });
