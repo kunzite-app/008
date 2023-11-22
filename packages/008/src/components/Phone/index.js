@@ -420,18 +420,18 @@ class Phone extends React.Component {
       return blobToDataURL(new Blob(chunks, { type }));
     };
 
+    let recorder;
+    const chunks = [];
+
+    const streamIn = new MediaStream();
+    let recorderIn;
+    const chunksIn = [];
+
+    const streamOut = new MediaStream();
+    let recorderOut;
+    const chunksOut = [];
+
     session.on('accepted', async () => {
-      let recorder;
-      const chunks = [];
-
-      const streamIn = new MediaStream();
-      let recorderIn;
-      const chunksIn = [];
-
-      const streamOut = new MediaStream();
-      let recorderOut;
-      const chunksOut = [];
-
       try {
         const { peerConnection } = session.sessionDescriptionHandler;
         const audioContext = new AudioContext();
