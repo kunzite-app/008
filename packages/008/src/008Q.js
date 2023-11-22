@@ -5,20 +5,24 @@ const CACHE = {};
 const S3Q = 'https://kunziteq.s3.gra.perf.cloud.ovh.net';
 
 export const wavBytes = async ({ chunks }) => {
-  // TODO: flatten 2 channels
-  let arrayBuffer = await chunks[0].arrayBuffer();
-  const audioContext = new AudioContext();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-  const wavBlob = new Blob([toWav(audioBuffer)], { type: 'audio/wav' });
+  const buffer = await new Blob(chunks).arrayBuffer();
 
-  arrayBuffer = await wavBlob.arrayBuffer();
+  const audioContext = new AudioContext({
+    sampleRate: 16000,
+    channelCount: 1,
+    echoCancellation: true,
+    autoGainControl: true,
+    noiseSuppression: true
+  });
 
-  return new Uint8Array(arrayBuffer);
+  const resampled = await audioContext.decodeAudioData(buffer);
+  return new Uint8Array(toWav(resampled));
 };
 
 export const ttsInfer = async ({
   chunks,
   url,
+  onStream,
   audio = [],
   bin = `${S3Q}/ttsb.bin`,
   data = `${S3Q}/tts.json`
@@ -41,13 +45,30 @@ export const ttsInfer = async ({
   if (url) audio = await fetchBytes(url);
   if (chunks) audio = await wavBytes({ chunks });
 
+  const consolelog = console.log;
+  console.log = () => {};
+  const consolewarn = console.warn;
+  console.warn = () => {};
+
   await whisper.default();
   const builder = new whisper.SessionBuilder();
   const session = await builder.setModel(model).setTokenizer(tokenizer).build();
 
-  const { segments } = await session.run(audio);
+  let segments = [];
+
+  if (onStream) {
+    await session.stream(audio, false, segment => {
+      onStream?.(segment);
+      segments.push(segments);
+    });
+  } else {
+    ({ segments } = await session.run(audio));
+  }
 
   session.free();
+
+  console.warn = consolewarn;
+  console.log = consolelog;
 
   return segments;
 };

@@ -1,6 +1,7 @@
-import _ from 'lodash';
 import React from 'react';
 import { View } from 'react-native';
+
+import _ from 'lodash';
 import { UA } from 'sip.js';
 
 import {
@@ -409,6 +410,8 @@ class Phone extends React.Component {
   };
 
   processRecording = ({ session }) => {
+    const { webhooks } = this.state;
+
     const type = 'audio/webm';
 
     const chunksBlob = chunks => {
@@ -417,62 +420,84 @@ class Phone extends React.Component {
       return blobToDataURL(new Blob(chunks, { type }));
     };
 
-    const streamIn = new MediaStream();
-    const streamOut = new MediaStream();
-
     let recorder;
     const chunks = [];
 
+    const streamIn = new MediaStream();
     let recorderIn;
     const chunksIn = [];
 
+    const streamOut = new MediaStream();
     let recorderOut;
     const chunksOut = [];
 
     session.on('accepted', async () => {
-      const { peerConnection } = session.sessionDescriptionHandler;
-      const audioContext = new AudioContext();
-      const multi = audioContext.createMediaStreamDestination();
+      try {
+        const { peerConnection } = session.sessionDescriptionHandler;
+        const audioContext = new AudioContext();
+        const multi = audioContext.createMediaStreamDestination();
 
-      const addTracks = (tracks, stream, recorder, chunks) =>
-        tracks.forEach(({ track }) => {
-          stream.addTrack(track);
+        const addTracks = (tracks, stream, recorder, chunks) =>
+          tracks.forEach(({ track }) => {
+            stream.addTrack(track);
 
-          const src = audioContext.createMediaStreamSource(stream);
-          src.connect(multi);
+            const src = audioContext.createMediaStreamSource(stream);
+            src.connect(multi);
 
-          recorder = new MediaRecorder(stream);
-          recorder.ondataavailable = ({ data }) => chunks.push(data);
-          recorder.start();
-        });
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = ({ data }) => chunks.push(data);
+            recorder.start();
+            recorder.tsStart = Date.now();
+          });
 
-      addTracks(peerConnection.getSenders(), streamOut, recorderOut, chunksOut);
-      addTracks(peerConnection.getReceivers(), streamIn, recorderIn, chunksIn);
+        addTracks(
+          peerConnection.getReceivers(),
+          streamIn,
+          recorderIn,
+          chunksIn
+        );
+        addTracks(
+          peerConnection.getSenders(),
+          streamOut,
+          recorderOut,
+          chunksOut
+        );
 
-      recorder = new MediaRecorder(multi.stream, { mimeType: type });
-      recorder.ondataavailable = ({ data }) => chunks.push(data);
-      recorder.onstop = async () => {
-        const id = session.cdr?.id;
-        const blob = await chunksBlob(chunks);
-        this.emit({ type: 'phone:recording', data: { audio: { id, blob } } });
+        recorder = new MediaRecorder(multi.stream, { mimeType: type });
+        recorder.ondataavailable = ({ data }) => chunks.push(data);
+        recorder.onstop = async () => {
+          try {
+            const id = session.cdr?.id;
+            const blob = await chunksBlob(chunks);
+            this.emit({
+              type: 'phone:recording',
+              data: { audio: { id, blob } }
+            });
 
-        this.qworker.postMessage({
-          id,
-          audio: {
-            remote: await wavBytes({ chunks: chunksIn }),
-            local: await wavBytes({ chunks: chunksOut })
+            if (webhooks?.length) {
+              this.qworker.postMessage({
+                id,
+                audio: {
+                  remote: await wavBytes({ chunks: chunksIn }),
+                  local: await wavBytes({ chunks: chunksOut })
+                }
+              });
+            }
+          } catch (err) {
+            console.log(err);
           }
+        };
+
+        session.on('terminated', () => {
+          recorder.stop();
+          recorderIn.stop();
+          recorderOut.stop();
         });
-      };
 
-      recorder.start();
-    });
-
-    session.on('terminated', () => {
-      recorder?.stop();
-
-      recorderIn?.stop();
-      recorderOut?.stop();
+        recorder.start();
+      } catch (err) {
+        console.error(err);
+      }
     });
   };
 
@@ -517,11 +542,13 @@ class Phone extends React.Component {
         nickname,
         avatar,
 
-        allowAutoanswer,
-        autoanswer,
         allowTransfer,
         allowBlindTransfer,
         allowVideo,
+        allowAutoanswer,
+        autoanswer,
+
+        webhooks,
 
         contactsDialer: contacts,
         contactsDialerFilter: contactsFilter
@@ -546,11 +573,13 @@ class Phone extends React.Component {
         nickname,
         avatar,
 
-        allowAutoanswer,
-        autoanswer,
         allowBlindTransfer,
         allowTransfer,
         allowVideo,
+        allowAutoanswer,
+        autoanswer,
+
+        webhooks,
 
         contacts,
         contactsFilter

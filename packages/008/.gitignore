@@ -47,3 +47,4 @@ yarn-error.*
 /web/*.wav
 /web/*.ogg
 /web/*.mp3
+/web/*.bin

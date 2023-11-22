@@ -4,8 +4,8 @@ let BUSY = false;
 const QUEUE = [];
 
 const process = async () => {
-  console.log('[008Q] Processing...');
-  if (BUSY || !QUEUE.length) return;
+  // TODO: put back busy check once error handling is fixed
+  if (!QUEUE.length) return;
 
   try {
     BUSY = true;
