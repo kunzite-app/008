@@ -33,7 +33,6 @@
     "expo-av": "^13.4.1",
     "expo-splash-screen": "~0.18.2",
     "expo-status-bar": "~1.4.4",
-    "fix-webm-duration": "^1.0.5",
     "level": "^8.0.0",
     "lodash": "^4.17.21",
     "moment": "^2.27.0",
