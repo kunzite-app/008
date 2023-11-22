@@ -20,7 +20,7 @@ import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { wavBytes } from '../../008Q';
+import { wavBytes, webmBytes } from '../../008Q';
 
 import { name as packageName } from '../../../package.json';
 
@@ -420,6 +420,8 @@ class Phone extends React.Component {
     const streamIn = new MediaStream();
     const streamOut = new MediaStream();
 
+    let tsStart;
+    let duration;
     let recorder;
     const chunks = [];
 
@@ -430,49 +432,76 @@ class Phone extends React.Component {
     const chunksOut = [];
 
     session.on('accepted', async () => {
-      const { peerConnection } = session.sessionDescriptionHandler;
-      const audioContext = new AudioContext();
-      const multi = audioContext.createMediaStreamDestination();
+      try {
+        const { peerConnection } = session.sessionDescriptionHandler;
+        const audioContext = new AudioContext();
+        const multi = audioContext.createMediaStreamDestination();
 
-      const addTracks = (tracks, stream, recorder, chunks) =>
-        tracks.forEach(({ track }) => {
-          stream.addTrack(track);
+        const addTracks = (tracks, stream, recorder, chunks) =>
+          tracks.forEach(({ track }) => {
+            stream.addTrack(track);
 
-          const src = audioContext.createMediaStreamSource(stream);
-          src.connect(multi);
+            const src = audioContext.createMediaStreamSource(stream);
+            src.connect(multi);
 
-          recorder = new MediaRecorder(stream);
-          recorder.ondataavailable = ({ data }) => chunks.push(data);
-          recorder.start();
-        });
+            recorder = new MediaRecorder(stream);
+            recorder.ondataavailable = ({ data }) => chunks.push(data);
+            recorder.start();
+            recorder.tsStart = Date.now();
+          });
 
-      addTracks(peerConnection.getSenders(), streamOut, recorderOut, chunksOut);
-      addTracks(peerConnection.getReceivers(), streamIn, recorderIn, chunksIn);
+        addTracks(
+          peerConnection.getReceivers(),
+          streamIn,
+          recorderIn,
+          chunksIn
+        );
+        addTracks(
+          peerConnection.getSenders(),
+          streamOut,
+          recorderOut,
+          chunksOut
+        );
 
-      recorder = new MediaRecorder(multi.stream, { mimeType: type });
-      recorder.ondataavailable = ({ data }) => chunks.push(data);
-      recorder.onstop = async () => {
-        const id = session.cdr?.id;
-        const blob = await chunksBlob(chunks);
-        this.emit({ type: 'phone:recording', data: { audio: { id, blob } } });
+        recorder = new MediaRecorder(multi.stream, { mimeType: type });
+        recorder.ondataavailable = ({ data }) => chunks.push(data);
+        recorder.onstop = async () => {
+          try {
+            const id = session.cdr?.id;
+            const blob = await chunksBlob(chunks);
+            this.emit({
+              type: 'phone:recording',
+              data: { audio: { id, blob } }
+            });
 
-        this.qworker.postMessage({
-          id,
-          audio: {
-            remote: await wavBytes({ chunks: chunksIn }),
-            local: await wavBytes({ chunks: chunksOut })
+            this.qworker.postMessage({
+              id,
+              audio: {
+                // remote: await webmBytes({ chunks: chunksIn, duration }),
+                // local: await webmBytes({ chunks: chunksOut, duration })
+
+                remote: await wavBytes({ chunks: chunksIn }),
+                local: await wavBytes({ chunks: chunksOut })
+              }
+            });
+          } catch (err) {
+            console.log(err);
           }
+        };
+
+        recorder.start();
+        tsStart = Date.now();
+
+        session.on('terminated', () => {
+          recorder.stop();
+          duration = Date.now() - tsStart;
+
+          recorderIn.stop();
+          recorderOut.stop();
         });
-      };
-
-      recorder.start();
-    });
-
-    session.on('terminated', () => {
-      recorder?.stop();
-
-      recorderIn?.stop();
-      recorderOut?.stop();
+      } catch (err) {
+        console.error(err);
+      }
     });
   };
 

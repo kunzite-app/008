@@ -5,7 +5,10 @@ const QUEUE = [];
 
 const process = async () => {
   console.log('[008Q] Processing...');
-  if (BUSY || !QUEUE.length) return;
+  if (BUSY || !QUEUE.length) {
+    console.log('[008Q] Nothing to do', BUSY, QUEUE);
+    return;
+  }
 
   try {
     BUSY = true;
@@ -14,16 +17,18 @@ const process = async () => {
     const { id, audio } = data;
 
     console.log('[008Q] Transcribing...');
-    const transcript = await tts({ audio });
+    const transcript = await tts({ audio }).catch(err => {
+      throw err;
+    });
 
     self.postMessage({ id, transcript });
   } catch (err) {
-    console.error(err);
-  } finally {
-    QUEUE.shift();
-    BUSY = false;
-    process();
+    console.error('ERROROROOROROORR', err);
   }
+  console.error('FUUUCJCJCJCJJCJC');
+  QUEUE.shift();
+  BUSY = false;
+  process();
 };
 
 self.addEventListener('message', async ({ data }) => {
