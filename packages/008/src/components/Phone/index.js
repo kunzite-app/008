@@ -420,19 +420,18 @@ class Phone extends React.Component {
       return blobToDataURL(new Blob(chunks, { type }));
     };
 
-    const streamIn = new MediaStream();
-    const streamOut = new MediaStream();
-
-    let recorder;
-    const chunks = [];
-
-    let recorderIn;
-    const chunksIn = [];
-
-    let recorderOut;
-    const chunksOut = [];
-
     session.on('accepted', async () => {
+      let recorder;
+      const chunks = [];
+
+      const streamIn = new MediaStream();
+      let recorderIn;
+      const chunksIn = [];
+
+      const streamOut = new MediaStream();
+      let recorderOut;
+      const chunksOut = [];
+
       try {
         const { peerConnection } = session.sessionDescriptionHandler;
         const audioContext = new AudioContext();
@@ -489,13 +488,13 @@ class Phone extends React.Component {
           }
         };
 
-        recorder.start();
-
         session.on('terminated', () => {
           recorder.stop();
           recorderIn.stop();
           recorderOut.stop();
         });
+
+        recorder.start();
       } catch (err) {
         console.error(err);
       }
