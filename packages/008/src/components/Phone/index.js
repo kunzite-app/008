@@ -20,7 +20,7 @@ import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { wavBytes, webmBytes } from '../../008Q';
+import { wavBytes } from '../../008Q';
 
 import { name as packageName } from '../../../package.json';
 
@@ -409,6 +409,8 @@ class Phone extends React.Component {
   };
 
   processRecording = ({ session }) => {
+    const { webhooks } = this.state;
+
     const type = 'audio/webm';
 
     const chunksBlob = chunks => {
@@ -474,16 +476,18 @@ class Phone extends React.Component {
               data: { audio: { id, blob } }
             });
 
-            this.qworker.postMessage({
-              id,
-              audio: {
-                // remote: await webmBytes({ chunks: chunksIn, duration }),
-                // local: await webmBytes({ chunks: chunksOut, duration })
+            if (webhooks?.length) {
+              this.qworker.postMessage({
+                id,
+                audio: {
+                  // remote: await webmBytes({ chunks: chunksIn, duration }),
+                  // local: await webmBytes({ chunks: chunksOut, duration })
 
-                remote: await wavBytes({ chunks: chunksIn }),
-                local: await wavBytes({ chunks: chunksOut })
-              }
-            });
+                  remote: await wavBytes({ chunks: chunksIn }),
+                  local: await wavBytes({ chunks: chunksOut })
+                }
+              });
+            }
           } catch (err) {
             console.log(err);
           }
@@ -546,11 +550,13 @@ class Phone extends React.Component {
         nickname,
         avatar,
 
-        allowAutoanswer,
-        autoanswer,
         allowTransfer,
         allowBlindTransfer,
         allowVideo,
+        allowAutoanswer,
+        autoanswer,
+
+        webhooks,
 
         contactsDialer: contacts,
         contactsDialerFilter: contactsFilter
@@ -575,11 +581,13 @@ class Phone extends React.Component {
         nickname,
         avatar,
 
-        allowAutoanswer,
-        autoanswer,
         allowBlindTransfer,
         allowTransfer,
         allowVideo,
+        allowAutoanswer,
+        autoanswer,
+
+        webhooks,
 
         contacts,
         contactsFilter

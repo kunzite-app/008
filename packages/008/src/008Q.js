@@ -1,33 +1,31 @@
 import * as whisper from 'whisper-webgpu';
 import toWav from 'audiobuffer-to-wav';
 import fixWebmDuration from 'fix-webm-duration';
-import { blobToDataURL } from './utils';
 
 const CACHE = {};
-const S3Q = 'http://localhost:19006'; //'https://kunziteq.s3.gra.perf.cloud.ovh.net';
+const S3Q = 'https://kunziteq.s3.gra.perf.cloud.ovh.net';
 
 export const wavBytes = async ({ chunks }) => {
   // TODO: flatten 2 channels
   let arrayBuffer = await chunks[0].arrayBuffer();
-  const audioContext = new AudioContext();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-  const wavBlob = new Blob([toWav(audioBuffer)], { type: 'audio/wav' });
+  const audioContext = new AudioContext({
+    sampleRate: 16000,
+    channelCount: 1,
+    echoCancellation: true,
+    autoGainControl: true,
+    noiseSuppression: true
+  });
+  const resampled = await audioContext.decodeAudioData(arrayBuffer);
+  return new Uint8Array(toWav(resampled));
 
-  arrayBuffer = await wavBlob.arrayBuffer();
-
-  return new Uint8Array(arrayBuffer);
+  // return new Uint8Array(resampled.getChannelData(0).buffer);
 };
 
 export const webmBytes = async ({ chunks, duration }) => {
-  console.log(duration);
-  let xx = new Blob(chunks, { type: 'audio/webm' });
-  // console.log(await blobToDataURL(xx))
+  let glob = new Blob(chunks, { type: 'audio/webm' });
+  glob = await fixWebmDuration(glob, duration, { logger: false });
 
-  xx = await fixWebmDuration(xx, duration, { logger: false });
-  // console.log(await blobToDataURL(xx))
-
-  const buffer = await xx.arrayBuffer();
-  // console.log(buffer)
+  const buffer = await glob.arrayBuffer();
 
   return new Uint8Array(buffer);
 };
@@ -37,16 +35,15 @@ export const ttsInfer = async ({
   url,
   onStream,
   audio = [],
-  bin = `${S3Q}/base.bin`,
+  bin = `${S3Q}/ttsb.bin`,
   data = `${S3Q}/tts.json`
 }) => {
-  console.log('ttsInfer');
   const fetchBytes = async url => {
     if (!CACHE[url]) {
       const response = await fetch(url);
       const buffer = await response.arrayBuffer();
       const bytes = new Uint8Array(buffer);
-      return bytes;
+
       CACHE[url] = bytes;
     }
 
@@ -59,32 +56,30 @@ export const ttsInfer = async ({
   if (url) audio = await fetchBytes(url);
   if (chunks) audio = await wavBytes({ chunks });
 
-  console.log('whisper');
+  const consolelog = console.log;
+  console.log = () => {};
+  const consolewarn = console.warn;
+  console.warn = () => {};
+
   await whisper.default();
-  console.log('building');
   const builder = new whisper.SessionBuilder();
-  console.log('session', model, tokenizer);
   const session = await builder.setModel(model).setTokenizer(tokenizer).build();
 
   let segments = [];
 
-  /*
   if (onStream) {
-    await session.stream(audio, false, (segment) => {
+    await session.stream(audio, false, segment => {
       onStream?.(segment);
       segments.push(segments);
     });
   } else {
-    try {
-      console.log('KJSKDJKSJDSKJDSKJDSKJDKSJDKSJ');
-    ({ segments } = await session.run(audio).catch(err => { throw err }))
-    } catch (er) {
-      console.log('SDNSJKDHKSDJJSDKSJD');
-    }
+    ({ segments } = await session.run(audio));
   }
-  */
 
-  await session.free();
+  session.free();
+
+  console.warn = consolewarn;
+  console.log = consolelog;
 
   return segments;
 };
