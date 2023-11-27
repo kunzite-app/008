@@ -110,15 +110,14 @@ const CdrCell = ({ cdr = {}, onClick, lang = 'en' }) => {
         </Text>
       </View>
 
-      <View style={subcellStyle}>
-        <CallIcon call={cdr} />
-      </View>
-      
       {video &&
-        <View style={{ justifyContent: 'center' }}>
-          <VideoIcon />
+        <View style={subcellStyle}>
+          <VideoIcon size={11} />
         </View>
       }
+      <View style={subcellStyle}>
+        <CallIcon call={cdr} size={14} />
+      </View>
     </TouchableOpacity>
   );
 }
