@@ -9,10 +9,15 @@ import { useStore } from '../store/Context';
 import Timer from '../components/Timer';
 import { ContactAvatar } from '../components/Avatars';
 
-const CallButton = ({ style, size = 40, iconSize = 20, ...props }) => 
-  <RoundIconButton {...props} size={size} iconSize={iconSize}
+const CallButton = ({ style, size = 40, iconSize = 20, ...props }) => {
+  return (
+  <RoundIconButton 
+    {...props}
+    size={size} 
+    iconSize={iconSize}
     style={{ backgroundColor: `${COLORS.app}90`,  ...style }} 
-  />
+  />)
+}
 
 export const SessionScreen = ({
   visible,
@@ -170,6 +175,7 @@ export const SessionScreen = ({
               {allowBlindTransfer && (
                 <View style={{ marginLeft: 30, }}>
                   <CallButton
+                    testID="blindTransferButton"
                     iconColor="danger"
                     icon="phoneForwarded"
                     onClick={onBlindTransfer}
@@ -189,6 +195,8 @@ export const SessionScreen = ({
             <CancelAcceptCall
               onAccept={session?.isInbound() && !session?.hasAnswer ? onAccept : null} 
               onCancel={onCancel}
+              cancelTestID="hangupButton"
+              acceptTestID="acceptCallButton"
             />
           }
         </View>

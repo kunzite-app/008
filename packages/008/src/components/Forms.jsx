@@ -15,6 +15,6 @@ export const FormRow = ({ children, label, style = {} }) => (
 
 export const InputRow = ({ label, ...rest }) => (
   <FormRow label={label}>
-    <TextField {...rest} />
+    <TextField testID={label} {...rest} />
   </FormRow>
 );
