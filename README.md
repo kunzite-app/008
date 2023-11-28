@@ -1,4 +1,4 @@
-![008-Banner](https://user-images.githubusercontent.com/414967/273252147-a1dade26-e803-4aed-b51a-6c2ff85cd485.png)
+![008-Banner](https://user-images.githubusercontent.com/414967/286295040-fa676e0f-6ae8-4e7f-a2c1-432ac2596ea9.png)
 
 # 008 Event-driven AI powered Open Source Softphone
 
