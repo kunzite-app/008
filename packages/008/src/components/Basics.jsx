@@ -108,11 +108,12 @@ export const Select = ({
     renderDropdownIcon,
     iconStyle
   }) => {
+    console.log(options)
   return (
     <SelectDropdown
       data={options}
       defaultValueByIndex={options.findIndex((item) => item.value === value ) || 0}
-      onSelect={(item) => onChange?.(item.value)}
+      onSelect={(item) => { console.log(item); onChange?.(item.value) }}
       buttonTextAfterSelection={({ label, text }) => label || text}
       rowTextForSelection={({ label, text }) => label || text}
       buttonStyle={{
