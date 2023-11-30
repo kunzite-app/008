@@ -125,6 +125,7 @@ const createWindow = anchor => {
   }
 
   mainWindow = new BrowserWindow({
+    // icon: path.join(__dirname, 'assets', 'logo-round.png'),
     alwaysOnTop: ANCHORED,
     frame: !ANCHORED,
     skipTaskbar: ANCHORED,
@@ -156,7 +157,12 @@ const createWindow = anchor => {
 
   mainWindow.on('close', e => {
     if (!QUITTING) e.preventDefault();
-    mainWindow.hide();
+
+    if (ISLINUX || ISWIN) {
+      mainWindow.minimize();
+    } else {
+      mainWindow.hide();
+    }
   });
 
   if (ANCHORED) {
