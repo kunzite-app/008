@@ -165,16 +165,16 @@ const createWindow = anchor => {
 
   if (ANCHORED) {
     tray = new Tray(trayIcon());
-    tray.setIgnoreDoubleClickEvents(true);
+    // tray.setIgnoreDoubleClickEvents(true);
 
     tray.on('click', () => {
+      if (process.platform === 'linux') {
+        TRAYPOS = { ...screen.getCursorScreenPoint(), width: 0, height: 0 };
+      }
+
       if (mainWindow.isVisible()) {
         mainWindow.hide();
         return;
-      }
-
-      if (process.platform === 'linux') {
-        TRAYPOS = { ...screen.getCursorScreenPoint(), width: 0, height: 0 };
       }
 
       alignWindow();
