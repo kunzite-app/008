@@ -43,7 +43,7 @@ const WIN_MARGIN_Y = 23;
 let QUITTING;
 let ANCHORED =
   STORE.get('anchored') === undefined ? true : STORE.get('anchored');
-console.log(ANCHORED);
+let TRAYPOS;
 
 let mainWindow;
 let tray;
@@ -72,7 +72,7 @@ const alignWindow = () => {
   const { height, width } = mainWindow.getBounds();
 
   const screenBounds = screen.getPrimaryDisplay().size;
-  const trayBounds = tray.getBounds();
+  const trayBounds = TRAYPOS || tray.getBounds();
 
   let trayPos = 4; // 1:top-left 2:top-right 3:bottom-left 4.bottom-right
   trayPos = trayBounds.y > screenBounds.height / 2 ? trayPos : trayPos / 2;
@@ -171,6 +171,10 @@ const createWindow = anchor => {
       if (mainWindow.isVisible()) {
         mainWindow.hide();
         return;
+      }
+
+      if (process.platform === 'linux') {
+        TRAYPOS = { ...screen.getCursorScreenPoint(), width: 0, height: 0 };
       }
 
       alignWindow();
