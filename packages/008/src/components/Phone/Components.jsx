@@ -37,6 +37,8 @@ export const Header = ({
     };  
   });
 
+  console.log(options)
+
   const needle = number_out || numbers?.[0]?.number;
   const { value } = options.find(({ value }) => value === needle) || {};
   const itemFontStyle =  { fontSize: 16 };
