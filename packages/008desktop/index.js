@@ -165,30 +165,27 @@ const createWindow = anchor => {
     }
   });
 
-  if (ANCHORED) {
-    tray = new Tray(trayIcon());
-    tray.setIgnoreDoubleClickEvents(true);
-
-    tray.on('click', () => {
-      if (ISLINUX) {
-        TRAYPOS = { ...screen.getCursorScreenPoint(), width: 0, height: 0 };
-      }
-
-      if (mainWindow.isVisible()) {
-        mainWindow.hide();
-        return;
-      }
-
-      alignWindow();
-      display();
-    });
-
-    app.dock && app.dock.hide();
+  if (!ANCHORED) {
+    display();
     return;
   }
 
-  display();
-  app.dock && app.dock.show();
+  tray = new Tray(trayIcon());
+  tray.setIgnoreDoubleClickEvents(true);
+
+  tray.on('click', () => {
+    if (ISLINUX) {
+      TRAYPOS = { ...screen.getCursorScreenPoint(), width: 32, height: 32 };
+    }
+
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+      return;
+    }
+
+    alignWindow();
+    display();
+  });
 };
 
 const deepLink = ({ url }) => {
