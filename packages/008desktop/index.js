@@ -167,9 +167,10 @@ const createWindow = anchor => {
     tray = new Tray(trayIcon());
     // tray.setIgnoreDoubleClickEvents(true);
 
-    tray.on('click', () => {
+    tray.on('click', (ev, bounds, position) => {
+      console.log(ev, bounds, position);
       if (process.platform === 'linux') {
-        TRAYPOS = { ...screen.getCursorScreenPoint(), width: 0, height: 0 };
+        TRAYPOS = { ...position, width: 0, height: 0 };
       }
 
       if (mainWindow.isVisible()) {
