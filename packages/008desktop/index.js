@@ -38,6 +38,7 @@ const {
 } = process.env;
 
 const ISWIN = process.platform === 'win32';
+const ISLINUX = process.platform === 'linux';
 const WIN_MARGIN_Y = 23;
 
 let QUITTING;
@@ -51,14 +52,11 @@ let tray;
 const { quit } = app;
 
 const trayIcon = () => {
-  const assets = path.join(__dirname, 'assets');
+  let icon = nativeTheme.shouldUseDarkColors ? 'trayl.png' : 'trayd.png';
+  if (ISLINUX) icon = 'trayp.png';
+  if (ISWIN) icon = 'tray.ico';
 
-  if (ISWIN) return path.join(assets, 'tray.ico');
-
-  return path.join(
-    assets,
-    nativeTheme.shouldUseDarkColors ? 'trayl.png' : 'trayd.png'
-  );
+  return path.join(__dirname, 'assets', icon);
 };
 
 const alignWindow = () => {
@@ -144,8 +142,6 @@ const createWindow = anchor => {
     }
   });
 
-  // if (APP_DEBUG) mainWindow.webContents.openDevTools();
-
   mainWindow.webContents.on('did-fail-load', () => {
     setTimeout(() => mainWindow.loadURL(APP_URL), 1000);
   });
@@ -165,12 +161,11 @@ const createWindow = anchor => {
 
   if (ANCHORED) {
     tray = new Tray(trayIcon());
-    // tray.setIgnoreDoubleClickEvents(true);
+    tray.setIgnoreDoubleClickEvents(true);
 
-    tray.on('click', (ev, bounds, position) => {
-      console.log(ev, bounds, position);
-      if (process.platform === 'linux') {
-        TRAYPOS = { ...position, width: 0, height: 0 };
+    tray.on('click', () => {
+      if (ISLINUX) {
+        TRAYPOS = { ...screen.getCursorScreenPoint(), width: 0, height: 0 };
       }
 
       if (mainWindow.isVisible()) {
