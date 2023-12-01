@@ -9,15 +9,16 @@ const {
   shell,
   protocol,
   nativeTheme,
-  screen
+  screen,
+  dialog
 } = require('electron');
 const { openExternal } = shell;
 
 const regedit = require('rage-edit');
 const log = require('electron-log');
+const Store = require('electron-store');
 
 const pjson = require('./package.json');
-const Store = require('electron-store');
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -25,8 +26,6 @@ protocol.registerSchemesAsPrivileged([
     privileges: { bypassCSP: true }
   }
 ]);
-
-const STORE = new Store();
 
 const {
   APP_URL = url.format({
@@ -37,13 +36,18 @@ const {
   APP_DEBUG = false
 } = process.env;
 
+const STORE = new Store();
+
 const ISWIN = process.platform === 'win32';
 const ISLINUX = process.platform === 'linux';
 const WIN_MARGIN_Y = 23;
 
 let QUITTING;
-let ANCHORED =
-  STORE.get('anchored') === undefined ? true : STORE.get('anchored');
+let ANCHORED = ISLINUX
+  ? false
+  : STORE.get('anchored') === undefined
+  ? true
+  : STORE.get('anchored');
 let TRAYPOS;
 
 let mainWindow;
@@ -125,7 +129,6 @@ const createWindow = anchor => {
   }
 
   mainWindow = new BrowserWindow({
-    // icon: path.join(__dirname, 'assets', 'logo-round.png'),
     alwaysOnTop: ANCHORED,
     frame: !ANCHORED,
     skipTaskbar: ANCHORED,
@@ -147,16 +150,15 @@ const createWindow = anchor => {
     setTimeout(() => mainWindow.loadURL(APP_URL), 1000);
   });
 
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow.webContents.on('ready-to-show', () => {
     mainWindow.webContents.send('anchored', { anchored: ANCHORED });
   });
 
   mainWindow.setContentSize(0, 0);
-  mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(APP_URL);
 
-  mainWindow.on('close', e => {
-    if (!QUITTING) e.preventDefault();
+  mainWindow.on('close', ev => {
+    if (!QUITTING) ev.preventDefault();
 
     if (ISLINUX || ISWIN) {
       mainWindow.minimize();
@@ -172,7 +174,6 @@ const createWindow = anchor => {
 
   tray = new Tray(trayIcon());
   tray.setIgnoreDoubleClickEvents(true);
-
   tray.on('click', () => {
     if (ISLINUX) {
       TRAYPOS = { ...screen.getCursorScreenPoint(), width: 32, height: 32 };
@@ -209,13 +210,13 @@ const registerProtocolol = async () => {
   if (ISWIN) {
     const { productName } = pjson;
 
-    ['ApplicationName', 'ApplicationDescription'].forEach(async item => {
+    for (const field of ['ApplicationName', 'ApplicationDescription']) {
       await regedit.Registry.set(
         `HKCU\\Software\\${productName}\\Capabilities`,
-        item,
+        field,
         `${productName}`
       );
-    });
+    }
 
     for (const protocol of protocols) {
       await regedit.Registry.set(
@@ -244,16 +245,19 @@ const registerProtocolol = async () => {
 };
 
 const requestPermissions = async () => {
+  if (ISLINUX) return;
+
   const permissions = ['microphone', 'camera'];
-  permissions.forEach(async permission => {
+  for (const permission of permissions) {
     if (systemPreferences.getMediaAccessStatus(permission) !== 'granted')
       await systemPreferences.askForMediaAccess(permission);
-  });
+  }
 };
 
 !app.requestSingleInstanceLock() && quit();
 
 app.on('activate', display);
+
 app.on('before-quit', () => (QUITTING = true));
 
 app.on('open-url', (_, url) => {
@@ -261,7 +265,7 @@ app.on('open-url', (_, url) => {
   deepLink({ url });
 });
 
-app.on('second-instance', (_, argv) => {
+app.on('second-instance', (ev, argv) => {
   display();
 
   if (ISWIN) {
@@ -276,10 +280,11 @@ nativeTheme.on('updated', () => {
 
 ipcMain.on('show', display);
 ipcMain.on('quit', quit);
-ipcMain.on('anchor', () => createWindow(true));
-ipcMain.on('unanchor', () => createWindow(false));
+if (!ISLINUX) {
+  ipcMain.on('anchor', () => createWindow(true));
+  ipcMain.on('unanchor', () => createWindow(false));
+}
 ipcMain.on('open', (_, { url }) => openExternal(url));
-
 ipcMain.on('resize', (_, opts) => {
   const { width, height } = opts;
 
@@ -292,11 +297,19 @@ ipcMain.on('resize', (_, opts) => {
 
 app.on('ready', async () => {
   try {
-    await requestPermissions();
     await registerProtocolol();
+    await requestPermissions();
+
     createWindow(ANCHORED);
   } catch (err) {
     log.error(err);
+    await dialog.showMessageBox({
+      type: 'error',
+      title: 'Error',
+      message: 'Houston we had a problem!',
+      detail: err.message,
+      buttons: ['Close']
+    });
     quit();
   }
 });
