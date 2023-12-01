@@ -8,13 +8,15 @@ const {
   systemPreferences,
   shell,
   protocol,
-  nativeTheme
+  nativeTheme,
+  screen,
+  dialog
 } = require('electron');
 const { openExternal } = shell;
 
-const trayWindow = require('electron-tray-window');
 const regedit = require('rage-edit');
 const log = require('electron-log');
+const Store = require('electron-store');
 
 const pjson = require('./package.json');
 
@@ -34,51 +36,105 @@ const {
   APP_DEBUG = false
 } = process.env;
 
-const WINDOWS_MAGICAL_MARGIN = 23;
-const margin_y = process.platform === 'win32' ? WINDOWS_MAGICAL_MARGIN : null;
+const STORE = new Store();
 
-let SIZE, QUITTING, ANCHORED;
+const ISWIN = process.platform === 'win32';
+const ISLINUX = process.platform === 'linux';
+const WIN_MARGIN_Y = 23;
+
+let QUITTING;
+let ANCHORED = ISLINUX
+  ? false
+  : STORE.get('anchored') === undefined
+  ? true
+  : STORE.get('anchored');
+let TRAYPOS;
 
 let mainWindow;
 let tray;
 
+const { quit } = app;
+
 const trayIcon = () => {
-  const assets = path.join(__dirname, 'assets');
+  let icon = nativeTheme.shouldUseDarkColors ? 'trayl.png' : 'trayd.png';
+  if (ISLINUX) icon = 'trayp.png';
+  if (ISWIN) icon = 'tray.ico';
 
-  if (process.platform === 'win32') return path.join(assets, 'tray.ico');
-
-  return path.join(
-    assets,
-    nativeTheme.shouldUseDarkColors ? 'trayl.png' : 'trayd.png'
-  );
+  return path.join(__dirname, 'assets', icon);
 };
 
-const createTray = () => {
-  tray = new Tray(trayIcon());
-  tray.setIgnoreDoubleClickEvents(true);
-};
+const alignWindow = () => {
+  if (!mainWindow) return;
 
-const createWindow = () => {
-  let height = 0;
-  let width = 0;
-  let x, y;
+  let x = 0;
+  let y = 0;
+  const margin_x = 0;
+  const margin_y = ISWIN ? WIN_MARGIN_Y : 0;
 
-  if (mainWindow) {
-    [x, y] = mainWindow.getPosition();
-    mainWindow.close();
-    tray.destroy();
+  const { height, width } = mainWindow.getBounds();
+
+  const screenBounds = screen.getPrimaryDisplay().size;
+  const trayBounds = TRAYPOS || tray.getBounds();
+
+  let trayPos = 4; // 1:top-left 2:top-right 3:bottom-left 4.bottom-right
+  trayPos = trayBounds.y > screenBounds.height / 2 ? trayPos : trayPos / 2;
+  trayPos = trayBounds.x > screenBounds.width / 2 ? trayPos : trayPos - 1;
+
+  // calculate the new window position
+  switch (trayPos) {
+    case 1: // TOP - LEFT
+      x = Math.floor(trayBounds.x + margin_x + trayBounds.width / 2);
+      y = Math.floor(trayBounds.y + margin_y + trayBounds.height / 2);
+      break;
+
+    case 2: // TOP - RIGHT
+      x = Math.floor(trayBounds.x - width - margin_x + trayBounds.width / 2);
+      y = Math.floor(trayBounds.y + margin_y + trayBounds.height / 2);
+      break;
+
+    case 3: // BOTTOM - LEFT
+      x = Math.floor(trayBounds.x + margin_x + trayBounds.width / 2);
+      y = Math.floor(trayBounds.y - height - margin_y + trayBounds.height / 2);
+      break;
+
+    case 4: // BOTTOM - RIGHT
+      x = Math.floor(trayBounds.x - width - margin_x + trayBounds.width / 2);
+      y = Math.floor(trayBounds.y - height - margin_y + trayBounds.height / 2);
+      break;
   }
 
-  if (SIZE) {
-    height = ANCHORED ? 0 : SIZE.height;
-    width = ANCHORED ? 0 : SIZE.width;
+  mainWindow.setPosition(x, y);
+};
+
+const display = () => {
+  if (!mainWindow) return;
+
+  mainWindow.show();
+  mainWindow.focus();
+};
+
+const createWindow = anchor => {
+  if (mainWindow) {
+    if (anchor && ANCHORED) return;
+    if (!anchor && !ANCHORED) return;
+  }
+
+  ANCHORED = anchor;
+  STORE.set('anchored', ANCHORED);
+
+  if (mainWindow) {
+    mainWindow.close();
+
+    if (tray) tray.destroy();
   }
 
   mainWindow = new BrowserWindow({
     alwaysOnTop: ANCHORED,
     frame: !ANCHORED,
     skipTaskbar: ANCHORED,
+    useContentSize: !ANCHORED,
     resizable: APP_DEBUG,
+    fullscreenable: false,
     maximizable: false,
     minimizable: false,
     show: false,
@@ -90,69 +146,53 @@ const createWindow = () => {
     }
   });
 
-  mainWindow.loadURL(APP_URL);
-  mainWindow.setContentSize(width, height);
-
-  mainWindow.setMenuBarVisibility(false);
-
   mainWindow.webContents.on('did-fail-load', () => {
-    setTimeout(() => mainWindow.loadURL(APP_URL), 1 * 1000);
+    setTimeout(() => mainWindow.loadURL(APP_URL), 1000);
   });
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    ANCHORED ? trayWindow.alignWindow() : display();
+  mainWindow.webContents.on('ready-to-show', () => {
     mainWindow.webContents.send('anchored', { anchored: ANCHORED });
   });
 
-  if (APP_DEBUG) mainWindow.webContents.openDevTools();
+  mainWindow.setContentSize(0, 0);
+  mainWindow.setMenuBarVisibility(false);
+  mainWindow.loadURL(APP_URL);
 
-  if (ANCHORED) {
-    createTray();
-    app.dock && app.dock.hide();
-  } else {
-    mainWindow.on('close', e => {
-      if (!QUITTING) e.preventDefault();
+  mainWindow.on('close', ev => {
+    if (!QUITTING) ev.preventDefault();
+
+    if (ISLINUX || ISWIN) {
+      mainWindow.minimize();
+    } else {
       mainWindow.hide();
-    });
+    }
+  });
 
-    x && y ? mainWindow.setPosition(x, y - margin_y) : mainWindow.center();
-
-    mainWindow.show();
-    app.dock && app.dock.show();
-
+  if (!ANCHORED) {
+    display();
     return;
   }
 
-  trayWindow.setOptions({
-    tray,
-    window: mainWindow,
-    margin_y
+  tray = new Tray(trayIcon());
+  tray.setIgnoreDoubleClickEvents(true);
+  tray.on('click', () => {
+    if (ISLINUX) {
+      TRAYPOS = { ...screen.getCursorScreenPoint(), width: 32, height: 32 };
+    }
+
+    if (mainWindow.isVisible()) {
+      mainWindow.hide();
+      return;
+    }
+
+    alignWindow();
+    display();
   });
-};
-
-const display = () => {
-  if (mainWindow) {
-    mainWindow.show();
-    mainWindow.focus();
-  }
-};
-
-const quit = () => app.quit();
-
-const anchor = () => {
-  if (ANCHORED) return;
-  ANCHORED = true;
-  createWindow();
-};
-
-const unanchor = () => {
-  if (!ANCHORED) return;
-  ANCHORED = false;
-  createWindow();
 };
 
 const deepLink = ({ url }) => {
   try {
+    if (url === '.') return;
     mainWindow.webContents.send('deep-link', { url });
   } catch (err) {}
 };
@@ -168,19 +208,16 @@ const registerProtocolol = async () => {
     else app.setAsDefaultProtocolClient(protocol);
   });
 
-  if (process.platform === 'win32') {
+  if (ISWIN) {
     const { productName } = pjson;
 
-    await regedit.Registry.set(
-      `HKCU\\Software\\${productName}\\Capabilities`,
-      'ApplicationName',
-      `${productName}`
-    );
-    await regedit.Registry.set(
-      `HKCU\\Software\\${productName}\\Capabilities`,
-      'ApplicationDescription',
-      `${productName}`
-    );
+    for (const field of ['ApplicationName', 'ApplicationDescription']) {
+      await regedit.Registry.set(
+        `HKCU\\Software\\${productName}\\Capabilities`,
+        field,
+        `${productName}`
+      );
+    }
 
     for (const protocol of protocols) {
       await regedit.Registry.set(
@@ -209,65 +246,71 @@ const registerProtocolol = async () => {
 };
 
 const requestPermissions = async () => {
+  if (ISLINUX) return;
+
   const permissions = ['microphone', 'camera'];
-  permissions.forEach(async permission => {
+  for (const permission of permissions) {
     if (systemPreferences.getMediaAccessStatus(permission) !== 'granted')
       await systemPreferences.askForMediaAccess(permission);
-  });
+  }
 };
 
 !app.requestSingleInstanceLock() && quit();
 
 app.on('activate', display);
-app.on('before-quit', () => (QUITTING = true));
 
-app.on('certificate-error', (ev, _, __, ___, ____, callback) => {
-  ev.preventDefault();
-  const data = true;
-  callback(data);
-});
+app.on('before-quit', () => (QUITTING = true));
 
 app.on('open-url', (_, url) => {
   display();
   deepLink({ url });
 });
 
-app.on('second-instance', (_, argv) => {
+app.on('second-instance', (ev, argv) => {
   display();
 
-  if (process.platform === 'win32') {
+  if (ISWIN) {
     const url = argv[argv.length - 1];
-    if (url === '.') return;
     deepLink({ url });
+  }
+});
+
+nativeTheme.on('updated', () => {
+  if (tray) tray.setImage(trayIcon());
+});
+
+ipcMain.on('show', display);
+ipcMain.on('quit', quit);
+if (!ISLINUX) {
+  ipcMain.on('anchor', () => createWindow(true));
+  ipcMain.on('unanchor', () => createWindow(false));
+}
+ipcMain.on('open', (_, { url }) => openExternal(url));
+ipcMain.on('resize', (_, opts) => {
+  const { width, height } = opts;
+
+  mainWindow.setContentSize(width, height);
+  if (ANCHORED) {
+    mainWindow.setSize(width, height);
+    alignWindow();
   }
 });
 
 app.on('ready', async () => {
   try {
-    await requestPermissions();
     await registerProtocolol();
+    await requestPermissions();
 
-    ipcMain.on('show', display);
-    ipcMain.on('quit', quit);
-    ipcMain.on('anchor', anchor);
-    ipcMain.on('unanchor', unanchor);
-    ipcMain.on('open', (_, { url }) => openExternal(url));
-
-    ipcMain.on('resize', (_, opts) => {
-      const { width, height } = opts;
-      if (!mainWindow || !trayWindow) return;
-
-      SIZE = { width, height };
-
-      mainWindow.setContentSize(width, height);
-      trayWindow.setWindowSize({ width, height });
-    });
-
-    nativeTheme.on('updated', () => tray.setImage(trayIcon()));
-
-    anchor();
+    createWindow(ANCHORED);
   } catch (err) {
     log.error(err);
+    await dialog.showMessageBox({
+      type: 'error',
+      title: 'Error',
+      message: 'Houston we had a problem!',
+      detail: err.message,
+      buttons: ['Close']
+    });
     quit();
   }
 });
