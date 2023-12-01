@@ -658,8 +658,8 @@ class Phone extends React.Component {
       });
     };
 
-    const onNumberChangeHandler = ([number = {}]) =>
-      this.context.setSettings({ number_out: number.value });
+    const onNumberChangeHandler = number_out =>
+      this.context.setSettings({ number_out });
 
     const contactClickHandler = contact =>
       this.emit({ type: 'contact:click', data: { contact } });

@@ -1,6 +1,5 @@
 import { Session } from 'sip.js';
 
-
 Session.prototype.getStream = function () {
   const stream = new MediaStream();
   const { peerConnection } = this.sessionDescriptionHandler;
@@ -9,7 +8,7 @@ Session.prototype.getStream = function () {
   });
 
   return stream;
-}
+};
 
 Session.prototype.setMuted = function (muted) {
   if (!this.sessionDescriptionHandler) return;
@@ -34,8 +33,6 @@ Session.prototype.setMutedVideo = function (muted) {
 };
 
 Session.prototype.isVideo = function () {
-  if (!this.sessionDescriptionHandler) return;
-
   if (!this.isInbound())
     return this.sessionDescriptionHandlerOptions.constraints?.video;
 

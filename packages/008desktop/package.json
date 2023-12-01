@@ -1,7 +1,7 @@
 {
   "name": "008desktop",
   "description": "Open-source event-driven AI powered Softphone",
-  "version": "1.1.1",
+  "version": "1.1.5-alpha.0",
   "private": true,
   "author": {
     "name": "Kunzite",
@@ -76,8 +76,7 @@
   },
   "dependencies": {
     "electron-log": "^4.4.8",
-    "electron-tray-window": "https://github.com/sostribe/electron-tray-window",
-    "node-fetch": "2",
+    "electron-store": "^8.1.0",
     "rage-edit": "^1.2.0"
   },
   "devDependencies": {

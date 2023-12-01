@@ -314,6 +314,7 @@ export const SettingsScreen = () => {
     password,
     login,
 
+    setSettings,
     showSettings,
     toggleShowSettings,
     settingsTab = 'user',
@@ -338,7 +339,7 @@ export const SettingsScreen = () => {
   }, [settingsUri, nickname, password]);
 
   const onChangeSettingsHandler = input => {
-    login(input);
+    setSettings(input);
   };
 
   const onChangeConnectionHandler = input => {
