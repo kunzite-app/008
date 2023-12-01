@@ -155,6 +155,7 @@ const createWindow = anchor => {
   });
 
   mainWindow.setContentSize(0, 0);
+  mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(APP_URL);
 
   mainWindow.on('close', ev => {
