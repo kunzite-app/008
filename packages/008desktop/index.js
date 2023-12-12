@@ -158,6 +158,8 @@ const createWindow = anchor => {
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(APP_URL);
 
+  if (APP_DEBUG) mainWindow.webContents.openDevTools();
+
   mainWindow.on('close', ev => {
     if (!QUITTING) ev.preventDefault();
 

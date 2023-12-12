@@ -178,6 +178,22 @@ class Phone extends React.Component {
       }
     });
 
+    console.log('sdsd', {
+      uri: sipUri,
+      authorizationUser: sipUser,
+      password: sipPassword,
+      userAgentString: userAgent,
+      autostart: false,
+      register,
+      transportOptions: {
+        wsServers: [wsUri],
+        traceSip: false,
+        connectionTimeout: 5,
+        reconnectionTimeout: 5,
+        maxReconnectionAttempts: 0
+      }
+    });
+
     ua.on('transportCreated', transport => {
       transport.on('disconnected', async () =>
         this.setState({ rand: genId() })

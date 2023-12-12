@@ -66,12 +66,6 @@ const DEFAULTS = {
     { value: 'offline', text: 'Offline', color: '#A9A9A9' }
   ],
 
-  devices: [],
-  microphones: [],
-  ringer: 'default',
-  speaker: 'default',
-  microphone: 'default',
-
   number_out: undefined,
   numbers: [],
 
@@ -91,12 +85,20 @@ const DEFAULTS = {
   password: undefined,
   avatar: undefined,
 
-  contactsDialer: {},
-  contactsDialerFilter: '',
-  cdrs: [],
   webhooks: [],
 
   size: { width: 340, height: 460 }
+};
+
+const DEFAULTS_NOCONFIG = {
+  devices: [],
+  microphones: [],
+  ringer: 'default',
+  speaker: 'default',
+  microphone: 'default',
+  contactsDialer: {},
+  contactsDialerFilter: '',
+  cdrs: []
 };
 
 export const useStore = create(
@@ -104,6 +106,7 @@ export const useStore = create(
     subscribeWithSelector((set, get) => {
       return {
         ...DEFAULTS,
+        ...DEFAULTS_NOCONFIG,
 
         electron: false,
         anchored: true,
@@ -146,8 +149,7 @@ export const useStore = create(
 
           const settings = await response.json();
           set(() => ({
-            nickname,
-            password,
+            ...DEFAULTS,
             ...settings,
             settingsUri,
             showSettings: false
@@ -184,7 +186,7 @@ export const useStore = create(
           localStorage.clear();
           contacts.clear();
 
-          set(() => ({ ...DEFAULTS }));
+          set(() => ({ ...DEFAULTS, ...DEFAULTS_NOCONFIG }));
 
           initializeStore(get());
         }
