@@ -150,8 +150,6 @@ export const useStore = create(
           const settings = await response.json();
           set(() => ({
             ...DEFAULTS,
-            nickname,
-            password,
             ...settings,
             settingsUri,
             showSettings: false
