@@ -273,7 +273,6 @@ class Phone extends React.Component {
       ? [`P-Asserted-Identity:${number_out}`, `x-Number:${number_out}`]
       : [];
 
-    console.log('identityHeaders', identityHeaders);
     try {
       const target = cleanPhoneNumber(number);
       const session = this.ua.invite(target, {
@@ -503,7 +502,6 @@ class Phone extends React.Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    console.log(this.state);
     const { state } = this;
 
     const fields = ['wsUri', 'sipUri', 'sipUser', 'sipPassword'];
