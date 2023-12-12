@@ -60,19 +60,11 @@ const initializeStore = async state => {
 };
 
 const DEFAULTS = {
-  status: 'online',
   statuses: [
     { value: 'online', text: 'Online', color: '#057e74' },
     { value: 'offline', text: 'Offline', color: '#A9A9A9' }
   ],
 
-  devices: [],
-  microphones: [],
-  ringer: 'default',
-  speaker: 'default',
-  microphone: 'default',
-
-  number_out: undefined,
   numbers: [],
 
   sipUri: undefined,
@@ -91,12 +83,23 @@ const DEFAULTS = {
   password: undefined,
   avatar: undefined,
 
-  contactsDialer: {},
-  contactsDialerFilter: '',
-  cdrs: [],
   webhooks: [],
 
   size: { width: 340, height: 460 }
+};
+
+const DEFAULTS_NOCONFIG = {
+  status: 'online',
+  number_out: undefined,
+
+  devices: [],
+  microphones: [],
+  ringer: 'default',
+  speaker: 'default',
+  microphone: 'default',
+  contactsDialer: {},
+  contactsDialerFilter: '',
+  cdrs: []
 };
 
 export const useStore = create(
@@ -104,6 +107,7 @@ export const useStore = create(
     subscribeWithSelector((set, get) => {
       return {
         ...DEFAULTS,
+        ...DEFAULTS_NOCONFIG,
 
         electron: false,
         anchored: true,
@@ -146,12 +150,19 @@ export const useStore = create(
 
           const settings = await response.json();
           set(() => ({
-            nickname,
-            password,
+            ...DEFAULTS,
             ...settings,
             settingsUri,
             showSettings: false
           }));
+
+          const { number_out } = get();
+
+          const { numbers = [] } = settings;
+          if (!numbers.find(num => number_out === num.number))
+            set(() => ({
+              number_out: ''
+            }));
         },
 
         showSettings: false,
@@ -184,7 +195,7 @@ export const useStore = create(
           localStorage.clear();
           contacts.clear();
 
-          set(() => ({ ...DEFAULTS }));
+          set(() => ({ ...DEFAULTS, ...DEFAULTS_NOCONFIG }));
 
           initializeStore(get());
         }
