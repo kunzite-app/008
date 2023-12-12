@@ -269,14 +269,15 @@ class Phone extends React.Component {
     const { dialer_number, number_out, microphone } = this.state;
     const { number = dialer_number, extraHeaders = [], video = false } = opts;
 
-    const indentityHeaders = number_out
+    const identityHeaders = number_out
       ? [`P-Asserted-Identity:${number_out}`, `x-Number:${number_out}`]
       : [];
 
+    console.log('identityHeaders', identityHeaders);
     try {
       const target = cleanPhoneNumber(number);
       const session = this.ua.invite(target, {
-        extraHeaders: [...indentityHeaders, ...extraHeaders],
+        extraHeaders: [...identityHeaders, ...extraHeaders],
         sessionDescriptionHandlerOptions: {
           constraints: {
             audio: { deviceId: { ideal: microphone } },
@@ -502,6 +503,7 @@ class Phone extends React.Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
+    console.log(this.state);
     const { state } = this;
 
     const fields = ['wsUri', 'sipUri', 'sipUser', 'sipPassword'];

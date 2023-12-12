@@ -60,13 +60,11 @@ const initializeStore = async state => {
 };
 
 const DEFAULTS = {
-  status: 'online',
   statuses: [
     { value: 'online', text: 'Online', color: '#057e74' },
     { value: 'offline', text: 'Offline', color: '#A9A9A9' }
   ],
 
-  number_out: undefined,
   numbers: [],
 
   sipUri: undefined,
@@ -91,6 +89,9 @@ const DEFAULTS = {
 };
 
 const DEFAULTS_NOCONFIG = {
+  status: 'online',
+  number_out: undefined,
+
   devices: [],
   microphones: [],
   ringer: 'default',
@@ -154,6 +155,14 @@ export const useStore = create(
             settingsUri,
             showSettings: false
           }));
+
+          const { number_out } = get();
+
+          const { numbers = [] } = settings;
+          if (!numbers.find(num => number_out === num.number))
+            set(() => ({
+              number_out: ''
+            }));
         },
 
         showSettings: false,
