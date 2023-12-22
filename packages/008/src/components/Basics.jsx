@@ -72,7 +72,8 @@ export const Text = ({ children, style, ...props }) => (
 
 export const TextInput = ({ style, ...props }) =>
   <RNTextInput 
-    style={[{ fontFamily, color: COLORS.textPrimary, outlineStyle: 'none' }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} {...props} 
+    style={[{ fontFamily, color: COLORS.textPrimary, outlineStyle: 'none' }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} 
+      {...props} 
   />
 
 export const TextField = ({
@@ -137,7 +138,7 @@ export const Select = ({
   )
 }
 
-export const Button = ({ children, color, style, onClick, fullWidth }) => {
+export const Button = ({ children, color, style, onClick, fullWidth, testID }) => {
   const calculatedColor = COLORS[color] || color;
 
   let stylex = { minWidth: 100, height: 40, borderRadius: 5, backgroundColor: calculatedColor, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', color: 'white' }
@@ -145,6 +146,7 @@ export const Button = ({ children, color, style, onClick, fullWidth }) => {
   
   return (
     <TouchableOpacity 
+      testID={testID}
       style={[ stylex, style ]}
       onPress={onClick} 
     >
@@ -179,9 +181,10 @@ export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
   if (icon === 'search') return <SearchIcon { ...styling } />;
 }
 
-export const ButtonIcon = ({ children, icon, onClick, style, size = 18, color }) => {
+export const ButtonIcon = ({ children, icon, onClick, style, color, testID, size = 18 }) => {
   return (
     <TouchableOpacity
+      testID={testID}
       onPress={onClick}
       style={[
         { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
@@ -191,16 +194,15 @@ export const ButtonIcon = ({ children, icon, onClick, style, size = 18, color })
       { icon && <Icon {...{icon, size, color }} />}
       {children}
     </TouchableOpacity>
-
   )
 };
 
-export const RoundIconButton = ({ size = 30, color, icon, iconSize, iconColor, onClick, style }) => {
+export const RoundIconButton = ({ color, iconSize, iconColor, style, size = 30, ...props }) => {
   return (
     <ButtonIcon 
-      icon={icon} 
+      {...props}
       color={iconColor} 
-      size={iconSize} onClick={onClick} 
+      size={iconSize} 
       style={[{ 
         width: size,
         height: size,
@@ -241,7 +243,7 @@ export const HRule = ({ color = BORDERCOLOR }) => (
   />
 );
 
-export const CancelAccept = ({ onCancel, onAccept }) => {
+export const CancelAccept = ({ onCancel, onAccept, acceptID }) => {
   return (
     <View
       style={{
@@ -257,7 +259,7 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
       )}
 
       {onAccept && (
-        <Button color="secondary" onClick={onAccept} fullWidth={!onCancel}>
+        <Button testID={acceptID} color="secondary" onClick={onAccept} fullWidth={!onCancel}>
           <CheckIcon />
         </Button>
       )}
@@ -265,7 +267,7 @@ export const CancelAccept = ({ onCancel, onAccept }) => {
   );
 };
 
-export const CancelAcceptCall = ({ onCancel, onAccept }) => {
+export const CancelAcceptCall = ({ onCancel, onAccept, cancelTestID, acceptTestID }) => {
   const size = 50;
   return (
     <View
@@ -278,6 +280,7 @@ export const CancelAcceptCall = ({ onCancel, onAccept }) => {
     >
       {onCancel && (
         <RoundIconButton
+          testID={cancelTestID}
           size={size}
           color={COLORS.danger}
           iconColor="white" 
@@ -288,6 +291,7 @@ export const CancelAcceptCall = ({ onCancel, onAccept }) => {
 
       {onAccept && (
         <RoundIconButton
+          testID={acceptTestID}
           size={size}
           color={COLORS.secondary}
           iconColor="white" 

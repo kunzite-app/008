@@ -726,6 +726,7 @@ class Phone extends React.Component {
           style={{ paddingTop: 30 }}
         >
           <Dialer
+            testID="transferDialer"
             isTransfer={true}
             onDialClick={onTransferHandler}
             onCdrClick={onTransferHandler}
