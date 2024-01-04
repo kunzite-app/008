@@ -23,10 +23,8 @@ export const processAudio = async ({ input }) => {
   if (typeof input === "string") {
     const response = await fetch(input);
     buffer = await response.arrayBuffer();
-  } else if (input instanceof Array || input instanceof Blob) {
-    buffer = await new Blob(input).arrayBuffer();
   } else {
-    throw new Error("Audio type not supported");
+    buffer = await new Blob(input).arrayBuffer();
   }
 
   const actx = new AudioContext({
@@ -48,16 +46,19 @@ export const processAudio = async ({ input }) => {
 
   const mono = actx.createBuffer(1, audio.length, actx.sampleRate);
   mono.copyToChannel(audio, 0, 0);
-  return mono;
+
+  const wav = toWav(mono);
+
+  return { audio, wav };
 };
 
 export const transcript = async ({
-  audio = [],
-  bin = `models/ttsb.bin`,
+  wav,
+  bin = `${S3Q}/ttsb.bin`,
   data = `${S3Q}/tts.json`,
   onStream,
 }) => {
-  const inputs = new Uint8Array(toWav(audio));
+  const inputs = new Uint8Array(wav);
 
   const tokenizer = await fetchBytes({ url: data });
   const model = await fetchBytes({ url: bin });
@@ -96,10 +97,6 @@ export const onnxSession = ({
 
 export const vad = async ({ audio, size = 1536, session }) => {
   const batchSize = 1;
-
-  const channelData = audio.getChannelData(0);
-  audio = new Float32Array(channelData.length);
-  audio.set(channelData);
 
   if (!session)
     session = await onnxSession({ model: "models/silero_vad.onnx" });

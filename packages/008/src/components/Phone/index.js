@@ -21,9 +21,9 @@ import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
 import { emit } from '../../Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { wavBytes } from '../../008Q';
 
 import { name as packageName } from '../../../package.json';
+import { processAudio } from '008Q';
 
 class Phone extends React.Component {
   constructor(props) {
@@ -475,11 +475,12 @@ class Phone extends React.Component {
             });
 
             if (webhooks?.length) {
+              const wav = async input => (await processAudio({ input })).wav;
               this.qworker.postMessage({
                 id,
                 audio: {
-                  remote: await wavBytes({ chunks: chunksIn }),
-                  local: await wavBytes({ chunks: chunksOut })
+                  remote: await wav(chunksIn),
+                  local: await wav(chunksOut)
                 }
               });
             }

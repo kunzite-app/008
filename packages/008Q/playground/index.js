@@ -1,14 +1,13 @@
 const { transcript, vad, processAudio } = window.Q008;
 
 const main = async () => {
-  const audio = await processAudio({ input: "carrental.wav" });
+  const { wav } = await processAudio({ input: "carrental.wav" });
 
-  console.log(audio);
-  console.log(await transcript({ audio }));
+  console.log(await transcript({ wav }));
 };
 
 const main2 = async () => {
-  const audio = await processAudio({ input: "carrental.wav" });
+  const { audio } = await processAudio({ input: "carrental.wav" });
 
   const now = new Date();
   console.log("Running inference...");
