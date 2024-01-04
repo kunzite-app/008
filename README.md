@@ -320,8 +320,8 @@ Every sort of contribution will be very helpful to enhance 008. How you’ll par
 
 # License
 
-Released under the GPL3 license.
+Released under the AGPL-3.0 license.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
 
-If you wish to use our software in a manner that does not allow for GPL-3.0 compliance (e.g., incorporating our software into proprietary software), you can obtain a commercial license. This commercial license provides more flexibility in terms of integration and redistribution, but comes with its own terms and conditions. If you require a commercial license, please [send us an email](mailto:enquire@kunzite.app) directly for more information and pricing details.
+If you wish to use our software in a manner that does not allow for AGPL-3.0 compliance (e.g., incorporating our software into proprietary software), you can obtain a commercial license. This commercial license provides more flexibility in terms of integration and redistribution, but comes with its own terms and conditions. If you require a commercial license, please [send us an email](mailto:enquire@kunzite.app) directly for more information and pricing details.
