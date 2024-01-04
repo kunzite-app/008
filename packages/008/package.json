@@ -2,12 +2,15 @@
   "name": "@kunzite/008",
   "description": "Open-source event-driven AI powered Softphone",
   "version": "1.1.5",
+  "license": "AGPL-3.0-only",
   "private": true,
   "author": {
     "name": "Kunzite",
     "email": "support@kunzite.app",
     "url": "https://kunzite.app"
   },
+  "repository": "https://github.com/kunzite-app/008",
+  "bugs": "https://github.com/kunzite-app/008/issues",
   "homepage": "./",
   "scripts": {
     "start": "expo start --dev-client",
