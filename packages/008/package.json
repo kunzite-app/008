@@ -22,10 +22,10 @@
     "lint": "eslint ./"
   },
   "dependencies": {
+    "008Q": "*",
     "@expo/webpack-config": "^18.0.1",
     "@microsoft/applicationinsights-react-js": "^17.0.1",
     "@microsoft/applicationinsights-web": "^3.0.3",
-    "audiobuffer-to-wav": "^1.0.0",
     "base-64": "^1.0.0",
     "crypto-js": "^4.1.1",
     "elasticlunr": "^0.9.5",
@@ -46,7 +46,6 @@
     "react-native-web": "^0.19.8",
     "sip.js": "^0.15.11",
     "vcf": "^2.1.1",
-    "whisper-webgpu": "^0.8.0",
     "zustand": "^4.4.1"
   },
   "devDependencies": {
