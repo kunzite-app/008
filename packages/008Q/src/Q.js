@@ -4,7 +4,7 @@ import toWav from "audiobuffer-to-wav";
 import { InferenceSession, Tensor } from "onnxruntime-web/webgpu";
 import * as webllm from "@mlc-ai/web-llm";
 
-const S3Q = "./models";
+const S3Q = "https://kunziteq.s3.gra.perf.cloud.ovh.net";
 
 export const fetchBytes = async ({ url, cache = true, onProgress }) => {
   const cache_ = await caches.open("008Q");
