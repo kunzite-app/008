@@ -2529,6 +2529,11 @@
   dependencies:
     "@nevware21/ts-utils" ">= 0.9.4 < 2.x"
 
+"@mlc-ai/web-llm@^0.2.16":
+  version "0.2.16"
+  resolved "https://registry.yarnpkg.com/@mlc-ai/web-llm/-/web-llm-0.2.16.tgz#e5d64704487411e253695e4ce4a2e36510c9e171"
+  integrity sha512-G49+MJiplFDV9HXSqz/EUou0POcHj8Jv24ttFFKmDJsO6TkLb3NanngZJl/pBkK+qdIi0HIkwGe5BFtYzRCK9A==
+
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@mrmlnc/readdir-enhanced/-/readdir-enhanced-2.2.1.tgz#524af240d1a360527b730475ecfa1344aa540dde"

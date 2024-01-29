@@ -9,4 +9,13 @@ module.exports = {
     libraryTarget: "var",
   },
   mode: "production",
+
+  resolve: {
+    fallback: {
+      fs: false,
+      path: false,
+      os: false,
+      perf_hooks: false,
+    },
+  },
 };
