@@ -221,7 +221,7 @@ export const chat = async ({
 };
 
 export const summarize = async ({
-  transcript,
+  transcription,
   chatOpts = {},
   model,
   onInitProgress,
@@ -235,9 +235,15 @@ export const summarize = async ({
     ...chatOpts,
   };
 
+  let txt = "";
+  transcription.forEach(({ text }) => {
+    txt += `${text}<br/>`;
+  });
+  console.log(txt);
+
   const prompt = `Summarize the following conversation into a concise abstract paragraph using the same original language. Avoid unnecessary details or tangential points.
 
-${transcript}
+${txt}
   `;
   return await chat({ prompt, chatOpts, model, onInitProgress, onProgress });
 };

@@ -23,7 +23,7 @@ const transcribe = async ({ audio }) => {
   transcriptElem.innerHTML = "Transcribing...";
   let onInitProgress = (report) => {
     const { progress } = report;
-    transcriptElem.innerHTML = `Transcribing... <br>Loading model (only the first time) ${Math.floor(
+    transcriptElem.innerHTML = `Transcribing... <br/>Loading model (only the first time) ${Math.floor(
       progress * 100
     )}%`;
   };
@@ -31,18 +31,18 @@ const transcribe = async ({ audio }) => {
 
   let transcript_ = "";
   transcription.forEach(({ text }) => {
-    transcript_ += text + "<br/>";
+    transcript_ += `${text}<br/>`;
   });
   transcriptElem.innerHTML = transcript_;
 
   summaElem.innerHTML = "Summarizing...";
   onInitProgress = (report) => {
     const { progress } = report;
-    summaElem.innerHTML = `Summarizing... <br>Loading model (only the first time) ${Math.floor(
+    summaElem.innerHTML = `Summarizing... <br/>Loading model (only the first time) ${Math.floor(
       progress * 100
     )}%`;
   };
-  const summa = await summarize({ transcript: transcript_, onInitProgress });
+  const summa = await summarize({ transcription, onInitProgress });
   summaElem.innerHTML = summa;
 };
 
