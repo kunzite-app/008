@@ -25,12 +25,6 @@ import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
 import { name as packageName } from '../../../package.json';
 import { processAudio } from '008Q';
 
-const launchWorker = url => {
-  return new Worker(new URL(url, import.meta.url), {
-    type: 'module'
-  });
-};
-
 class Phone extends React.Component {
   constructor(props) {
     super(props);
@@ -53,23 +47,36 @@ class Phone extends React.Component {
       ...props
     };
 
-    this.qworkerTTS = launchWorker('../../008QWorkerTTS.js');
-    this.qworkerLLM = launchWorker('../../008QWorkerLLM.js');
+    this.qworkerTTS = new Worker(
+      new URL('../../008QWorkerTTS.js', import.meta.url),
+      {
+        type: 'module'
+      }
+    );
+
+    this.qworkerLLM = new Worker(
+      new URL('../../008QWorkerLLM.js', import.meta.url),
+      {
+        type: 'module'
+      }
+    );
 
     this.qworkerTTS.addEventListener('message', ({ data }) => {
+      console.log(data);
       this.emit({ type: 'phone:transcript', data });
       this.qworkerLLM.postMessage(data);
     });
 
     this.qworkerLLM.addEventListener('message', ({ data }) => {
+      console.log(data);
       this.emit({ type: 'phone:summarization', data });
     });
 
+    /*
     setTimeout(() => {
-      console.log('sending...', this.qworkerTTS);
       this.qworkerTTS.postMessage({ id: 'test' });
     }, 5 * 1000);
-    console.log('shouldbe!');
+    */
   }
 
   emit = ({ type, data = {} }) => {

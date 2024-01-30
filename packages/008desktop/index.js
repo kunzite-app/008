@@ -20,6 +20,8 @@ const Store = require('electron-store');
 
 const pjson = require('./package.json');
 
+process.argv.push('--enable-dawn-features=allow_unsafe_apis');
+
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'file',

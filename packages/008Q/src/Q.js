@@ -237,9 +237,8 @@ export const summarize = async ({
 
   let txt = "";
   transcription.forEach(({ text }) => {
-    txt += `${text}<br/>`;
+    txt += `${text}\n`;
   });
-  console.log(txt);
 
   const prompt = `Summarize the following conversation into a concise abstract paragraph using the same original language. Avoid unnecessary details or tangential points.
 

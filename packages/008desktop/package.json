@@ -83,7 +83,7 @@
     "rage-edit": "^1.2.0"
   },
   "devDependencies": {
-    "electron": "27.0.2",
+    "electron": "28.2.0",
     "electron-builder": "^24.8.0",
     "electron-icon-builder": "^2.0.1",
     "electron-notarize": "^1.2.2",

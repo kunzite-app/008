@@ -1,7 +1,7 @@
 import PQueue from 'p-queue';
 
 import { transcript } from '008Q';
-console.log('HERE');
+
 const QUEUE = new PQueue({ concurrency: 2 });
 
 export const tts = async ({ audio }) => {
@@ -23,10 +23,14 @@ self.addEventListener('message', async ({ data }) => {
   const { id, audio } = data;
   QUEUE.add(async () => {
     console.log('[008Q] Transcribing...');
-    // const transcript = await tts({ audio });
-    const transcriptt = await transcript({
-      audio: 'http://localhost:8081/playground/carrental.mp3'
-    });
-    self.postMessage({ id, transcript: transcriptt });
+    const transcript = await tts({ audio });
+
+    /*
+    const transcript = [
+      { text: 'hello? this is david speaking' },
+      { text: 'hello?' }
+    ]
+    */
+    self.postMessage({ id, transcript });
   });
 });
