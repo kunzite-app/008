@@ -1,7 +1,7 @@
 {
   "name": "008Q",
   "version": "1.1.5",
-  "main": "dist/index.js",
+  "main": "dist/008Q.js",
   "license": "AGPL-3.0-only",
   "private": true,
   "author": {

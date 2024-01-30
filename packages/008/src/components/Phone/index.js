@@ -25,6 +25,12 @@ import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
 import { name as packageName } from '../../../package.json';
 import { processAudio } from '008Q';
 
+const launchWorker = url => {
+  return new Worker(new URL(url, import.meta.url), {
+    type: 'module'
+  });
+};
+
 class Phone extends React.Component {
   constructor(props) {
     super(props);
@@ -47,13 +53,23 @@ class Phone extends React.Component {
       ...props
     };
 
-    this.qworker = new Worker(new URL('../../008QWorker.js', import.meta.url), {
-      type: 'module'
+    this.qworkerTTS = launchWorker('../../008QWorkerTTS.js');
+    this.qworkerLLM = launchWorker('../../008QWorkerLLM.js');
+
+    this.qworkerTTS.addEventListener('message', ({ data }) => {
+      this.emit({ type: 'phone:transcript', data });
+      this.qworkerLLM.postMessage(data);
     });
 
-    this.qworker.addEventListener('message', ({ data }) => {
-      this.emit({ type: 'phone:transcript', data });
+    this.qworkerLLM.addEventListener('message', ({ data }) => {
+      this.emit({ type: 'phone:summarization', data });
     });
+
+    setTimeout(() => {
+      console.log('sending...', this.qworkerTTS);
+      this.qworkerTTS.postMessage({ id: 'test' });
+    }, 5 * 1000);
+    console.log('shouldbe!');
   }
 
   emit = ({ type, data = {} }) => {
@@ -476,7 +492,7 @@ class Phone extends React.Component {
 
             if (webhooks?.length) {
               const wav = async input => (await processAudio({ input })).wav;
-              this.qworker.postMessage({
+              this.qworkerTTS.postMessage({
                 id,
                 audio: {
                   remote: await wav(chunksIn),
