@@ -403,6 +403,16 @@ export const SettingsScreen = () => {
         <WebhooksList data={webhooks} />
       </View>
     ),
+    q: (
+      <View style={{ flex: 1 }}>
+        <Title>008Q</Title>
+        <View>
+          <audio id="audioPlayer" controls src="carrental.wav" style={{ width: '100%' }}></audio>
+        </View>
+       
+        
+      </View>
+    ),
   };
   
   const opts = [
@@ -410,7 +420,8 @@ export const SettingsScreen = () => {
     { option: 'connection', icon: 'settings' },
     { option: 'devices', icon: 'headphones' },
     { option: 'contacts', icon: 'users' },
-    { option: 'webhooks', icon: 'share2' }
+    { option: 'webhooks', icon: 'share2' },
+    // { option: 'q', icon: 'share2' }
   ]
 
   return (

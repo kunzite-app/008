@@ -34,9 +34,13 @@ import {
 export const Icon = ({ icon, size = 16 }) => {
   if (icon === 'unanchor') 
     return <img width={size} height={size} src="assets/icons/unanchor.svg" />
+  
+    if (icon === 'q')
+      return <img width={size} height={size} src="assets/icons/unanchor.svg" />
 } 
 
 const UnanchorIcon = () => <Icon icon="unanchor" />;
+const QIcon = () => <Icon icon="q" />;
 
 export {
   UserIcon,
@@ -54,7 +58,6 @@ export {
   PhoneOffIcon,
   PhoneIncomingIcon,
   PhoneOutgoingIcon,
-  UnanchorIcon,
   SaveIcon,
   LoginIcon,
   ResetIcon,
@@ -69,5 +72,8 @@ export {
   EyeIcon,
   SearchIcon,
   ChevronRightIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
+
+  UnanchorIcon,
+  QIcon,
 };

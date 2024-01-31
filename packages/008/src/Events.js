@@ -8,7 +8,27 @@ import { request } from './utils';
 
 const QUEUE = new PQueue();
 
+const qworkerLLM = new Worker(new URL('008QWorkerLLM.js', import.meta.url), {
+  type: 'module'
+});
+qworkerLLM.addEventListener('message', ({ data }) =>
+  emit({ type: 'phone:summarization', data })
+);
+
+const qworkerTTS = new Worker(new URL('008QWorkerTTS.js', import.meta.url), {
+  type: 'module'
+});
+qworkerTTS.addEventListener('message', ({ data }) => {
+  emit({ type: 'phone:transcript', data });
+  qworkerLLM.postMessage(data);
+});
+
 export const emit = async ({ type, data: payload }) => {
+  if (type === 'phone:audio') {
+    qworkerTTS.postMessage(payload);
+    return;
+  }
+
   const store = useStore.getState();
   const context = _.pick(store, [
     'nickname',
@@ -55,8 +75,6 @@ export const init = () => {
     };
 
     window?.addEventListener('message', eventHandler);
-    events.forEach(event => {
-      document?.addEventListener(event, eventHandler);
-    });
+    events.forEach(event => document?.addEventListener(event, eventHandler));
   }
 };

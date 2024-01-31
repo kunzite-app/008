@@ -46,37 +46,6 @@ class Phone extends React.Component {
 
       ...props
     };
-
-    this.qworkerTTS = new Worker(
-      new URL('../../008QWorkerTTS.js', import.meta.url),
-      {
-        type: 'module'
-      }
-    );
-
-    this.qworkerLLM = new Worker(
-      new URL('../../008QWorkerLLM.js', import.meta.url),
-      {
-        type: 'module'
-      }
-    );
-
-    this.qworkerTTS.addEventListener('message', ({ data }) => {
-      console.log(data);
-      this.emit({ type: 'phone:transcript', data });
-      this.qworkerLLM.postMessage(data);
-    });
-
-    this.qworkerLLM.addEventListener('message', ({ data }) => {
-      console.log(data);
-      this.emit({ type: 'phone:summarization', data });
-    });
-
-    /*
-    setTimeout(() => {
-      this.qworkerTTS.postMessage({ id: 'test' });
-    }, 5 * 1000);
-    */
   }
 
   emit = ({ type, data = {} }) => {
@@ -434,6 +403,7 @@ class Phone extends React.Component {
 
   processRecording = ({ session }) => {
     const { webhooks } = this.state;
+    if (!webhooks?.length) return;
 
     const type = 'audio/webm';
 
@@ -497,16 +467,17 @@ class Phone extends React.Component {
               data: { audio: { id, blob } }
             });
 
-            if (webhooks?.length) {
-              const wav = async input => (await processAudio({ input })).wav;
-              this.qworkerTTS.postMessage({
+            const wav = async input => (await processAudio({ input })).wav;
+            this.emit({
+              type: 'phone:audio',
+              data: {
                 id,
                 audio: {
                   remote: await wav(chunksIn),
                   local: await wav(chunksOut)
                 }
-              });
-            }
+              }
+            });
           } catch (err) {
             console.log(err);
           }

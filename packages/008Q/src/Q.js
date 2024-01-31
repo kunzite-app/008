@@ -82,7 +82,7 @@ export const transcript = async ({
   wav,
   bin = `${S3Q}/ttsb.bin`,
   data = `${S3Q}/tts.json`,
-  onProgress,
+  onProgress = (segment) => console.log(segment),
   onInitProgress = (report) => console.log(report),
 }) => {
   const inputs = new Uint8Array(wav);
@@ -96,20 +96,29 @@ export const transcript = async ({
   const builder = new whisper.SessionBuilder();
   const session = await builder.setModel(model).setTokenizer(tokenizer).build();
 
-  let segments = [];
-  if (onProgress) {
-    await session.stream(inputs, false, (segment) => {
-      onProgress?.(segment);
-      segments.push(segments);
-    });
-  } else {
-    ({ segments } = await session.run(inputs));
-  }
+  const segments = [];
+  await session.stream(inputs, false, (segment) => {
+    onProgress?.(segment);
+    segments.push(segment);
+  });
   console.warn = consolewarn;
 
   session.free();
 
   return segments;
+};
+
+export const tts = async ({ audio }) => {
+  const ttschannel = async (channel, wav) => {
+    if (!wav) return [];
+
+    return (await transcript({ wav })).map((item) => ({ ...item, channel }));
+  };
+  const remote = await ttschannel("remote", audio.remote);
+  const local = await ttschannel("local", audio.local);
+  const merged = [...remote, ...local].sort((a, b) => a.start - b.start);
+
+  return merged;
 };
 
 export const onnxSession = ({
@@ -194,11 +203,10 @@ const llmconf = {
 };
 
 let LLM;
-
 export const chat = async ({
   prompt,
   chatOpts,
-  model = "7B",
+  model = "3B",
   onInitProgress = (report) => console.log(report),
   onProgress = (step, message) => console.log(step, message),
 }) => {
@@ -236,13 +244,18 @@ export const summarize = async ({
   };
 
   let txt = "";
-  transcription.forEach(({ text }) => {
-    txt += `${text}\n`;
+  let diarized = false;
+  transcription.forEach(({ channel, text }) => {
+    diarized = diarized || channel;
+    txt += `${channel ? `${channel}: ` : ""}${text}\n`;
   });
 
-  const prompt = `Summarize the following conversation into a concise abstract paragraph using the same original language. Avoid unnecessary details or tangential points.
+  const promptDiarized = diarized
+    ? " If possible the conversation will contain who is the speaker as Local, Remote or SpeakerX where X is a number."
+    : "";
+  const prompt = `Summarize the following conversation into a concise abstract paragraph. Avoid unnecessary details or tangential points.${promptDiarized}
 
-${txt}
-  `;
+${txt}\n`;
+
   return await chat({ prompt, chatOpts, model, onInitProgress, onProgress });
 };
