@@ -189,6 +189,12 @@ export const vad = async ({ audio, size = 1536, session }) => {
 const llmconf = {
   model_list: [
     {
+      local_id: "1_6B_dev",
+      model_url: "https://huggingface.co/OO8/1_6B_dev/resolve/main/",
+      model_lib_url:
+        "https://huggingface.co/OO8/1_6B_dev/resolve/main/webgpu.wasm",
+    },
+    {
       local_id: "3B",
       model_url: "https://huggingface.co/OO8/3B/resolve/main/",
       model_lib_url: "https://huggingface.co/OO8/3B/resolve/main/webgpu.wasm",
