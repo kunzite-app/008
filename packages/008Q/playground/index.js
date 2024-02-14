@@ -42,8 +42,7 @@ const transcribe = async ({ audio }) => {
       progress * 100
     )}%`;
   };
-  const model = "1_6B_dev";
-  const summa = await summarize({ transcription, onInitProgress, model });
+  const summa = await summarize({ transcription, onInitProgress });
   summaElem.innerHTML = summa;
 };
 

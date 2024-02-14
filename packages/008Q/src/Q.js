@@ -190,9 +190,8 @@ const llmconf = {
   model_list: [
     {
       local_id: "1_6B_dev",
-      model_url: "https://huggingface.co/OO8/1_6B_dev/resolve/main/",
-      model_lib_url:
-        "https://huggingface.co/OO8/1_6B_dev/resolve/main/webgpu.wasm",
+      model_url: "http://localhost:8082/1_6B_dev/",
+      model_lib_url: "http://localhost:8082/1_6B_dev/webgpu.wasm",
     },
     {
       local_id: "3B",
