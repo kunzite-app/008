@@ -11,6 +11,6 @@ self.addEventListener('message', async ({ data }) => {
     console.log('[008Q] Transcribing...');
     const transcript = await tts({ audio });
 
-    self.postMessage({ id, transcript });
+    self.postMessage({ id, ...transcript });
   });
 });

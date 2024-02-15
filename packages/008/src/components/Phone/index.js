@@ -464,7 +464,7 @@ class Phone extends React.Component {
             const blob = await chunksBlob(chunks);
             this.emit({
               type: 'phone:recording',
-              data: { audio: { id, blob } }
+              data: { id, audio: { blob } }
             });
 
             const wav = async input => (await processAudio({ input })).wav;

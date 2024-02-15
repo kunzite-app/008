@@ -220,8 +220,8 @@ Triggered upon the recording is ready. It's sent as a base64 encoded webm file.
 {
   "type": "phone:recording",
   "data": {
+    "id": "uuid", // the call id
     "audio": {
-      "id": "uuid", // the call id
       "blob": "base64 webm audio file"
     },
     "context": {}
@@ -240,17 +240,31 @@ Triggered upon the transcription is ready.
 {
   "type": "phone:transcript",
   "data": {
-    "trancript": {
-      "id": "uuid", // the call id
-      "segments": [
-        {
-          "channel": "remote|local",
-          "start": 0,
-          "end": 0,
-          "text": ""
-        }
-      ]
-    },
+    "id": "uuid", // the call id
+    "segments": [
+      {
+        "channel": "remote|local",
+        "start": 0,
+        "end": 0,
+        "text": ""
+      }
+    ],
+    "context": {}
+  }
+}
+```
+
+<details>
+  <summary>phone:summarization</summary>
+
+Triggered upon the summarization is ready.
+
+```json
+{
+  "type": "phone:summarization",
+  "data": {
+    "id": "uuid", // the call id
+    "summarization": "text",
     "context": {}
   }
 }
