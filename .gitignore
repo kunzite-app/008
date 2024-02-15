@@ -31,3 +31,4 @@ packages/008desktop/build/*
 !packages/008desktop/build/
 !packages/008desktop/build/entitlements.mac.plist
 packages/008Q/**/models
+!packages/web-llm/lib

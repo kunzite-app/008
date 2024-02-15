@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 
 import { Screen } from './Screen';
-import { COLORS, Status , ButtonIcon, HRule, Select, CancelAccept, Button, Text } from '../components/Basics';
+import { COLORS, Status , ButtonIcon, HRule, Select, CancelAccept, Button, Text, Switch } from '../components/Basics';
 import { FormRow, InputRow } from '../components/Forms';
 import {
   AnchorIcon,
@@ -319,6 +319,9 @@ export const SettingsScreen = () => {
     settingsTab = 'user',
 
     webhooks,
+
+    qTts,
+    qSummarization
   } = store;
 
   const [option, setOption] = useState(settingsTab);
@@ -403,6 +406,22 @@ export const SettingsScreen = () => {
         <WebhooksList data={webhooks} />
       </View>
     ),
+    q: (
+      <View style={{ flex: 1 }}>
+        <Title>008Q</Title>
+        <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
+          <Text>Transcribe</Text>
+          <Switch value={qTts} onValueChange={() => {
+            const value = !qTts;
+            value ? setSettings({ qTts: value }) : setSettings({ qTts: false, qSummarization: false })
+          }} />
+        </View>
+        <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
+        <Text>Summarize</Text>
+        <Switch value={qSummarization} onValueChange={() => setSettings({ qSummarization: !qSummarization })} />
+        </View>
+      </View>
+    ),
   };
   
   const opts = [
@@ -410,7 +429,8 @@ export const SettingsScreen = () => {
     { option: 'connection', icon: 'settings' },
     { option: 'devices', icon: 'headphones' },
     { option: 'contacts', icon: 'users' },
-    { option: 'webhooks', icon: 'share2' }
+    { option: 'webhooks', icon: 'share2' },
+    { option: 'q', icon: 'q' }
   ]
 
   return (

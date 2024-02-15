@@ -1,20 +1,46 @@
 import * as whisper from "whisper-webgpu";
-import { InferenceSession, Tensor } from "onnxruntime-web/webgpu";
 import toWav from "audiobuffer-to-wav";
 
-const CACHE = {};
+import { InferenceSession, Tensor } from "onnxruntime-web/webgpu";
+import * as webllm from "@mlc-ai/web-llm";
+
 const S3Q = "https://kunziteq.s3.gra.perf.cloud.ovh.net";
 
-export const fetchBytes = async ({ url, cache = true }) => {
-  if (!CACHE[url]) {
-    const response = await fetch(url);
-    const buffer = await response.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
+export const fetchBytes = async ({ url, cache = true, onProgress }) => {
+  const cache_ = await caches.open("008Q");
+  const response = await cache_.match(url);
 
-    if (cache) CACHE[url] = bytes;
+  if (cache && response) {
+    const buffer = await response.arrayBuffer();
+    return new Uint8Array(buffer);
   }
 
-  return CACHE[url];
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+
+    request.onload = async () => {
+      const buffer = request.response;
+      const bytes = new Uint8Array(buffer);
+
+      const response = new Response(bytes);
+      await cache_.put(url, response.clone());
+
+      resolve(bytes);
+    };
+
+    request.onerror = () => reject(request.statusText);
+
+    request.onprogress = (ev = {}) => {
+      const { lengthComputable, loaded, total } = ev;
+      if (lengthComputable) {
+        onProgress?.({ progress: loaded / total });
+      }
+    };
+
+    request.send();
+  });
 };
 
 export const processAudio = async ({ input }) => {
@@ -56,12 +82,13 @@ export const transcript = async ({
   wav,
   bin = `${S3Q}/ttsb.bin`,
   data = `${S3Q}/tts.json`,
-  onStream,
+  onProgress = (segment) => console.log(segment),
+  onInitProgress = (report) => console.log(report),
 }) => {
   const inputs = new Uint8Array(wav);
 
   const tokenizer = await fetchBytes({ url: data });
-  const model = await fetchBytes({ url: bin });
+  const model = await fetchBytes({ url: bin, onProgress: onInitProgress });
 
   const consolewarn = console.warn;
   console.warn = () => {};
@@ -69,20 +96,29 @@ export const transcript = async ({
   const builder = new whisper.SessionBuilder();
   const session = await builder.setModel(model).setTokenizer(tokenizer).build();
 
-  let segments = [];
-  if (onStream) {
-    await session.stream(inputs, false, (segment) => {
-      onStream?.(segment);
-      segments.push(segments);
-    });
-  } else {
-    ({ segments } = await session.run(inputs));
-  }
+  const segments = [];
+  await session.stream(inputs, false, (segment) => {
+    onProgress?.(segment);
+    segments.push(segment);
+  });
   console.warn = consolewarn;
 
   session.free();
 
   return segments;
+};
+
+export const tts = async ({ audio }) => {
+  const ttschannel = async (channel, wav) => {
+    if (!wav) return [];
+
+    return (await transcript({ wav })).map((item) => ({ ...item, channel }));
+  };
+  const remote = await ttschannel("remote", audio.remote);
+  const local = await ttschannel("local", audio.local);
+  const merged = [...remote, ...local].sort((a, b) => a.start - b.start);
+
+  return merged;
 };
 
 export const onnxSession = ({
@@ -148,4 +184,83 @@ export const vad = async ({ audio, size = 1536, session }) => {
   }
 
   return probs.slice(0, totalSamples);
+};
+
+const llmconf = {
+  model_list: [
+    {
+      local_id: "1_6B_dev",
+      model_url: "http://localhost:8082/1_6B_dev/",
+      model_lib_url: "http://localhost:8082/1_6B_dev/webgpu.wasm",
+    },
+    {
+      local_id: "3B",
+      model_url: "https://huggingface.co/OO8/3B/resolve/main/",
+      model_lib_url: "https://huggingface.co/OO8/3B/resolve/main/webgpu.wasm",
+    },
+    {
+      local_id: "7B",
+      model_url: "https://huggingface.co/OO8/7B/resolve/main/",
+      model_lib_url: "https://huggingface.co/OO8/7B/resolve/main/webgpu.wasm",
+      required_features: ["shader-f16"],
+    },
+  ],
+};
+
+let LLM;
+export const chat = async ({
+  prompt,
+  chatOpts,
+  model = "3B",
+  onInitProgress = (report) => console.log(report),
+  onProgress = (step, message) => console.log(step, message),
+}) => {
+  let chat = LLM;
+
+  if (!chat) {
+    chat = new webllm.ChatModule();
+    chat.setInitProgressCallback(onInitProgress);
+    await chat.reload(model, chatOpts, llmconf);
+
+    LLM = chat;
+  } else {
+    chat.interruptGenerate();
+  }
+
+  const response = await chat.generate(prompt, onProgress);
+  chat.resetChat();
+
+  return response;
+};
+
+export const summarize = async ({
+  transcription,
+  chatOpts = {},
+  model,
+  onInitProgress,
+  onProgress,
+}) => {
+  chatOpts = {
+    temperature: 0.2,
+    conv_config: {
+      system: "You are a helpful assistant named 008.",
+    },
+    ...chatOpts,
+  };
+
+  let txt = "";
+  let diarized = false;
+  transcription.forEach(({ channel, text }) => {
+    diarized = diarized || channel;
+    txt += `${channel ? `${channel}: ` : ""}${text}\n`;
+  });
+
+  const promptDiarized = diarized
+    ? " If possible the conversation will contain who is the speaker as Local, Remote or SpeakerX where X is a number."
+    : "";
+  const prompt = `Summarize the following conversation into a concise abstract paragraph. Avoid unnecessary details or tangential points.${promptDiarized}
+
+${txt}\n`;
+
+  return await chat({ prompt, chatOpts, model, onInitProgress, onProgress });
 };

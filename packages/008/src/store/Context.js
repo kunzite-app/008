@@ -85,6 +85,9 @@ const DEFAULTS = {
 
   webhooks: [],
 
+  qTts: true,
+  qSummarization: false,
+
   size: { width: 340, height: 460 }
 };
 

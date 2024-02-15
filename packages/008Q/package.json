@@ -1,7 +1,7 @@
 {
   "name": "008Q",
   "version": "1.1.5",
-  "main": "dist/index.js",
+  "main": "index.js",
   "license": "AGPL-3.0-only",
   "private": true,
   "author": {
@@ -16,13 +16,12 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
+    "@mlc-ai/web-llm": "*",
     "audiobuffer-to-wav": "^1.0.0",
     "onnxruntime-web": "^1.16.3",
     "whisper-webgpu": "^0.8.0"
   },
   "devDependencies": {
-    "webpack": "^5.89.0",
-    "webpack-cli": "^5.1.4",
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",
@@ -32,6 +31,8 @@
     "eslint-plugin-prettier": "^3.1.2",
     "eslint-plugin-promise": "^6.0.1",
     "eslint-plugin-standard": "^4.0.1",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
   }
 }
