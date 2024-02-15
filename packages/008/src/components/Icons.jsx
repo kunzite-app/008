@@ -35,12 +35,12 @@ export const Icon = ({ icon, size = 16 }) => {
   if (icon === 'unanchor') 
     return <img width={size} height={size} src="assets/icons/unanchor.svg" />
   
-    if (icon === 'q')
-      return <img width={size} height={size} src="assets/icons/unanchor.svg" />
+  if (icon === 'q')
+    return <img width={size} height={size} src="assets/icons/008.svg" />
 } 
 
-const UnanchorIcon = () => <Icon icon="unanchor" />;
-const QIcon = () => <Icon icon="q" />;
+const UnanchorIcon = (props) => <Icon {...props} icon="unanchor" />;
+const QIcon = (props) => <Icon {...props} icon="q" />;
 
 export {
   UserIcon,

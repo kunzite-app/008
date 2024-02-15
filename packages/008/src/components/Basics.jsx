@@ -6,6 +6,7 @@ import {
   TextInput as RNTextInput, 
   TouchableOpacity, 
   View, 
+  Switch as RNSwitch
 } from 'react-native';
 
 import {
@@ -32,7 +33,8 @@ import {
   PhoneIncomingIcon,
   PhoneOutgoingIcon,
   SearchIcon,
-  EyeIcon
+  EyeIcon,
+  QIcon,
 } from './Icons';
 
 import SelectDropdown from 'react-native-select-dropdown';
@@ -177,6 +179,7 @@ export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
   if (icon === 'x') return <XIcon { ...styling } />;
   if (icon === 'eye') return <EyeIcon { ...styling } />;
   if (icon === 'search') return <SearchIcon { ...styling } />;
+  if (icon === 'q') return <QIcon { ...styling } />;
 }
 
 export const ButtonIcon = ({ children, icon, onClick, style, size = 18, color }) => {
@@ -194,6 +197,8 @@ export const ButtonIcon = ({ children, icon, onClick, style, size = 18, color })
 
   )
 };
+
+export const Switch = (props) =>  <RNSwitch activeTrackColor={COLORS.borderColor} activeThumbColor={COLORS.primary} {...props} />;
 
 export const RoundIconButton = ({ size = 30, color, icon, iconSize, iconColor, onClick, style }) => {
   return (

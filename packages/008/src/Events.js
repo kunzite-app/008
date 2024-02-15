@@ -8,6 +8,7 @@ import { request } from './utils';
 
 const QUEUE = new PQueue();
 
+let qLLMEnabled = false;
 const qworkerLLM = new Worker(new URL('008QWorkerLLM.js', import.meta.url), {
   type: 'module'
 });
@@ -15,16 +16,18 @@ qworkerLLM.addEventListener('message', ({ data }) =>
   emit({ type: 'phone:summarization', data })
 );
 
+let qTTSEnabled = false;
 const qworkerTTS = new Worker(new URL('008QWorkerTTS.js', import.meta.url), {
   type: 'module'
 });
 qworkerTTS.addEventListener('message', ({ data }) => {
   emit({ type: 'phone:transcript', data });
-  qworkerLLM.postMessage(data);
+
+  if (qLLMEnabled) qworkerLLM.postMessage(data);
 });
 
 export const emit = async ({ type, data: payload }) => {
-  if (type === 'phone:audio') {
+  if (type === 'phone:audio' && qTTSEnabled) {
     qworkerTTS.postMessage(payload);
     return;
   }
@@ -53,10 +56,24 @@ export const emit = async ({ type, data: payload }) => {
 
 export const init = () => {
   const store = useStore.getState();
+  qTTSEnabled = store.qTts;
+  qLLMEnabled = store.qSummarization;
 
   useStore.subscribe(
     state => state.status,
     status => emit({ type: 'status:change', data: { status } })
+  );
+
+  useStore.subscribe(
+    state => state.qTts,
+    value => (qTTSEnabled = value)
+  );
+
+  useStore.subscribe(
+    state => state.qSummarization,
+    value => {
+      qLLMEnabled = value;
+    }
   );
 
   if (Platform.OS === 'web') {
