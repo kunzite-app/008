@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
 import { Screen } from './Screen';
-import { AudioPlayer } from '../components/Audioplayer';
+import { Player } from '../components/Player';
 import { COLORS, CallIcon, CancelAccept, CancelAcceptCall, Link, RoundIconButton, Text } from '../components/Basics';
 import { DialGrid } from '../components/Dialer';
 import { useStore } from '../store/Context';
@@ -80,6 +80,7 @@ export const SessionScreen = ({
     muteHandler();
     muteVideoHandler();
   });
+  
 
   const { cdr: { from, to, contact } } = session;
   const isVideo = session.isVideo();
@@ -87,7 +88,7 @@ export const SessionScreen = ({
 
   return (
     <Screen closeable={false} visible={visible}>
-      <AudioPlayer session={session} speaker={speaker} />
+      <Player stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
 
       <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute' }}>
         <View

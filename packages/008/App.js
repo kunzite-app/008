@@ -13,8 +13,6 @@ import { Container } from './src/components/Container';
 import { SettingsScreen, PhoneScreen } from './src/screens';
 import { ContextProvider, useStore } from './src/store/Context';
 
-import './src/SessionExtend';
-
 const reactPlugin = new ReactPlugin();
 const appInsights = new ApplicationInsights({
   config: {

@@ -4,6 +4,8 @@ import { View } from 'react-native';
 import _ from 'lodash';
 import { UA } from 'sip.js';
 
+import { processAudio } from '008Q';
+
 import {
   RING_TONE,
   RING_BACK,
@@ -19,11 +21,12 @@ import { SessionScreen } from '../../screens/SessionScreen';
 
 import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
-import { emit } from '../../Events';
+import { emit } from '../../store/Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
 
 import { name as packageName } from '../../../package.json';
-import { processAudio } from '008Q';
+
+const USER_AGENT = '008 Softphone';
 
 class Phone extends React.Component {
   constructor(props) {
@@ -95,7 +98,7 @@ class Phone extends React.Component {
     emit({ type, data });
   };
 
-  set_events = () => {
+  click2CallHandler = () => {
     document?.addEventListener('click2call', ({ detail: data }) => {
       let { number } = data;
 
@@ -111,31 +114,24 @@ class Phone extends React.Component {
     });
   };
 
-  set_network_handler = () => {
+  networkHandler = () => {
     window?.addEventListener('offline', () =>
       this.setState({ network: false })
     );
-
     window?.addEventListener('online', () => this.setState({ network: true }));
+
+    this.networkWatcher = setInterval(() => {
+      const { network, session } = this.state;
+      if (!network && session) play_failure();
+    }, 5 * 1000);
   };
 
-  set_ua_daemon = () => {
-    if (this.ua) {
-      this.ua.stop();
-      clearInterval(this.connWatcher);
-      clearInterval(this.networkWatcher);
-    }
-
+  startUADaemon = () => {
     this.set_ua();
 
     this.connWatcher = setInterval(() => {
       const { status } = this.state;
       if (!this.ua?.isRegistered() && status !== 'offline') this.set_ua();
-    }, 5 * 1000);
-
-    this.networkWatcher = setInterval(() => {
-      const { network, session } = this.state;
-      if (!network && session) play_failure();
     }, 5 * 1000);
   };
 
@@ -146,7 +142,7 @@ class Phone extends React.Component {
       sipPassword,
       wsUri,
       status,
-      userAgent = '008 Softphone'
+      userAgent = USER_AGENT
     } = this.state;
 
     this.ua?.stop();
@@ -236,7 +232,7 @@ class Phone extends React.Component {
     const { session, microphone } = this.state;
     if (session?.hasAnswer) return;
 
-    const video = session.request?.body?.includes('m=video');
+    const video = session.isVideo();
     session?.accept({
       sessionDescriptionHandlerOptions: {
         constraints: {
@@ -581,9 +577,9 @@ class Phone extends React.Component {
       });
     });
 
-    this.set_events();
-    this.set_network_handler();
-    this.set_ua_daemon();
+    this.click2CallHandler();
+    this.networkHandler();
+    this.startUADaemon();
   };
 
   componentWillUnmount() {

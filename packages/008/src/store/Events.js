@@ -3,13 +3,13 @@ import { Platform } from 'react-native';
 import PQueue from 'p-queue';
 import _ from 'lodash';
 
-import { useStore } from './store/Context';
-import { request } from './utils';
+import { useStore } from './Context';
+import { request } from '../utils';
 
 const QUEUE = new PQueue();
 
 let qLLMEnabled = false;
-const qworkerLLM = new Worker(new URL('008QWorkerLLM.js', import.meta.url), {
+const qworkerLLM = new Worker(new URL('../008QWorkerLLM.js', import.meta.url), {
   type: 'module'
 });
 qworkerLLM.addEventListener('message', ({ data }) =>
@@ -17,7 +17,7 @@ qworkerLLM.addEventListener('message', ({ data }) =>
 );
 
 let qTTSEnabled = false;
-const qworkerTTS = new Worker(new URL('008QWorkerTTS.js', import.meta.url), {
+const qworkerTTS = new Worker(new URL('../008QWorkerTTS.js', import.meta.url), {
   type: 'module'
 });
 qworkerTTS.addEventListener('message', ({ data }) => {
