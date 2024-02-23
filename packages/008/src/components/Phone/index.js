@@ -327,6 +327,7 @@ class Phone extends React.Component {
             this.emit({ type: 'phone:accepted', data: { cdr } });
             break;
           case SessionState.Terminated:
+            console.log('heree!!!!');
             this.reset();
             this.emit({ type: 'phone:terminated', data: { cdr } });
             break;
@@ -399,41 +400,51 @@ class Phone extends React.Component {
       };
 
       if (blind) {
-        session.refer(target, payload);
+        session.refer(target /*payload*/);
+        // TODO: why do I need to bye here?
+        // session.bye();
         return;
       }
 
-      const sessiont = this.ua.invite(target, payload);
+      const sessiont = new Inviter(this.ua, target, payload);
 
       const cdr = new Cdr({ session: sessiont });
-      cdr.setContact(
-        this.context.contacts().contact_by_phone({ phone: cdr.to })
-      );
+      const contact = this.context
+        .contacts()
+        .contact_by_phone({ phone: cdr.to });
+      cdr.setContact(contact);
       sessiont.cdr = cdr;
 
-      sessiont.on('progress', () => {
-        RING_BACK.play();
+      sessiont.stateChange.addListener(state => {
+        switch (state) {
+          case SessionState.Established:
+            RING_BACK.stop();
+            this.setState({ rand: genId() });
+            break;
+          case SessionState.Terminated:
+            RING_BACK.stop();
+
+            this.setState({ sessiont: null }, () => {
+              try {
+                session?.unhold();
+              } catch (err) {
+                this.reset();
+              }
+            });
+        }
       });
 
-      sessiont.on('accepted', () => {
-        RING_BACK.stop();
-        this.setState({ rand: genId() });
-      });
-
-      sessiont.on('terminated', (_, cause) => {
-        RING_BACK.stop();
-
-        this.setState({ sessiont: null }, () => {
-          try {
-            session?.unhold();
-          } catch (err) {
-            this.reset(cause);
+      RING_BACK.play();
+      sessiont.invite({
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
           }
-        });
-      });
-
-      sessiont.on('failed', message => {
-        play_failure(message);
+        },
+        requestDelegate: {
+          onReject: () => play_failure({ statusCode: 486 })
+        }
       });
 
       this.setState({ sessiont });
@@ -713,6 +724,11 @@ class Phone extends React.Component {
       });
     };
 
+    const transferConfirmHandler = () => {
+      session.refer(sessiont);
+      session.bye();
+    };
+
     const onNumberChangeHandler = number_out =>
       this.context.setSettings({ number_out });
 
@@ -770,7 +786,7 @@ class Phone extends React.Component {
           session={sessiont}
           visible={!_.isEmpty(sessiont)}
           onCancel={transferOnCancelHandler}
-          onAccept={transferHandler}
+          onAccept={transferConfirmHandler}
           isTransfer={true}
         />
 
