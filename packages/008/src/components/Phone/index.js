@@ -13,13 +13,7 @@ import {
   SessionState
 } from '../../Sip';
 
-import {
-  RING_TONE,
-  RING_BACK,
-  NOTIFICATION_TONE,
-  play_failure,
-  play_hangup
-} from '../../Sound';
+import { RING_TONE, RING_BACK, play_failure, play_hangup } from '../../Sound';
 
 import { Dialer } from '../Dialer';
 import { Header } from './Components';
@@ -184,8 +178,6 @@ class Phone extends React.Component {
               switch (state) {
                 case SessionState.Established:
                   RING_TONE.stop();
-                  NOTIFICATION_TONE.stop();
-
                   this.setState({ rand: genId() });
                   this.emit({ type: 'phone:accepted', data: { cdr } });
                   break;
@@ -198,15 +190,12 @@ class Phone extends React.Component {
 
             this.emit({ type: 'phone:ringing', data: { cdr } });
 
+            RING_TONE.play();
             const { allowAutoanswer, autoanswer } = this.state;
             if (allowAutoanswer || session.autoanswer()) {
-              NOTIFICATION_TONE.play();
-
               const sessionSecs = parseInt(session.autoanswer());
               await sleep(!isNaN(sessionSecs) ? sessionSecs : autoanswer);
               if (session.state === SessionState.Establishing) session.accept();
-            } else {
-              RING_TONE.play();
             }
           });
         },
@@ -440,7 +429,6 @@ class Phone extends React.Component {
 
     RING_TONE.stop();
     RING_BACK.stop();
-    NOTIFICATION_TONE.stop();
 
     if (session && !(session instanceof Inviter)) play_hangup();
 
@@ -563,7 +551,6 @@ class Phone extends React.Component {
 
     if (prevState.ringer !== state.ringer) {
       RING_TONE.setDevice(state.ringer);
-      NOTIFICATION_TONE.setDevice(state.ringer);
     }
   }
 

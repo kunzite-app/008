@@ -73,11 +73,6 @@ export const REJECT_TONE = new Sound({
   loop: true
 });
 
-export const NOTIFICATION_TONE = new Sound({
-  media: `notification`,
-  loop: true
-});
-
 export const play_failure = (message = {}) => {
   const { statusCode } = message;
   REJECT_TONE.play();
