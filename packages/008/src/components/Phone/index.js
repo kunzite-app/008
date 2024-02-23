@@ -2,7 +2,13 @@ import React from 'react';
 import { View } from 'react-native';
 
 import _ from 'lodash';
-import { UA } from 'sip.js';
+import {
+  UserAgent,
+  Registerer,
+  Inviter,
+  RegistererState,
+  SessionState
+} from 'sip.js';
 
 import { processAudio } from '008Q';
 
@@ -25,6 +31,7 @@ import { emit } from '../../store/Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
 
 import { name as packageName } from '../../../package.json';
+import { number } from 'prop-types';
 
 const USER_AGENT = '008 Softphone';
 
@@ -131,7 +138,7 @@ class Phone extends React.Component {
 
     this.connWatcher = setInterval(() => {
       const { status } = this.state;
-      if (!this.ua?.isRegistered() && status !== 'offline') this.set_ua();
+      if (!this.ua?.isConnected() && status !== 'offline') this.ua?.reconnect();
     }, 5 * 1000);
   };
 
@@ -147,91 +154,111 @@ class Phone extends React.Component {
 
     this.ua?.stop();
 
-    if (!wsUri?.length) return;
-
-    const register = status !== 'offline';
-    const ua = new UA({
-      uri: sipUri,
-      authorizationUser: sipUser,
-      password: sipPassword,
+    if (!wsUri?.length || !sipUri?.length) return;
+    console.log('uri', sipUri);
+    const ua = new UserAgent({
+      uri: UserAgent.makeURI(sipUri),
+      authorizationUsername: sipUser,
+      authorizationPassword: sipPassword,
       userAgentString: userAgent,
-      autostart: false,
-      register,
       transportOptions: {
-        wsServers: [wsUri],
-        traceSip: false,
-        connectionTimeout: 5,
-        reconnectionTimeout: 5,
-        maxReconnectionAttempts: 0
+        server: wsUri
+      },
+      delegate: {
+        onInvite: session => {
+          if (this.state.session?.id) {
+            session.reject();
+            return;
+          }
+
+          this.setState({ session }, async () => {
+            this.processRecording({ session });
+
+            const cdr = new Cdr({ session });
+            const contact = this.context
+              .contacts()
+              .contact_by_phone({ phone: cdr.from });
+            cdr.setContact(contact);
+            session.cdr = cdr;
+
+            session.stateChange.addListener(state => {
+              switch (state) {
+                case SessionState.Established:
+                  RING_TONE.stop();
+                  NOTIFICATION_TONE.stop();
+
+                  this.setState({ rand: genId() });
+                  this.emit({ type: 'phone:accepted', data: { cdr } });
+                  break;
+                case SessionState.Terminated:
+                  this.reset();
+                  this.emit({ type: 'phone:terminated', data: { cdr } });
+                  break;
+              }
+            });
+
+            this.emit({ type: 'phone:ringing', data: { cdr } });
+
+            const { allowAutoanswer, autoanswer } = this.state;
+            if (allowAutoanswer || session.autoanswer()) {
+              NOTIFICATION_TONE.play();
+
+              const sessionSecs = parseInt(session.autoanswer());
+              await sleep(!isNaN(sessionSecs) ? sessionSecs : autoanswer);
+              if (session.state === SessionState.Establishing) session.accept();
+            } else {
+              RING_TONE.play();
+            }
+          });
+        },
+        onConnect: () => {
+          console.log('Network connectivity established');
+          this.setState({ rand: genId() });
+        },
+        onDisconnect: error => {
+          console.log('Network error', error);
+
+          if (!error) console.log('UA stopped');
+
+          this.setState({ rand: genId() });
+        },
+        onMessage: message => {
+          console.log('MESSAGE received', message);
+          // message.accept();
+        },
+        onNotify: notification => {
+          console.log('NOTIFY received', notification);
+          // notification.accept();
+        },
+        onRefer: referral => {
+          console.log('REFER received', referral);
+          // referral.accept();
+        }
       }
     });
 
-    ua.on('transportCreated', transport => {
-      transport.on('disconnected', async () =>
-        this.setState({ rand: genId() })
-      );
-    });
+    if (status !== 'offline') {
+      await ua.start();
 
-    ['unregistered', 'registrationFailed', 'registered'].forEach(ev => {
-      ua.on(ev, () => this.setState({ rand: genId() }));
-    });
-
-    ua.on('invite', async session => {
-      if (this.state.session?.id) {
-        session.terminate();
-        return;
-      }
-
-      this.processRecording({ session });
-
-      const cdr = new Cdr({ session });
-      cdr.setContact(
-        this.context.contacts().contact_by_phone({ phone: cdr.from })
-      );
-      session.cdr = cdr;
-
-      session.on('accepted', () => {
-        RING_TONE.stop();
-        NOTIFICATION_TONE.stop();
-        this.setState({ rand: genId() });
-
-        this.emit({ type: 'phone:accepted', data: { cdr } });
-      });
-
-      session.on('terminated', (_, cause) => {
-        this.reset(cause);
-        this.emit({ type: 'phone:terminated', data: { cdr } });
-      });
-
-      session.on('failed', ev => {
-        play_failure();
-      });
-
-      this.setState({ session }, async () => {
-        const { allowAutoanswer, autoanswer } = this.state;
-
-        this.emit({ type: 'phone:ringing', data: { cdr } });
-
-        if (allowAutoanswer || session.autoanswer()) {
-          NOTIFICATION_TONE.play();
-
-          const sessionSecs = parseInt(session.autoanswer());
-          await sleep(!isNaN(sessionSecs) ? sessionSecs : autoanswer);
-          if (!session.hasAnswer && !session.endTime) session.accept();
-        } else {
-          RING_TONE.play();
+      const registerer = new Registerer(ua);
+      registerer.stateChange.addListener(state => {
+        switch (state) {
+          case RegistererState.Registered:
+          case RegistererState.Unregistered:
+          case RegistererState.Terminated:
+            console.log(state);
+            this.setState({ rand: genId() });
+            break;
         }
       });
-    });
+      await registerer.register();
+    }
 
-    ua.start();
     this.ua = ua;
   };
 
   answer = async () => {
     const { session, microphone } = this.state;
-    if (session?.hasAnswer) return;
-
     const video = session.isVideo();
     session?.accept({
       sessionDescriptionHandlerOptions: {
@@ -244,17 +271,24 @@ class Phone extends React.Component {
   };
 
   hangup = async () => {
-    try {
-      const { session } = this.state;
-      if (session?.endTime) return;
-      session.terminate();
-    } catch (err) {
-      this.reset();
+    const { session } = this.state;
+
+    switch (session.state) {
+      case SessionState.Initial:
+      case SessionState.Establishing:
+        session.isInbound() ? session.reject() : session.cancel();
+        break;
+      case SessionState.Established:
+        session.bye();
+        break;
     }
+
+    // TODO: check this
+    this.reset();
   };
 
   call = async (opts = {}) => {
-    const { dialer_number, number_out, microphone } = this.state;
+    const { dialer_number, number_out, microphone, sipUri } = this.state;
     const { number = dialer_number, extraHeaders = [], video = false } = opts;
 
     const identityHeaders = number_out
@@ -262,45 +296,61 @@ class Phone extends React.Component {
       : [];
 
     try {
-      const target = cleanPhoneNumber(number);
-      const session = this.ua.invite(target, {
-        extraHeaders: [...identityHeaders, ...extraHeaders],
-        sessionDescriptionHandlerOptions: {
-          constraints: {
-            audio: { deviceId: { ideal: microphone } },
-            video
-          }
-        }
+      const {
+        raw: { host, port, scheme }
+      } = UserAgent.makeURI(sipUri);
+      const clean = cleanPhoneNumber(number);
+      const target =
+        UserAgent.makeURI(clean) ||
+        UserAgent.makeURI(
+          `${scheme}:${clean}@${host}${port ? `:${port}` : ''}`
+        );
+      const session = new Inviter(this.ua, target, {
+        extraHeaders: [...identityHeaders, ...extraHeaders]
       });
 
       this.processRecording({ session });
 
       const cdr = new Cdr({ session });
-      cdr.setContact(
-        this.context.contacts().contact_by_phone({ phone: cdr.to })
-      );
+      const contact = this.context
+        .contacts()
+        .contact_by_phone({ phone: cdr.to });
+      cdr.setContact(contact);
       session.cdr = cdr;
 
-      session.on('accepted', () => {
-        RING_BACK.stop();
-        this.setState({ rand: genId() });
+      session.stateChange.addListener(state => {
+        switch (state) {
+          case SessionState.Established:
+            RING_BACK.stop();
+            this.setState({ rand: genId() });
 
-        this.emit({ type: 'phone:accepted', data: { cdr } });
+            this.emit({ type: 'phone:accepted', data: { cdr } });
+            break;
+          case SessionState.Terminated:
+            this.reset();
+            this.emit({ type: 'phone:terminated', data: { cdr } });
+            break;
+        }
       });
 
-      session.on('terminated', (_, cause) => {
-        this.reset(cause);
-        this.emit({ type: 'phone:terminated', data: { cdr } });
-      });
-
-      session.on('failed', message => {
-        play_failure(message);
+      session.invite({
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
+          }
+        },
+        requestDelegate: {
+          onReject: () => play_failure({ statusCode: 486 })
+        }
       });
 
       RING_BACK.play();
       this.emit({ type: 'phone:ringing', data: { cdr } });
       this.setState({ session });
-    } catch (_) {
+    } catch (err) {
+      console.error(err);
+
       play_failure();
       this.reset();
     }
@@ -313,7 +363,9 @@ class Phone extends React.Component {
         dialer_number,
         show_blindTransfer,
         microphone,
-        number_out
+        number_out,
+
+        sipUri
       } = this.state;
 
       const {
@@ -327,7 +379,15 @@ class Phone extends React.Component {
         ? [`P-Asserted-Identity:${number_out}`, `x-Number:${number_out}`]
         : [];
 
-      const target = cleanPhoneNumber(number);
+      const {
+        raw: { host, port, scheme }
+      } = UserAgent.makeURI(sipUri);
+      const clean = cleanPhoneNumber(number);
+      const target =
+        UserAgent.makeURI(clean) ||
+        UserAgent.makeURI(
+          `${scheme}:${clean}@${host}${port ? `:${port}` : ''}`
+        );
       const payload = {
         extraHeaders: [...indentityHeaders, ...extraHeaders],
         sessionDescriptionHandlerOptions: {
@@ -378,23 +438,23 @@ class Phone extends React.Component {
 
       this.setState({ sessiont });
     } catch (err) {
+      console.error(err);
       play_failure();
     }
   };
 
-  reset = cause => {
-    const { sessiont } = this.state;
-    try {
-      sessiont?.terminate();
-    } catch (err) {}
+  reset = () => {
+    const { session, sessiont } = this.state;
+    sessiont?.bye();
 
-    this.setState(this.defaults, () => {
-      RING_TONE.stop();
-      RING_BACK.stop();
-      NOTIFICATION_TONE.stop();
-    });
+    RING_TONE.stop();
+    RING_BACK.stop();
+    NOTIFICATION_TONE.stop();
 
-    if (cause === 'BYE') play_hangup();
+    // if (session && !(session instanceof Inviter))
+    // play_hangup();
+
+    this.setState(this.defaults);
   };
 
   processRecording = ({ session }) => {
@@ -420,74 +480,78 @@ class Phone extends React.Component {
     let recorderOut;
     const chunksOut = [];
 
-    session.on('accepted', async () => {
-      try {
-        const { peerConnection } = session.sessionDescriptionHandler;
-        const audioContext = new AudioContext();
-        const multi = audioContext.createMediaStreamDestination();
-
-        const addTracks = (tracks, stream, recorder, chunks) =>
-          tracks.forEach(({ track }) => {
-            stream.addTrack(track);
-
-            const src = audioContext.createMediaStreamSource(stream);
-            src.connect(multi);
-
-            recorder = new MediaRecorder(stream);
-            recorder.ondataavailable = ({ data }) => chunks.push(data);
-            recorder.start();
-            recorder.tsStart = Date.now();
-          });
-
-        addTracks(
-          peerConnection.getReceivers(),
-          streamIn,
-          recorderIn,
-          chunksIn
-        );
-        addTracks(
-          peerConnection.getSenders(),
-          streamOut,
-          recorderOut,
-          chunksOut
-        );
-
-        recorder = new MediaRecorder(multi.stream, { mimeType: type });
-        recorder.ondataavailable = ({ data }) => chunks.push(data);
-        recorder.onstop = async () => {
+    session.stateChange.addListener(state => {
+      switch (state) {
+        case SessionState.Established:
           try {
-            const id = session.cdr?.id;
-            const blob = await chunksBlob(chunks);
-            this.emit({
-              type: 'phone:recording',
-              data: { id, audio: { blob } }
-            });
+            const { peerConnection } = session.sessionDescriptionHandler;
+            const audioContext = new AudioContext();
+            const multi = audioContext.createMediaStreamDestination();
 
-            const wav = async input => (await processAudio({ input })).wav;
-            this.emit({
-              type: 'phone:audio',
-              data: {
-                id,
-                audio: {
-                  remote: await wav(chunksIn),
-                  local: await wav(chunksOut)
-                }
+            const addTracks = (tracks, stream, recorder, chunks) =>
+              tracks.forEach(({ track }) => {
+                stream.addTrack(track);
+
+                const src = audioContext.createMediaStreamSource(stream);
+                src.connect(multi);
+
+                recorder = new MediaRecorder(stream);
+                recorder.ondataavailable = ({ data }) => chunks.push(data);
+                recorder.start();
+                recorder.tsStart = Date.now();
+              });
+
+            addTracks(
+              peerConnection.getReceivers(),
+              streamIn,
+              recorderIn,
+              chunksIn
+            );
+            addTracks(
+              peerConnection.getSenders(),
+              streamOut,
+              recorderOut,
+              chunksOut
+            );
+
+            recorder = new MediaRecorder(multi.stream, { mimeType: type });
+            recorder.ondataavailable = ({ data }) => chunks.push(data);
+            recorder.onstop = async () => {
+              try {
+                const id = session.cdr?.id;
+                const blob = await chunksBlob(chunks);
+                this.emit({
+                  type: 'phone:recording',
+                  data: { id, audio: { blob } }
+                });
+
+                const wav = async input => (await processAudio({ input })).wav;
+                this.emit({
+                  type: 'phone:audio',
+                  data: {
+                    id,
+                    audio: {
+                      remote: await wav(chunksIn),
+                      local: await wav(chunksOut)
+                    }
+                  }
+                });
+              } catch (err) {
+                console.log(err);
               }
-            });
+            };
+
+            recorder.start();
           } catch (err) {
-            console.log(err);
+            console.error(err);
           }
-        };
 
-        session.on('terminated', () => {
-          recorder.stop();
-          recorderIn.stop();
-          recorderOut.stop();
-        });
-
-        recorder.start();
-      } catch (err) {
-        console.error(err);
+          break;
+        case SessionState.Terminated:
+          recorder?.stop();
+          recorderIn?.stop();
+          recorderOut?.stop();
+          break;
       }
     });
   };
@@ -502,23 +566,23 @@ class Phone extends React.Component {
 
     if (prevState.status !== state.status) {
       const { ua } = this;
-      if (state.status === 'offline')
-        if (ua?.isRegistered()) ua?.unregister();
-        else if (!ua?.isRegistered()) ua?.register();
+      if (ua) {
+        state.status === 'offline' ? ua.stop() : ua.start();
+      }
     }
 
     if (prevState.ringer !== state.ringer) {
       RING_TONE.setDevice(state.ringer);
       NOTIFICATION_TONE.setDevice(state.ringer);
     }
-
-    if (!state.sipUri?.length) this.ua?.stop();
   }
 
   componentDidMount = async () => {
     this.unsubscribe = useStore.subscribe(state => {
       const {
         numbers = [],
+        number_out,
+
         speaker,
         microphone,
         ringer,
@@ -544,8 +608,6 @@ class Phone extends React.Component {
         contactsDialer: contacts,
         contactsDialerFilter: contactsFilter
       } = state;
-
-      const { number_out = numbers[0]?.number } = state;
 
       this.setState({
         numbers,
@@ -575,6 +637,8 @@ class Phone extends React.Component {
         contacts,
         contactsFilter
       });
+
+      console.log('numbers2', this.state);
     });
 
     this.click2CallHandler();
@@ -618,7 +682,7 @@ class Phone extends React.Component {
       contactsFilter
     } = this.state;
 
-    const noConnection = !this.ua?.isRegistered() || !network;
+    const noConnection = !this.ua?.isConnected() || !network;
     const status_color = statuses.find(
       item => item.value === (noConnection ? 'offline' : status)
     )?.color;
@@ -628,22 +692,22 @@ class Phone extends React.Component {
     };
 
     const showTransferDialerHandler = async (blind = false) => {
-      session?.hasAnswer && session?.hold();
+      session.hold();
       this.setState({ show_transfer: true, show_blindTransfer: blind });
     };
 
     const transferOnCancelHandler = async () => {
       this.setState({ show_transfer: false }, async () => {
-        try {
-          sessiont?.terminate();
-        } catch (err) {}
-        session?.unhold();
+        if (sessiont) {
+          try {
+            sessiont instanceof Inviter ? sessiont.cancel() : sessiont.reject();
+            session.unhold();
+          } catch (err) {}
+        }
       });
     };
 
-    const transferConfirmHandler = () => sessiont.refer(session);
-
-    const onTransferHandler = number => {
+    const transferHandler = number => {
       this.setState({ show_transfer: false }, async () => {
         await this.transfer({ number });
       });
@@ -706,7 +770,7 @@ class Phone extends React.Component {
           session={sessiont}
           visible={!_.isEmpty(sessiont)}
           onCancel={transferOnCancelHandler}
-          onAccept={transferConfirmHandler}
+          onAccept={transferHandler}
           isTransfer={true}
         />
 
@@ -718,9 +782,9 @@ class Phone extends React.Component {
         >
           <Dialer
             isTransfer={true}
-            onDialClick={onTransferHandler}
-            onCdrClick={onTransferHandler}
-            onContactClick={(phones = []) => onTransferHandler(phones[0])}
+            onDialClick={transferHandler}
+            onCdrClick={transferHandler}
+            onContactClick={(phones = []) => transferHandler(phones[0])}
             cdrs={this.context.cdrs}
             contacts={contacts}
             contactsFilter={contactsFilter}

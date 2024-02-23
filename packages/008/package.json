@@ -47,7 +47,7 @@
     "react-native": "0.71.8",
     "react-native-select-dropdown": "^3.4.0",
     "react-native-web": "^0.19.8",
-    "sip.js": "^0.15.11",
+    "sip.js": "^0.21.2",
     "vcf": "^2.1.1",
     "zustand": "^4.4.1"
   },

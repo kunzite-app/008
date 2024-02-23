@@ -350,7 +350,7 @@ export const Status = ({ color, size = 10, style }) => {
 };
 
 export const CallIcon = ({
-  call,
+  call = {},
   ...props
 }) => {
   const { direction } = call;

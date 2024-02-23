@@ -63,6 +63,13 @@ const initializeStore = async state => {
   initContacts();
   initElectron();
   initEvents();
+
+  console.log('numbers', numbers, state);
+  const { number_out, numbers = [] } = state;
+  if (!numbers.find(num => number_out === num.number))
+    state.setSettings({ number_out: numbers[0]?.number || '' });
+
+  state.setSettings({ number_out: '+34917370224' });
 };
 
 const DEFAULTS = {
@@ -127,6 +134,7 @@ export const useStore = create(
         },
 
         login: async ({ settingsUri, nickname, password }) => {
+          console.log('ehrherhehrehr');
           if (!settingsUri) throw new Error(`No settings uri available!`);
 
           const headers = {
@@ -164,14 +172,6 @@ export const useStore = create(
             settingsUri,
             showSettings: false
           }));
-
-          const { number_out } = get();
-
-          const { numbers = [] } = settings;
-          if (!numbers.find(num => number_out === num.number))
-            set(() => ({
-              number_out: ''
-            }));
         },
 
         showSettings: false,

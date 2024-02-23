@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 
+import { SessionState } from 'sip.js';
+
 import { Screen } from './Screen';
 import { Player } from '../components/Player';
 import { COLORS, CallIcon, CancelAccept, CancelAcceptCall, Link, RoundIconButton, Text } from '../components/Basics';
@@ -40,7 +42,17 @@ export const SessionScreen = ({
   const [muted, setMuted] = useState(false);
   const [mutedVideo, setMutedVideo] = useState(false);
 
-  const dialHandler = key => session.dtmf(key);
+  const dialHandler = key => {
+    session.info({
+      requestOptions: {
+        body: {
+          contentDisposition: 'render',
+          contentType: 'application/dtmf-relay',
+          content: `Signal=${key}\r\nDuration=1000`
+        }
+      }
+    })
+  }
 
   const holdHandler = () => {
     try {
@@ -75,20 +87,22 @@ export const SessionScreen = ({
   
   if (!session) return null;
 
-  session?.on('accepted', () => {
-    holdHandler();
-    muteHandler();
-    muteVideoHandler();
+  session.stateChange.addListener((state) => {
+    if(state === SessionState.Established) {
+      holdHandler();
+      muteHandler();
+      muteVideoHandler();
+    }
   });
-  
 
-  const { cdr: { from, to, contact } } = session;
+  const { cdr: { from, to, contact } = {} } = session;
   const isVideo = session.isVideo();
   const number = session.isInbound() ? from : to || contact?.phones?.[0] || '';
+  const established = session.state === SessionState.Established;
 
   return (
     <Screen closeable={false} visible={visible}>
-      <Player stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
+      <Player key={established} stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
 
       <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute' }}>
         <View
@@ -102,7 +116,7 @@ export const SessionScreen = ({
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignContent: 'center', width: 80, backgroundColor: COLORS.secondary, padding: 5, borderRadius: 15 }}>
             <CallIcon call={session.cdr} color="white" size={14} />
 
-            {session?.hasAnswer && <Timer style={{ color: 'white' }} />}
+            {established && <Timer style={{ color: 'white' }} />}
           </View>
         </View>
 
@@ -159,7 +173,7 @@ export const SessionScreen = ({
             />
           </View>
 
-          {((session.hasAnswer && !isTransfer) && (allowTransfer || allowBlindTransfer)) && (
+          {((established && !isTransfer) && (allowTransfer || allowBlindTransfer)) && (
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
               {allowTransfer && (
                 <CallButton
@@ -188,7 +202,7 @@ export const SessionScreen = ({
               onCancel={onCancel}
             /> :
             <CancelAcceptCall
-              onAccept={session?.isInbound() && !session?.hasAnswer ? onAccept : null} 
+              onAccept={session?.isInbound() && !established ? onAccept : null} 
               onCancel={onCancel}
             />
           }
