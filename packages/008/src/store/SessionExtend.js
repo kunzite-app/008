@@ -1,4 +1,4 @@
-import { Session, Invitation } from 'sip.js';
+import { Session, Invitation, Web, SessionState } from 'sip.js';
 
 Session.prototype.getStream = function () {
   const stream = new MediaStream();
@@ -31,6 +31,22 @@ Session.prototype.setMutedVideo = function (muted) {
     });
 };
 
+Session.prototype.hold = async function () {
+  this.setHold(true);
+};
+
+Session.prototype.unhold = async function () {
+  this.setHold(false);
+};
+
+Session.prototype.setHold = async function (hold) {
+  if (this.state !== SessionState.Established) return;
+
+  await this.invite({
+    sessionDescriptionHandlerModifiers: hold ? [Web.holdModifier] : []
+  });
+};
+
 Session.prototype.isVideo = function () {
   if (this.isInbound())
     return (
@@ -47,12 +63,4 @@ Session.prototype.isInbound = function () {
 
 Session.prototype.autoanswer = function () {
   return this.request?.getHeader('X-Autoanswer');
-};
-
-Session.prototype.hold = function () {
-  console.log('hold');
-};
-
-Session.prototype.unhold = function () {
-  console.log('hold');
 };

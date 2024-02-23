@@ -327,7 +327,7 @@ class Phone extends React.Component {
             this.emit({ type: 'phone:accepted', data: { cdr } });
             break;
           case SessionState.Terminated:
-            console.log('heree!!!!');
+            console.log('terminated!!!');
             this.reset();
             this.emit({ type: 'phone:terminated', data: { cdr } });
             break;
@@ -400,7 +400,7 @@ class Phone extends React.Component {
       };
 
       if (blind) {
-        session.refer(target /*payload*/);
+        session.refer(target, payload);
         // TODO: why do I need to bye here?
         // session.bye();
         return;
@@ -711,8 +711,17 @@ class Phone extends React.Component {
       this.setState({ show_transfer: false }, async () => {
         if (sessiont) {
           try {
-            sessiont instanceof Inviter ? sessiont.cancel() : sessiont.reject();
             session.unhold();
+
+            switch (sessiont.state) {
+              case SessionState.Initial:
+              case SessionState.Establishing:
+                sessiont.cancel();
+                break;
+              case SessionState.Established:
+                sessiont.bye();
+                break;
+            }
           } catch (err) {}
         }
       });
