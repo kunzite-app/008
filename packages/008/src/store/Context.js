@@ -9,7 +9,6 @@ import {
 import { encode } from 'base-64';
 import _ from 'lodash';
 
-import './SessionExtend';
 import { init as initElectron } from './Electron';
 import { init as initEvents } from './Events';
 

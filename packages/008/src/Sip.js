@@ -1,4 +1,13 @@
-import { Session, Invitation, Web, SessionState } from 'sip.js';
+import {
+  UserAgent,
+  Registerer,
+  Inviter,
+  Invitation,
+  RegistererState,
+  Session,
+  SessionState,
+  Web
+} from 'sip.js';
 
 Session.prototype.getStream = function () {
   const stream = new MediaStream();
@@ -63,4 +72,14 @@ Session.prototype.isInbound = function () {
 
 Session.prototype.autoanswer = function () {
   return this.request?.getHeader('X-Autoanswer');
+};
+
+export {
+  UserAgent,
+  Registerer,
+  Inviter,
+  Invitation,
+  RegistererState,
+  Session,
+  SessionState
 };

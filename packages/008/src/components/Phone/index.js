@@ -2,15 +2,16 @@ import React from 'react';
 import { View } from 'react-native';
 
 import _ from 'lodash';
+
+import { processAudio } from '008Q';
+
 import {
   UserAgent,
   Registerer,
   Inviter,
   RegistererState,
   SessionState
-} from 'sip.js';
-
-import { processAudio } from '008Q';
+} from '../../Sip';
 
 import {
   RING_TONE,
@@ -31,7 +32,6 @@ import { emit } from '../../store/Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
 
 import { name as packageName } from '../../../package.json';
-import { number } from 'prop-types';
 
 const USER_AGENT = '008 Softphone';
 
@@ -155,7 +155,6 @@ class Phone extends React.Component {
     this.ua?.stop();
 
     if (!wsUri?.length || !sipUri?.length) return;
-    console.log('uri', sipUri);
     const ua = new UserAgent({
       uri: UserAgent.makeURI(sipUri),
       authorizationUsername: sipUser,
@@ -212,27 +211,10 @@ class Phone extends React.Component {
           });
         },
         onConnect: () => {
-          console.log('Network connectivity established');
           this.setState({ rand: genId() });
         },
         onDisconnect: error => {
-          console.log('Network error', error);
-
-          if (!error) console.log('UA stopped');
-
           this.setState({ rand: genId() });
-        },
-        onMessage: message => {
-          console.log('MESSAGE received', message);
-          // message.accept();
-        },
-        onNotify: notification => {
-          console.log('NOTIFY received', notification);
-          // notification.accept();
-        },
-        onRefer: referral => {
-          console.log('REFER received', referral);
-          // referral.accept();
         }
       }
     });
@@ -246,7 +228,6 @@ class Phone extends React.Component {
           case RegistererState.Registered:
           case RegistererState.Unregistered:
           case RegistererState.Terminated:
-            console.log(state);
             this.setState({ rand: genId() });
             break;
         }
@@ -327,7 +308,6 @@ class Phone extends React.Component {
             this.emit({ type: 'phone:accepted', data: { cdr } });
             break;
           case SessionState.Terminated:
-            console.log('terminated!!!');
             this.reset();
             this.emit({ type: 'phone:terminated', data: { cdr } });
             break;
@@ -548,7 +528,7 @@ class Phone extends React.Component {
                   }
                 });
               } catch (err) {
-                console.log(err);
+                console.error(err);
               }
             };
 
@@ -648,8 +628,6 @@ class Phone extends React.Component {
         contacts,
         contactsFilter
       });
-
-      console.log('numbers2', this.state);
     });
 
     this.click2CallHandler();
