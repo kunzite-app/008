@@ -442,8 +442,7 @@ class Phone extends React.Component {
     RING_BACK.stop();
     NOTIFICATION_TONE.stop();
 
-    // if (session && !(session instanceof Inviter))
-    // play_hangup();
+    if (session && !(session instanceof Inviter)) play_hangup();
 
     this.setState(this.defaults);
   };
