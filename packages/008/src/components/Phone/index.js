@@ -370,8 +370,7 @@ class Phone extends React.Component {
 
       if (blind) {
         session.refer(target, payload);
-        // TODO: why do I need to bye here?
-        // session.bye();
+        session.bye();
         return;
       }
 
@@ -667,28 +666,23 @@ class Phone extends React.Component {
     };
 
     const showTransferDialerHandler = async (blind = false) => {
-      session.hold();
+      await session.hold();
       this.setState({ show_transfer: true, show_blindTransfer: blind });
     };
 
     const transferOnCancelHandler = async () => {
-      this.setState({ show_transfer: false }, async () => {
-        if (sessiont) {
-          try {
-            session.unhold();
+      await session.unhold();
+      switch (sessiont?.state) {
+        case SessionState.Initial:
+        case SessionState.Establishing:
+          sessiont.cancel();
+          break;
+        case SessionState.Established:
+          sessiont.bye();
+          break;
+      }
 
-            switch (sessiont.state) {
-              case SessionState.Initial:
-              case SessionState.Establishing:
-                sessiont.cancel();
-                break;
-              case SessionState.Established:
-                sessiont.bye();
-                break;
-            }
-          } catch (err) {}
-        }
-      });
+      this.setState({ show_transfer: false });
     };
 
     const transferHandler = number => {
@@ -742,8 +736,10 @@ class Phone extends React.Component {
         </View>
 
         <SessionScreen
+          {...session}
           key={session?.id}
           session={session}
+          hold={session?._hold}
           visible={!_.isEmpty(session)}
           onCancel={this.hangup}
           onAccept={this.answer}

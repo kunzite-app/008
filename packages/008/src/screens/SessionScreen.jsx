@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useReducer, useState } from 'react';
 import { View } from 'react-native';
 
 import { SessionState } from 'sip.js';
@@ -31,67 +31,36 @@ export const SessionScreen = ({
   onTransfer,
   onBlindTransfer,
 }) => {
-  
-  const store = useStore();
-  const {
-    speaker
-  } = store;
-
+  const { speaker } = useStore();
   const [showDialer, setShowDialer] = useState(false);
-  const [hold, setHold] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [mutedVideo, setMutedVideo] = useState(false);
+  const [_, forceUpdate] = useReducer(x => x + 1, 0);
 
-  const dialHandler = key => {
-    session.info({
-      requestOptions: {
-        body: {
-          contentDisposition: 'render',
-          contentType: 'application/dtmf-relay',
-          content: `Signal=${key}\r\nDuration=1000`
-        }
-      }
-    })
-  }
+  if (!session) return null;
+  
 
-  const holdHandler = () => {
-    try {
-      if (hold) session?.hold();
-      else session?.unhold();
-    } catch(err){ console.error(err) };
+  
+  const dialHandler = key => session.dtmf(key);
+
+  const holdHandler = async () => {
+    await session.setHold(!session._hold);
+    forceUpdate();
   }
 
   const muteHandler = () => {
-    try { 
-      session?.setMuted(muted) 
-    } catch(err){ console.error(err) };
+    session.setMuted(!session._muted);
+    forceUpdate();
   }
 
   const muteVideoHandler = () => {
-    try { 
-      session?.setMutedVideo(mutedVideo) 
-    } catch(err){ console.error(err) };
+    session.setMutedVideo(!session._mutedVideo);
+    forceUpdate();
   }
-
-  useEffect(() => {
-    holdHandler();
-  }, [hold]);
-
-  useEffect(() => {
-    muteHandler();
-  }, [muted]);
-
-  useEffect(() => {
-    muteVideoHandler();
-  }, [mutedVideo]);
-  
-  if (!session) return null;
 
   session.stateChange.addListener((state) => {
     if(state === SessionState.Established) {
-      holdHandler();
-      muteHandler();
-      muteVideoHandler();
+      session.setHold(session._hold);
+      session.setMuted(session._muted);
+      session.setMutedVideo(session._mutedVideo);
     }
   });
 
@@ -154,22 +123,22 @@ export const SessionScreen = ({
             />
 
             <CallButton
-              iconColor={muted ? 'danger' : undefined}
+              iconColor={session._muted ? 'danger' : undefined}
               icon="micOff"
-              onClick={() => setMuted(!muted)}
+              onClick={muteHandler}
             />
             
             {isVideo &&
               <CallButton
-                iconColor={mutedVideo ? 'danger' : undefined}
+                iconColor={session._mutedVideo ? 'danger' : undefined}
                 icon="video"
-                onClick={() => setMutedVideo(!mutedVideo)}
+                onClick={muteVideoHandler}
               />
             }
             
             <CallButton
-              icon={hold ? 'play' : 'pause'}
-              onClick={() => setHold(!hold)}
+              icon={session._hold ? 'play' : 'pause'}
+              onClick={holdHandler}
             />
           </View>
 

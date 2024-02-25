@@ -21,6 +21,7 @@ Session.prototype.getStream = function () {
 };
 
 Session.prototype.setMuted = function (muted) {
+  this._muted = muted;
   this.sessionDescriptionHandler?.peerConnection
     ?.getLocalStreams()
     .forEach(stream => {
@@ -31,6 +32,7 @@ Session.prototype.setMuted = function (muted) {
 };
 
 Session.prototype.setMutedVideo = function (muted) {
+  this._mutedVideo = muted;
   this.sessionDescriptionHandler?.peerConnection
     ?.getLocalStreams()
     .forEach(stream => {
@@ -49,8 +51,9 @@ Session.prototype.unhold = async function () {
 };
 
 Session.prototype.setHold = async function (hold) {
-  if (this.state !== SessionState.Established) return;
+  this._hold = hold;
 
+  if (this.state !== SessionState.Established) return;
   await this.invite({
     sessionDescriptionHandlerModifiers: hold ? [Web.holdModifier] : []
   });
@@ -72,6 +75,18 @@ Session.prototype.isInbound = function () {
 
 Session.prototype.autoanswer = function () {
   return this.request?.getHeader('X-Autoanswer');
+};
+
+Session.prototype.dtmf = function (key) {
+  this.info({
+    requestOptions: {
+      body: {
+        contentDisposition: 'render',
+        contentType: 'application/dtmf-relay',
+        content: `Signal=${key}\r\nDuration=1000`
+      }
+    }
+  });
 };
 
 export {
