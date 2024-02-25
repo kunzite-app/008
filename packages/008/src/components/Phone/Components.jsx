@@ -37,8 +37,8 @@ export const Header = ({
     };  
   });
 
-  const needle = number_out || numbers?.[0]?.number;
-  const { value } = options.find(({ value }) => value === needle) || {};
+  const { value } = options.find(({ value }) => value === number_out) || options[0] || {};
+
   const itemFontStyle =  { fontSize: 16 };
   const backgroundColor = COLORS.backColor;
 
@@ -56,16 +56,19 @@ export const Header = ({
         {hasNumbers &&
           <View style={{ justifyContent: 'center',  alignItems: 'center' }}>
             <Select
+              key={value}
               tabIndex="-1"
               options={options}
               value={value}
               onChange={onChange}
               buttonStyle={{ borderWidth: 0, backgroundColor: '#0000', width: numbersWidth }}
-              renderCustomizedButtonChild={(item) =>
+              renderCustomizedButtonChild={(item) => { 
+                return (
                 <View>
                   <Text numberOfLines={1} style={{ fontSize: 16, flex: 1, textAlign: 'center', paddingHorizontal: 5 }}>{name}</Text>
                   <Text numberOfLines={1} style={{ ...itemFontStyle, color: COLORS.textSecondary, flex: 1, textAlign: 'center' }}>{item?.value}</Text>
                 </View>
+  )}
               }
               rowTextStyle={{ ...itemFontStyle, textAlign: 'center', backgroundColor, borderRadius: 8, padding: 5 }}
               dropdownStyle={{ margin: 10, height: options.length * 50, backgroundColor: '#fff', borderRadius: 8 }}

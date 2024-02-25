@@ -8,12 +8,10 @@ import {
   ReactPlugin
 } from '@microsoft/applicationinsights-react-js';
 
-import { Button } from './src/components/Basics';
+import { Button, COLORS, Text } from './src/components/Basics';
 import { Container } from './src/components/Container';
 import { SettingsScreen, PhoneScreen } from './src/screens';
 import { ContextProvider, useStore } from './src/store/Context';
-
-import './src/SessionExtend';
 
 const reactPlugin = new ReactPlugin();
 const appInsights = new ApplicationInsights({
@@ -42,8 +40,14 @@ export default function App() {
         <View
           style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
         >
-          <Button onClick={() => window?.location.reload()}>
-            Something went wrong. Please reload
+          <Button
+            style={{ padding: 10 }}
+            color={COLORS.primary}
+            onClick={() => window?.location.reload()}
+          >
+            <Text style={{ color: 'white' }}>
+              Something went wrong. Reload app.
+            </Text>
           </Button>
         </View>
       )}

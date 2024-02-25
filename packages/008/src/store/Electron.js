@@ -1,20 +1,14 @@
-import { useStore } from './store/Context';
-
-let ipcRenderer;
+import { useStore } from './Context';
 
 const emit = (ev, data) =>
   document?.dispatchEvent(new CustomEvent(ev, { detail: data }));
 
+let ipcRenderer;
 export const quit = () => ipcRenderer?.send('quit');
 export const show = () => ipcRenderer?.send('show');
 export const anchor = () => ipcRenderer?.send('anchor');
 export const unanchor = () => ipcRenderer?.send('unanchor');
 export const resize = size => ipcRenderer?.send('resize', { ...size });
-
-export const openLink = ({ url }) => {
-  ipcRenderer?.send('open', { url });
-  window?.open(url, '_blank');
-};
 
 export const init = () => {
   try {
@@ -45,4 +39,9 @@ export const init = () => {
   } catch (err) {
     console.log('Electron not found?', err);
   }
+};
+
+export const openLink = ({ url }) => {
+  ipcRenderer?.send('open', { url });
+  window?.open(url, '_blank');
 };
