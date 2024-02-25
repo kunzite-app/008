@@ -63,7 +63,6 @@ export const Header = ({
               onChange={onChange}
               buttonStyle={{ borderWidth: 0, backgroundColor: '#0000', width: numbersWidth }}
               renderCustomizedButtonChild={(item) => { 
-                console.log('sdsdsds', number_out,  value, options, item)
                 return (
                 <View>
                   <Text numberOfLines={1} style={{ fontSize: 16, flex: 1, textAlign: 'center', paddingHorizontal: 5 }}>{name}</Text>
