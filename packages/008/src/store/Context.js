@@ -35,6 +35,12 @@ const initializeStore = async state => {
       const devices = await getSpeakers();
       const microphones = await getMicrophones();
 
+      let { speaker, microphone } = state;
+      if (!devices.find(d => d.id === speaker)) {
+        state.setSettings({ speaker: 'default' });
+        speaker = 'default';
+      }
+
       state.setSettings({ devices, microphones });
     };
 
@@ -62,13 +68,6 @@ const initializeStore = async state => {
   initContacts();
   initElectron();
   initEvents();
-
-  console.log('numbers', numbers, state);
-  const { number_out, numbers = [] } = state;
-  if (!numbers.find(num => number_out === num.number))
-    state.setSettings({ number_out: numbers[0]?.number || '' });
-
-  state.setSettings({ number_out: '+34917370224' });
 };
 
 const DEFAULTS = {
@@ -133,7 +132,6 @@ export const useStore = create(
         },
 
         login: async ({ settingsUri, nickname, password }) => {
-          console.log('ehrherhehrehr');
           if (!settingsUri) throw new Error(`No settings uri available!`);
 
           const headers = {
@@ -165,6 +163,11 @@ export const useStore = create(
           }
 
           const settings = await response.json();
+          const { number_out, numbers = [] } = settings;
+          if (!number_out) {
+            settings.number_out = numbers[0]?.name || '';
+          }
+
           set(() => ({
             ...DEFAULTS,
             ...settings,

@@ -37,8 +37,6 @@ export const SessionScreen = ({
 
   if (!session) return null;
   
-
-  
   const dialHandler = key => session.dtmf(key);
 
   const holdHandler = async () => {
