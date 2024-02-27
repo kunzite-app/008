@@ -156,8 +156,6 @@ const createWindow = anchor => {
     mainWindow.webContents.send('anchored', { anchored: ANCHORED });
   });
 
-  mainWindow.webContents.openDevTools();
-
   mainWindow.setContentSize(0, 0);
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(APP_URL);
