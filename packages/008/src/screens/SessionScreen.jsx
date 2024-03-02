@@ -176,6 +176,8 @@ export const SessionScreen = ({
             <CancelAccept
               onAccept={onAccept} 
               onCancel={onCancel}
+              cancelTestID="hangupButton"
+              acceptTestID="acceptCallButton"
             /> :
             <CancelAcceptCall
               onAccept={session?.isInbound() && !established ? onAccept : null} 

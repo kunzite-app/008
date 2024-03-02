@@ -385,7 +385,7 @@ export const SettingsScreen = () => {
                 console.log(err);
               }
             }}
-            acceptID="settingsAccept"
+            acceptTestID="settingsAccept"
           />
         
       </View>

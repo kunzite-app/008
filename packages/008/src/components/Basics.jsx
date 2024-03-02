@@ -247,7 +247,7 @@ export const HRule = ({ color = BORDERCOLOR }) => (
   />
 );
 
-export const CancelAccept = ({ onCancel, onAccept, acceptID }) => {
+export const CancelAccept = ({ onCancel, onAccept, acceptTestID, cancelTestID, }) => {
   return (
     <View
       style={{
@@ -257,13 +257,13 @@ export const CancelAccept = ({ onCancel, onAccept, acceptID }) => {
       }}
     >
       {onCancel && (
-        <Button color="danger" onClick={onCancel} fullWidth={!onAccept}>
+        <Button testID={cancelTestID} color="danger" onClick={onCancel} fullWidth={!onAccept}>
           <XIcon />
         </Button>
       )}
 
       {onAccept && (
-        <Button testID={acceptID} color="secondary" onClick={onAccept} fullWidth={!onCancel}>
+        <Button testID={acceptTestID} color="secondary" onClick={onAccept} fullWidth={!onCancel}>
           <CheckIcon />
         </Button>
       )}
