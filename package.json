@@ -17,7 +17,7 @@
     "clean": "lerna clean",
     "prepare": "husky install",
     "lint": "lerna run lint",
-    "tests": "lerna run e2e --scope @kunzite/008"
+    "e2e": "lerna run e2e --scope @kunzite/008"
   },
   "lint-staged": {
     "**/*.{js}": [
