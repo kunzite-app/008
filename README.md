@@ -67,6 +67,14 @@ To do so, follow these steps:
 }
 ```
 
+### Quick test
+
+Do you want to test it without having to install your sip server? We have you covered!
+Set `https://raw.githubusercontent.com/kunzite-app/008/master/packages/008/web/cfgDemo008.json` as the config.
+Try to call the number `008`
+
+![test-config](https://gist.github.com/assets/414967/6ab9c32e-90a9-454c-993c-ade3046db7cd)
+
 ## Autoanswer
 
 Autoanswer can be enabled via two options:
@@ -253,6 +261,8 @@ Triggered upon the transcription is ready.
   }
 }
 ```
+
+</details>
 
 <details>
   <summary>phone:summarization</summary>
