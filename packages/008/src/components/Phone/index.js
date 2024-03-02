@@ -13,7 +13,7 @@ import {
   SessionState
 } from '../../Sip';
 
-import { RING_TONE, RING_BACK, play_failure, play_hangup } from '../../Sound';
+import { RING_TONE, RING_BACK, play_tone, play_reject } from '../../Sound';
 
 import { Dialer } from '../Dialer';
 import { Header } from './Components';
@@ -123,7 +123,7 @@ class Phone extends React.Component {
 
     this.networkWatcher = setInterval(() => {
       const { network, session } = this.state;
-      if (!network && session) play_failure();
+      if (!network && session) play_tone();
     }, 5 * 1000);
   };
 
@@ -180,6 +180,10 @@ class Phone extends React.Component {
                   RING_TONE.stop();
                   this.setState({ rand: genId() });
                   this.emit({ type: 'phone:accepted', data: { cdr } });
+
+                  session.delegate = {
+                    onBye: () => play_reject()
+                  };
                   break;
                 case SessionState.Terminated:
                   this.reset();
@@ -295,6 +299,10 @@ class Phone extends React.Component {
             this.setState({ rand: genId() });
 
             this.emit({ type: 'phone:accepted', data: { cdr } });
+
+            session.delegate = {
+              onBye: () => play_reject()
+            };
             break;
           case SessionState.Terminated:
             this.reset();
@@ -311,7 +319,7 @@ class Phone extends React.Component {
           }
         },
         requestDelegate: {
-          onReject: () => play_failure({ statusCode: 486 })
+          onReject: () => play_reject()
         }
       });
 
@@ -321,7 +329,7 @@ class Phone extends React.Component {
     } catch (err) {
       console.error(err);
 
-      play_failure();
+      play_tone();
       this.reset();
     }
   };
@@ -411,14 +419,14 @@ class Phone extends React.Component {
           }
         },
         requestDelegate: {
-          onReject: () => play_failure({ statusCode: 486 })
+          onReject: () => play_reject()
         }
       });
 
       this.setState({ sessiont });
     } catch (err) {
       console.error(err);
-      play_failure();
+      play_tone();
     }
   };
 
@@ -429,7 +437,7 @@ class Phone extends React.Component {
     RING_TONE.stop();
     RING_BACK.stop();
 
-    if (session && !(session instanceof Inviter)) play_hangup();
+    if (session && !(session instanceof Inviter)) play_reject();
 
     this.setState(this.defaults);
   };
