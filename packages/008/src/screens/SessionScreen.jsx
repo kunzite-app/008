@@ -77,7 +77,9 @@ export const SessionScreen = ({
 
   return (
     <Screen closeable={false} visible={visible}>
-      <Player key={established} stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
+      {established &&
+        <Player stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
+      }
 
       <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute' }}>
         <View
