@@ -73,7 +73,7 @@ Do you want to test it without having to install your sip server? We have you co
 Set `https://raw.githubusercontent.com/kunzite-app/008/master/packages/008/web/cfgDemo008.json` as the config.
 Try to call the number `008`
 
-<img width="338" alt="image" src="https://gist.github.com/assets/414967/6ab9c32e-90a9-454c-993c-ade3046db7cd">
+<img width="338" alt="Quick Test Config" src="https://github-production-user-asset-6210df.s3.amazonaws.com/414967/309506356-6ab9c32e-90a9-454c-993c-ade3046db7cd.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240302%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240302T231629Z&X-Amz-Expires=300&X-Amz-Signature=3fa18349dd72fc4b6baed9042350685efef0bb3509d0e4d73fdab9fcb99713f3&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=0">
 
 ## Autoanswer
 
