@@ -10,14 +10,18 @@ import {
 } from 'sip.js';
 
 Session.prototype.getStream = function () {
-  const stream = new MediaStream();
-  this.sessionDescriptionHandler?.peerConnection
-    ?.getReceivers()
-    .forEach(({ track }) => {
-      if (track) stream.addTrack(track);
-    });
+  try {
+    const stream = new MediaStream();
+    this.sessionDescriptionHandler?.peerConnection
+      ?.getReceivers()
+      .forEach(({ track }) => {
+        if (track) stream.addTrack(track);
+      });
 
-  return stream;
+    return stream;
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 Session.prototype.setMuted = function (muted) {

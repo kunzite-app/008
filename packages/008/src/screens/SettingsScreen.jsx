@@ -189,6 +189,7 @@ export const ConnectionForm = ({ onChange, ...initialValues }) => {
   return (
     <View>
       <InputRow
+        data-test="settingsUri"
         label={'Settings'}
         placeholder="https://example.com/settings"
         value={settingsUri}
@@ -384,6 +385,7 @@ export const SettingsScreen = () => {
                 console.log(err);
               }
             }}
+            acceptTestID="settingsAccept"
           />
         
       </View>

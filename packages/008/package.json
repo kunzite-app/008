@@ -22,7 +22,8 @@
     "storybook-watch": "sb-rn-watcher",
     "storybook-web": "start-storybook -p 6006 -c .storybook-web",
     "build-storybook": "build-storybook -c .storybook-web",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "e2e": "yarn web & cypress run"
   },
   "dependencies": {
     "008Q": "*",
@@ -69,8 +70,10 @@
     "@storybook/react-native": "^6.5.6",
     "babel-loader": "^8.3.0",
     "babel-plugin-react-native-web": "^0.19.8",
+    "cypress": "^13.6.0",
     "eslint": "^8.49.0",
     "eslint-config-universe": "^12.0.0",
+    "eslint-plugin-cypress": "^2.15.1",
     "prettier": "^3.0.3",
     "prop-types": "^15.8.1",
     "react-native-safe-area-context": "^4.7.1"

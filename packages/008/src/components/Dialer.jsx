@@ -66,7 +66,7 @@ export const DialGrid = ({ style, buttonStyle, ...events }) => (
   </View>
 );
 
-export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style }) => {
+export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style, testID }) => {
   const [value, setValue] = useState(number);
 
   useEffect(() => {
@@ -90,6 +90,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
           style={{ flex: 1, fontSize: 18, textAlign: 'center' }}
           value={value}
           onChangeText={text => setValue(text)}
+          testID={`${testID? testID : ''}dialerTextInput`}
         />
         <ButtonIcon icon="delete" onClick={onPressDelete} color='textSecondary' />
       </View>
@@ -101,6 +102,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
           {!isTransfer &&
             <View>
               <RoundIconButton
+                testID="callButton"
                 size={buttonCallSize}
                 color={COLORS.secondary}
                 iconColor="white"
@@ -112,6 +114,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
               {onClickVideo &&
                <View style={{ alignItems: 'center', justifyContent: 'center', height: buttonCallSize, borderRadius: buttonCallSize / 2, position: 'absolute',  width: buttonCallSize - 5, left: buttonCallSize - 5, backgroundColor: appColor }}>
                   <RoundIconButton
+                    testID="videoCallButton"
                     size={cameraCallSize}
                     color={COLORS.primary}
                     iconColor="white"
@@ -126,6 +129,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style 
 
           {isTransfer &&
             <ButtonIcon
+              testID="transferButton"
               icon="phoneForwarded"
               size={iconSize}
               style={{ backgroundColor: COLORS.secondary, width: 50, height: 50, borderRadius: 30 }}
@@ -157,7 +161,8 @@ export const Dialer = ({
   onContactClick,
   onContactsFilterChange,
   style,
-  isTransfer
+  isTransfer,
+  testID
 }) => {
   const [tab, setTab] = useState('dialer');
   const [contactsFilter, setContactsFilter] = useState('');
@@ -171,6 +176,7 @@ export const Dialer = ({
     <View style={[{ flex: 1 }, style]}>
       {tab === 'dialer' && (
         <DialPad
+          testID={testID}
           style={{ marginHorizontal: 40 }}
           onClick={onDialClick} 
           onClickVideo={onDialClickVideo} 

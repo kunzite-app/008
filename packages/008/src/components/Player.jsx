@@ -7,7 +7,7 @@ export const Player = ({ stream, speaker, isvideo }) => {
   useEffect(() => {
     const elem = ref.current;
     elem.srcObject = stream;
-    elem.setSinkId(speaker)
+    elem.setSinkId(speaker);
   }, [stream, speaker]);
 
   if (isvideo)

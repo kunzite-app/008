@@ -11,10 +11,15 @@ import { useStore } from '../store/Context';
 import Timer from '../components/Timer';
 import { ContactAvatar } from '../components/Avatars';
 
-const CallButton = ({ style, size = 40, iconSize = 20, ...props }) => 
-  <RoundIconButton {...props} size={size} iconSize={iconSize}
+const CallButton = ({ style, size = 40, iconSize = 20, ...props }) => {
+  return (
+  <RoundIconButton 
+    {...props}
+    size={size} 
+    iconSize={iconSize}
     style={{ backgroundColor: `${COLORS.app}90`,  ...style }} 
-  />
+  />)
+}
 
 export const SessionScreen = ({
   visible,
@@ -72,7 +77,9 @@ export const SessionScreen = ({
 
   return (
     <Screen closeable={false} visible={visible}>
-      <Player key={established} stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
+      {established &&
+        <Player stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
+      }
 
       <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute' }}>
         <View
@@ -155,6 +162,7 @@ export const SessionScreen = ({
               {allowBlindTransfer && (
                 <View style={{ marginLeft: 30, }}>
                   <CallButton
+                    testID="blindTransferButton"
                     iconColor="danger"
                     icon="phoneForwarded"
                     onClick={onBlindTransfer}
@@ -170,10 +178,14 @@ export const SessionScreen = ({
             <CancelAccept
               onAccept={onAccept} 
               onCancel={onCancel}
+              cancelTestID="hangupButton"
+              acceptTestID="acceptCallButton"
             /> :
             <CancelAcceptCall
               onAccept={session?.isInbound() && !established ? onAccept : null} 
               onCancel={onCancel}
+              cancelTestID="hangupButton"
+              acceptTestID="acceptCallButton"
             />
           }
         </View>

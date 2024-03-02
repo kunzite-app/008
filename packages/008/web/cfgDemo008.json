@@ -1,0 +1,17 @@
+{
+  "sipUri": "sip:demo@demo.008agent.ai",
+  "sipPassword": "008Demo",
+  "wsUri": "wss://demo.008agent.ai:8089/ws",
+  "numbers": [
+    {
+      "number": "+1",
+      "tags": ["Main"]
+    }
+  ],
+  "statuses": [
+    { "value": "online", "text": "Online", "color": "#057e74" },
+    { "value": "offline", "text": "Offline", "color": "#A9A9A9" }
+  ],
+  "avatar": "https://content.astrolinevs.com/files/images/avatar_profile.png",
+  "nickname": "Demo"
+}
