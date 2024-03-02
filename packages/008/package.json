@@ -22,7 +22,8 @@
     "storybook-watch": "sb-rn-watcher",
     "storybook-web": "start-storybook -p 6006 -c .storybook-web",
     "build-storybook": "build-storybook -c .storybook-web",
-    "lint": "eslint ./"
+    "lint": "eslint ./",
+    "e2e": "yarn web & cypress run"
   },
   "dependencies": {
     "008Q": "*",
