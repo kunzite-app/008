@@ -73,18 +73,12 @@ export const REJECT_TONE = new Sound({
   loop: true
 });
 
-export const NOTIFICATION_TONE = new Sound({
-  media: `notification`,
-  loop: true
-});
-
-export const play_failure = (message = {}) => {
-  const { statusCode } = message;
+export const play_tone = () => {
   REJECT_TONE.play();
-  setTimeout(() => REJECT_TONE.stop(), statusCode === 486 ? 3000 : 1000);
+  setTimeout(() => REJECT_TONE.stop(), 1000);
 };
 
-export const play_hangup = () => {
+export const play_reject = () => {
   REJECT_TONE.play();
   setTimeout(() => REJECT_TONE.stop(), 3000);
 };

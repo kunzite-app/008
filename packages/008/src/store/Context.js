@@ -9,6 +9,9 @@ import {
 import { encode } from 'base-64';
 import _ from 'lodash';
 
+import { init as initElectron } from './Electron';
+import { init as initEvents } from './Events';
+
 import { getMicrophones, getSpeakers } from '../Sound';
 import Contacts from './Contacts';
 
@@ -31,6 +34,12 @@ const initializeStore = async state => {
     const setAudioDevices = async () => {
       const devices = await getSpeakers();
       const microphones = await getMicrophones();
+
+      let { speaker, microphone } = state;
+      if (!devices.find(d => d.id === speaker)) {
+        state.setSettings({ speaker: 'default' });
+        speaker = 'default';
+      }
 
       state.setSettings({ devices, microphones });
     };
@@ -57,6 +66,8 @@ const initializeStore = async state => {
   await requestPermissions();
   initAudioDevices();
   initContacts();
+  initElectron();
+  initEvents();
 };
 
 const DEFAULTS = {
@@ -84,6 +95,9 @@ const DEFAULTS = {
   avatar: undefined,
 
   webhooks: [],
+
+  qTts: true,
+  qSummarization: false,
 
   size: { width: 340, height: 460 }
 };
@@ -149,20 +163,17 @@ export const useStore = create(
           }
 
           const settings = await response.json();
+          const { number_out, numbers = [] } = settings;
+          if (!number_out) {
+            settings.number_out = numbers[0]?.name || '';
+          }
+
           set(() => ({
             ...DEFAULTS,
             ...settings,
             settingsUri,
             showSettings: false
           }));
-
-          const { number_out } = get();
-
-          const { numbers = [] } = settings;
-          if (!numbers.find(num => number_out === num.number))
-            set(() => ({
-              number_out: ''
-            }));
         },
 
         showSettings: false,

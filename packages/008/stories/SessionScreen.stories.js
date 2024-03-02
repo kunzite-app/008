@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 import { SessionScreen } from '../src/screens/SessionScreen';
+import { SessionState } from '../src/Sip';
 
 export default {
   title: 'Screens/SessionScreen',
@@ -67,7 +68,7 @@ InboundAnswered.args = {
   ...sharedArgs,
   session: {
     ...mockSession,
-    hasAnswer: true,
+    status: SessionState.Established,
     isInbound: () => true,
     cdr: {
       contact,
@@ -83,7 +84,7 @@ Outbound.args = {
   ...sharedArgs,
   session: {
     ...mockSession,
-    hasAnswer: false,
+    status: SessionState.Establishing,
     isInbound: () => false,
     cdr: {
       contact,
@@ -98,7 +99,7 @@ OutboundAnswered.args = {
   ...sharedArgs,
   session: {
     ...mockSession,
-    hasAnswer: true,
+    status: SessionState.Established,
     isInbound: () => true,
     cdr: {
       contact,
@@ -113,7 +114,7 @@ OutboundVideoAnswered.args = {
   ...sharedArgs,
   session: {
     ...mockSession,
-    hasAnswer: true,
+    status: SessionState.Established,
     isInbound: () => true,
     isVideo: () => true,
     cdr: {
@@ -130,7 +131,7 @@ AttendedTransfer.args = {
   isTransfer: true,
   session: {
     ...mockSession,
-    hasAnswer: true,
+    status: SessionState.Established,
     isInbound: () => false,
     cdr: {
       contact,

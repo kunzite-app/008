@@ -1,13 +1,16 @@
 {
   "name": "008desktop",
   "description": "Open-source event-driven AI powered Softphone",
-  "version": "1.1.5-alpha.0",
+  "version": "1.1.5",
+  "license": "AGPL-3.0-only",
   "private": true,
   "author": {
     "name": "Kunzite",
     "email": "support@kunzite.app",
     "url": "https://kunzite.app"
   },
+  "repository": "https://github.com/kunzite-app/008",
+  "bugs": "https://github.com/kunzite-app/008/issues",
   "productName": "008",
   "main": "index.js",
   "scripts": {
@@ -80,7 +83,7 @@
     "rage-edit": "^1.2.0"
   },
   "devDependencies": {
-    "electron": "27.0.2",
+    "electron": "28.2.0",
     "electron-builder": "^24.8.0",
     "electron-icon-builder": "^2.0.1",
     "electron-notarize": "^1.2.2",

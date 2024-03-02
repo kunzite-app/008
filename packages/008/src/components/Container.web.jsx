@@ -1,13 +1,7 @@
 import { View } from 'react-native';
 
-import { init } from '../Electron';
 import { COLORS } from './Basics';
-
-import { init as initEvents } from '../Events';
 import { useStore } from '../store/Context';
-
-init();
-initEvents();
 
 export const Container = ({ children }) => {
   const {

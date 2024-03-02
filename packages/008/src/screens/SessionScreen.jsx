@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useReducer, useState } from 'react';
 import { View } from 'react-native';
 
+import { SessionState } from 'sip.js';
+
 import { Screen } from './Screen';
-import { AudioPlayer } from '../components/Audioplayer';
+import { Player } from '../components/Player';
 import { COLORS, CallIcon, CancelAccept, CancelAcceptCall, Link, RoundIconButton, Text } from '../components/Basics';
 import { DialGrid } from '../components/Dialer';
 import { useStore } from '../store/Context';
@@ -34,65 +36,48 @@ export const SessionScreen = ({
   onTransfer,
   onBlindTransfer,
 }) => {
-  
-  const store = useStore();
-  const {
-    speaker
-  } = store;
-
+  const { speaker } = useStore();
   const [showDialer, setShowDialer] = useState(false);
-  const [hold, setHold] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [mutedVideo, setMutedVideo] = useState(false);
+  const [_, forceUpdate] = useReducer(x => x + 1, 0);
 
+  if (!session) return null;
+  
   const dialHandler = key => session.dtmf(key);
 
-  const holdHandler = () => {
-    try {
-      if (hold) session?.hold();
-      else session?.unhold();
-    } catch(err){ console.error(err) };
+  const holdHandler = async () => {
+    await session.setHold(!session._hold);
+    forceUpdate();
   }
 
   const muteHandler = () => {
-    try { 
-      session?.setMuted(muted) 
-    } catch(err){ console.error(err) };
+    session.setMuted(!session._muted);
+    forceUpdate();
   }
 
   const muteVideoHandler = () => {
-    try { 
-      session?.setMutedVideo(mutedVideo) 
-    } catch(err){ console.error(err) };
+    session.setMutedVideo(!session._mutedVideo);
+    forceUpdate();
   }
 
-  useEffect(() => {
-    holdHandler();
-  }, [hold]);
-
-  useEffect(() => {
-    muteHandler();
-  }, [muted]);
-
-  useEffect(() => {
-    muteVideoHandler();
-  }, [mutedVideo]);
-  
-  if (!session) return null;
-
-  session?.on('accepted', () => {
-    holdHandler();
-    muteHandler();
-    muteVideoHandler();
+  session.stateChange.addListener((state) => {
+    if(state === SessionState.Established) {
+      // needs a delay to avoid reinvite exceptions
+      setTimeout(() => {
+        session.setHold(session._hold);
+        session.setMuted(session._muted);
+        session.setMutedVideo(session._mutedVideo);
+      }, 100);
+    }
   });
 
-  const { cdr: { from, to, contact } } = session;
+  const { cdr: { from, to, contact } = {} } = session;
   const isVideo = session.isVideo();
   const number = session.isInbound() ? from : to || contact?.phones?.[0] || '';
+  const established = session.state === SessionState.Established;
 
   return (
     <Screen closeable={false} visible={visible}>
-      <AudioPlayer session={session} speaker={speaker} />
+      <Player key={established} stream={session.getStream()} speaker={speaker} isvideo={session.isVideo()} />
 
       <View style={{ flex: 1, width: '100%', height: '100%', justifyContent: 'space-between', position: 'absolute' }}>
         <View
@@ -106,7 +91,7 @@ export const SessionScreen = ({
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', alignContent: 'center', width: 80, backgroundColor: COLORS.secondary, padding: 5, borderRadius: 15 }}>
             <CallIcon call={session.cdr} color="white" size={14} />
 
-            {session?.hasAnswer && <Timer style={{ color: 'white' }} />}
+            {established && <Timer style={{ color: 'white' }} />}
           </View>
         </View>
 
@@ -144,26 +129,26 @@ export const SessionScreen = ({
             />
 
             <CallButton
-              iconColor={muted ? 'danger' : undefined}
+              iconColor={session._muted ? 'danger' : undefined}
               icon="micOff"
-              onClick={() => setMuted(!muted)}
+              onClick={muteHandler}
             />
             
             {isVideo &&
               <CallButton
-                iconColor={mutedVideo ? 'danger' : undefined}
+                iconColor={session._mutedVideo ? 'danger' : undefined}
                 icon="video"
-                onClick={() => setMutedVideo(!mutedVideo)}
+                onClick={muteVideoHandler}
               />
             }
             
             <CallButton
-              icon={hold ? 'play' : 'pause'}
-              onClick={() => setHold(!hold)}
+              icon={session._hold ? 'play' : 'pause'}
+              onClick={holdHandler}
             />
           </View>
 
-          {((session.hasAnswer && !isTransfer) && (allowTransfer || allowBlindTransfer)) && (
+          {((established && !isTransfer) && (allowTransfer || allowBlindTransfer)) && (
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
               {allowTransfer && (
                 <CallButton
@@ -193,7 +178,7 @@ export const SessionScreen = ({
               onCancel={onCancel}
             /> :
             <CancelAcceptCall
-              onAccept={session?.isInbound() && !session?.hasAnswer ? onAccept : null} 
+              onAccept={session?.isInbound() && !established ? onAccept : null} 
               onCancel={onCancel}
               cancelTestID="hangupButton"
               acceptTestID="acceptCallButton"

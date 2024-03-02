@@ -2,15 +2,18 @@ import React from 'react';
 import { View } from 'react-native';
 
 import _ from 'lodash';
-import { UA } from 'sip.js';
+
+import { processAudio } from '008Q';
 
 import {
-  RING_TONE,
-  RING_BACK,
-  NOTIFICATION_TONE,
-  play_failure,
-  play_hangup
-} from '../../Sound';
+  UserAgent,
+  Registerer,
+  Inviter,
+  RegistererState,
+  SessionState
+} from '../../Sip';
+
+import { RING_TONE, RING_BACK, play_tone, play_reject } from '../../Sound';
 
 import { Dialer } from '../Dialer';
 import { Header } from './Components';
@@ -19,11 +22,12 @@ import { SessionScreen } from '../../screens/SessionScreen';
 
 import { Cdr } from '../../store/Cdr';
 import { Context, useStore } from '../../store/Context';
-import { emit } from '../../Events';
+import { emit } from '../../store/Events';
 import { cleanPhoneNumber, sleep, genId, blobToDataURL } from '../../utils';
-import { wavBytes } from '../../008Q';
 
 import { name as packageName } from '../../../package.json';
+
+const USER_AGENT = '008 Softphone';
 
 class Phone extends React.Component {
   constructor(props) {
@@ -46,14 +50,6 @@ class Phone extends React.Component {
 
       ...props
     };
-
-    this.qworker = new Worker(new URL('../../008QWorker.js', import.meta.url), {
-      type: 'module'
-    });
-
-    this.qworker.addEventListener('message', ({ data }) => {
-      this.emit({ type: 'phone:transcript', data });
-    });
   }
 
   emit = ({ type, data = {} }) => {
@@ -103,7 +99,7 @@ class Phone extends React.Component {
     emit({ type, data });
   };
 
-  set_events = () => {
+  click2CallHandler = () => {
     document?.addEventListener('click2call', ({ detail: data }) => {
       let { number } = data;
 
@@ -119,31 +115,24 @@ class Phone extends React.Component {
     });
   };
 
-  set_network_handler = () => {
+  networkHandler = () => {
     window?.addEventListener('offline', () =>
       this.setState({ network: false })
     );
-
     window?.addEventListener('online', () => this.setState({ network: true }));
+
+    this.networkWatcher = setInterval(() => {
+      const { network, session } = this.state;
+      if (!network && session) play_tone();
+    }, 5 * 1000);
   };
 
-  set_ua_daemon = () => {
-    if (this.ua) {
-      this.ua.stop();
-      clearInterval(this.connWatcher);
-      clearInterval(this.networkWatcher);
-    }
-
+  startUADaemon = () => {
     this.set_ua();
 
     this.connWatcher = setInterval(() => {
       const { status } = this.state;
-      if (!this.ua?.isRegistered() && status !== 'offline') this.set_ua();
-    }, 5 * 1000);
-
-    this.networkWatcher = setInterval(() => {
-      const { network, session } = this.state;
-      if (!network && session) play_failure();
+      if (!this.ua?.isConnected() && status !== 'offline') this.ua?.reconnect();
     }, 5 * 1000);
   };
 
@@ -154,97 +143,97 @@ class Phone extends React.Component {
       sipPassword,
       wsUri,
       status,
-      userAgent = '008 Softphone'
+      userAgent = USER_AGENT
     } = this.state;
 
     this.ua?.stop();
 
-    if (!wsUri?.length) return;
-
-    const register = status !== 'offline';
-    const ua = new UA({
-      uri: sipUri,
-      authorizationUser: sipUser,
-      password: sipPassword,
+    if (!wsUri?.length || !sipUri?.length) return;
+    const ua = new UserAgent({
+      uri: UserAgent.makeURI(sipUri),
+      authorizationUsername: sipUser,
+      authorizationPassword: sipPassword,
       userAgentString: userAgent,
-      autostart: false,
-      register,
       transportOptions: {
-        wsServers: [wsUri],
-        traceSip: false,
-        connectionTimeout: 5,
-        reconnectionTimeout: 5,
-        maxReconnectionAttempts: 0
+        server: wsUri
+      },
+      delegate: {
+        onInvite: session => {
+          if (this.state.session?.id) {
+            session.reject();
+            return;
+          }
+
+          this.setState({ session }, async () => {
+            this.processRecording({ session });
+
+            const cdr = new Cdr({ session });
+            const contact = this.context
+              .contacts()
+              .contact_by_phone({ phone: cdr.from });
+            cdr.setContact(contact);
+            session.cdr = cdr;
+
+            session.stateChange.addListener(state => {
+              switch (state) {
+                case SessionState.Established:
+                  RING_TONE.stop();
+                  this.setState({ rand: genId() });
+                  this.emit({ type: 'phone:accepted', data: { cdr } });
+
+                  session.delegate = {
+                    onBye: () => play_reject()
+                  };
+                  break;
+                case SessionState.Terminated:
+                  this.reset();
+                  this.emit({ type: 'phone:terminated', data: { cdr } });
+                  break;
+              }
+            });
+
+            this.emit({ type: 'phone:ringing', data: { cdr } });
+
+            RING_TONE.play();
+            const { allowAutoanswer, autoanswer } = this.state;
+            if (allowAutoanswer || session.autoanswer()) {
+              const sessionSecs = parseInt(session.autoanswer());
+              await sleep(!isNaN(sessionSecs) ? sessionSecs : autoanswer);
+              if (session.state === SessionState.Establishing) session.accept();
+            }
+          });
+        },
+        onConnect: () => {
+          this.setState({ rand: genId() });
+        },
+        onDisconnect: error => {
+          this.setState({ rand: genId() });
+        }
       }
     });
 
-    ua.on('transportCreated', transport => {
-      transport.on('disconnected', async () =>
-        this.setState({ rand: genId() })
-      );
-    });
+    if (status !== 'offline') {
+      await ua.start();
 
-    ['unregistered', 'registrationFailed', 'registered'].forEach(ev => {
-      ua.on(ev, () => this.setState({ rand: genId() }));
-    });
-
-    ua.on('invite', async session => {
-      if (this.state.session?.id) {
-        session.terminate();
-        return;
-      }
-
-      this.processRecording({ session });
-
-      const cdr = new Cdr({ session });
-      cdr.setContact(
-        this.context.contacts().contact_by_phone({ phone: cdr.from })
-      );
-      session.cdr = cdr;
-
-      session.on('accepted', () => {
-        RING_TONE.stop();
-        NOTIFICATION_TONE.stop();
-        this.setState({ rand: genId() });
-
-        this.emit({ type: 'phone:accepted', data: { cdr } });
-      });
-
-      session.on('terminated', (_, cause) => {
-        this.reset(cause);
-        this.emit({ type: 'phone:terminated', data: { cdr } });
-      });
-
-      session.on('failed', ev => {
-        play_failure();
-      });
-
-      this.setState({ session }, async () => {
-        const { allowAutoanswer, autoanswer } = this.state;
-
-        this.emit({ type: 'phone:ringing', data: { cdr } });
-
-        if (allowAutoanswer || session.autoanswer()) {
-          NOTIFICATION_TONE.play();
-
-          const sessionSecs = parseInt(session.autoanswer());
-          await sleep(!isNaN(sessionSecs) ? sessionSecs : autoanswer);
-          if (!session.hasAnswer && !session.endTime) session.accept();
-        } else {
-          RING_TONE.play();
+      const registerer = new Registerer(ua);
+      registerer.stateChange.addListener(state => {
+        switch (state) {
+          case RegistererState.Registered:
+          case RegistererState.Unregistered:
+          case RegistererState.Terminated:
+            this.setState({ rand: genId() });
+            break;
         }
       });
-    });
+      await registerer.register();
+    }
 
-    ua.start();
     this.ua = ua;
   };
 
   answer = async () => {
     const { session, microphone } = this.state;
-    if (session?.hasAnswer) return;
-
-    const video = session.request?.body?.includes('m=video');
+    const video = session.isVideo();
     session?.accept({
       sessionDescriptionHandlerOptions: {
         constraints: {
@@ -256,17 +245,24 @@ class Phone extends React.Component {
   };
 
   hangup = async () => {
-    try {
-      const { session } = this.state;
-      if (session?.endTime) return;
-      session.terminate();
-    } catch (err) {
-      this.reset();
+    const { session } = this.state;
+
+    switch (session.state) {
+      case SessionState.Initial:
+      case SessionState.Establishing:
+        session.isInbound() ? session.reject() : session.cancel();
+        break;
+      case SessionState.Established:
+        session.bye();
+        break;
     }
+
+    // TODO: check this
+    this.reset();
   };
 
   call = async (opts = {}) => {
-    const { dialer_number, number_out, microphone } = this.state;
+    const { dialer_number, number_out, microphone, sipUri } = this.state;
     const { number = dialer_number, extraHeaders = [], video = false } = opts;
 
     const identityHeaders = number_out
@@ -274,46 +270,66 @@ class Phone extends React.Component {
       : [];
 
     try {
-      const target = cleanPhoneNumber(number);
-      const session = this.ua.invite(target, {
-        extraHeaders: [...identityHeaders, ...extraHeaders],
-        sessionDescriptionHandlerOptions: {
-          constraints: {
-            audio: { deviceId: { ideal: microphone } },
-            video
-          }
-        }
+      const {
+        raw: { host, port, scheme }
+      } = UserAgent.makeURI(sipUri);
+      const clean = cleanPhoneNumber(number);
+      const target =
+        UserAgent.makeURI(clean) ||
+        UserAgent.makeURI(
+          `${scheme}:${clean}@${host}${port ? `:${port}` : ''}`
+        );
+      const session = new Inviter(this.ua, target, {
+        extraHeaders: [...identityHeaders, ...extraHeaders]
       });
 
       this.processRecording({ session });
 
       const cdr = new Cdr({ session });
-      cdr.setContact(
-        this.context.contacts().contact_by_phone({ phone: cdr.to })
-      );
+      const contact = this.context
+        .contacts()
+        .contact_by_phone({ phone: cdr.to });
+      cdr.setContact(contact);
       session.cdr = cdr;
 
-      session.on('accepted', () => {
-        RING_BACK.stop();
-        this.setState({ rand: genId() });
+      session.stateChange.addListener(state => {
+        switch (state) {
+          case SessionState.Established:
+            RING_BACK.stop();
+            this.setState({ rand: genId() });
 
-        this.emit({ type: 'phone:accepted', data: { cdr } });
+            this.emit({ type: 'phone:accepted', data: { cdr } });
+
+            session.delegate = {
+              onBye: () => play_reject()
+            };
+            break;
+          case SessionState.Terminated:
+            this.reset();
+            this.emit({ type: 'phone:terminated', data: { cdr } });
+            break;
+        }
       });
 
-      session.on('terminated', (_, cause) => {
-        this.reset(cause);
-        this.emit({ type: 'phone:terminated', data: { cdr } });
-      });
-
-      session.on('failed', message => {
-        play_failure(message);
+      session.invite({
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
+          }
+        },
+        requestDelegate: {
+          onReject: () => play_reject()
+        }
       });
 
       RING_BACK.play();
       this.emit({ type: 'phone:ringing', data: { cdr } });
       this.setState({ session });
-    } catch (_) {
-      play_failure();
+    } catch (err) {
+      console.error(err);
+
+      play_tone();
       this.reset();
     }
   };
@@ -325,7 +341,9 @@ class Phone extends React.Component {
         dialer_number,
         show_blindTransfer,
         microphone,
-        number_out
+        number_out,
+
+        sipUri
       } = this.state;
 
       const {
@@ -339,7 +357,15 @@ class Phone extends React.Component {
         ? [`P-Asserted-Identity:${number_out}`, `x-Number:${number_out}`]
         : [];
 
-      const target = cleanPhoneNumber(number);
+      const {
+        raw: { host, port, scheme }
+      } = UserAgent.makeURI(sipUri);
+      const clean = cleanPhoneNumber(number);
+      const target =
+        UserAgent.makeURI(clean) ||
+        UserAgent.makeURI(
+          `${scheme}:${clean}@${host}${port ? `:${port}` : ''}`
+        );
       const payload = {
         extraHeaders: [...indentityHeaders, ...extraHeaders],
         sessionDescriptionHandlerOptions: {
@@ -352,65 +378,73 @@ class Phone extends React.Component {
 
       if (blind) {
         session.refer(target, payload);
+        session.bye();
         return;
       }
 
-      const sessiont = this.ua.invite(target, payload);
+      const sessiont = new Inviter(this.ua, target, payload);
 
       const cdr = new Cdr({ session: sessiont });
-      cdr.setContact(
-        this.context.contacts().contact_by_phone({ phone: cdr.to })
-      );
+      const contact = this.context
+        .contacts()
+        .contact_by_phone({ phone: cdr.to });
+      cdr.setContact(contact);
       sessiont.cdr = cdr;
 
-      sessiont.on('progress', () => {
-        RING_BACK.play();
+      sessiont.stateChange.addListener(state => {
+        switch (state) {
+          case SessionState.Established:
+            RING_BACK.stop();
+            this.setState({ rand: genId() });
+            break;
+          case SessionState.Terminated:
+            RING_BACK.stop();
+
+            this.setState({ sessiont: null }, () => {
+              try {
+                session?.unhold();
+              } catch (err) {
+                this.reset();
+              }
+            });
+        }
       });
 
-      sessiont.on('accepted', () => {
-        RING_BACK.stop();
-        this.setState({ rand: genId() });
-      });
-
-      sessiont.on('terminated', (_, cause) => {
-        RING_BACK.stop();
-
-        this.setState({ sessiont: null }, () => {
-          try {
-            session?.unhold();
-          } catch (err) {
-            this.reset(cause);
+      RING_BACK.play();
+      sessiont.invite({
+        sessionDescriptionHandlerOptions: {
+          constraints: {
+            audio: { deviceId: { ideal: microphone } },
+            video
           }
-        });
-      });
-
-      sessiont.on('failed', message => {
-        play_failure(message);
+        },
+        requestDelegate: {
+          onReject: () => play_reject()
+        }
       });
 
       this.setState({ sessiont });
     } catch (err) {
-      play_failure();
+      console.error(err);
+      play_tone();
     }
   };
 
-  reset = cause => {
-    const { sessiont } = this.state;
-    try {
-      sessiont?.terminate();
-    } catch (err) {}
+  reset = () => {
+    const { session, sessiont } = this.state;
+    sessiont?.bye();
 
-    this.setState(this.defaults, () => {
-      RING_TONE.stop();
-      RING_BACK.stop();
-      NOTIFICATION_TONE.stop();
-    });
+    RING_TONE.stop();
+    RING_BACK.stop();
 
-    if (cause === 'BYE') play_hangup();
+    if (session && !(session instanceof Inviter)) play_reject();
+
+    this.setState(this.defaults);
   };
 
   processRecording = ({ session }) => {
     const { webhooks } = this.state;
+    if (!webhooks?.length) return;
 
     const type = 'audio/webm';
 
@@ -431,72 +465,78 @@ class Phone extends React.Component {
     let recorderOut;
     const chunksOut = [];
 
-    session.on('accepted', async () => {
-      try {
-        const { peerConnection } = session.sessionDescriptionHandler;
-        const audioContext = new AudioContext();
-        const multi = audioContext.createMediaStreamDestination();
-
-        const addTracks = (tracks, stream, recorder, chunks) =>
-          tracks.forEach(({ track }) => {
-            stream.addTrack(track);
-
-            const src = audioContext.createMediaStreamSource(stream);
-            src.connect(multi);
-
-            recorder = new MediaRecorder(stream);
-            recorder.ondataavailable = ({ data }) => chunks.push(data);
-            recorder.start();
-            recorder.tsStart = Date.now();
-          });
-
-        addTracks(
-          peerConnection.getReceivers(),
-          streamIn,
-          recorderIn,
-          chunksIn
-        );
-        addTracks(
-          peerConnection.getSenders(),
-          streamOut,
-          recorderOut,
-          chunksOut
-        );
-
-        recorder = new MediaRecorder(multi.stream, { mimeType: type });
-        recorder.ondataavailable = ({ data }) => chunks.push(data);
-        recorder.onstop = async () => {
+    session.stateChange.addListener(state => {
+      switch (state) {
+        case SessionState.Established:
           try {
-            const id = session.cdr?.id;
-            const blob = await chunksBlob(chunks);
-            this.emit({
-              type: 'phone:recording',
-              data: { audio: { id, blob } }
-            });
+            const { peerConnection } = session.sessionDescriptionHandler;
+            const audioContext = new AudioContext();
+            const multi = audioContext.createMediaStreamDestination();
 
-            if (webhooks?.length) {
-              this.qworker.postMessage({
-                id,
-                audio: {
-                  remote: await wavBytes({ chunks: chunksIn }),
-                  local: await wavBytes({ chunks: chunksOut })
-                }
+            const addTracks = (tracks, stream, recorder, chunks) =>
+              tracks.forEach(({ track }) => {
+                stream.addTrack(track);
+
+                const src = audioContext.createMediaStreamSource(stream);
+                src.connect(multi);
+
+                recorder = new MediaRecorder(stream);
+                recorder.ondataavailable = ({ data }) => chunks.push(data);
+                recorder.start();
+                recorder.tsStart = Date.now();
               });
-            }
+
+            addTracks(
+              peerConnection.getReceivers(),
+              streamIn,
+              recorderIn,
+              chunksIn
+            );
+            addTracks(
+              peerConnection.getSenders(),
+              streamOut,
+              recorderOut,
+              chunksOut
+            );
+
+            recorder = new MediaRecorder(multi.stream, { mimeType: type });
+            recorder.ondataavailable = ({ data }) => chunks.push(data);
+            recorder.onstop = async () => {
+              try {
+                const id = session.cdr?.id;
+                const blob = await chunksBlob(chunks);
+                this.emit({
+                  type: 'phone:recording',
+                  data: { id, audio: { blob } }
+                });
+
+                const wav = async input => (await processAudio({ input })).wav;
+                this.emit({
+                  type: 'phone:audio',
+                  data: {
+                    id,
+                    audio: {
+                      remote: await wav(chunksIn),
+                      local: await wav(chunksOut)
+                    }
+                  }
+                });
+              } catch (err) {
+                console.error(err);
+              }
+            };
+
+            recorder.start();
           } catch (err) {
-            console.log(err);
+            console.error(err);
           }
-        };
 
-        session.on('terminated', () => {
-          recorder.stop();
-          recorderIn.stop();
-          recorderOut.stop();
-        });
-
-        recorder.start();
-      } catch (err) {
-        console.error(err);
+          break;
+        case SessionState.Terminated:
+          recorder?.stop();
+          recorderIn?.stop();
+          recorderOut?.stop();
+          break;
       }
     });
   };
@@ -511,23 +551,22 @@ class Phone extends React.Component {
 
     if (prevState.status !== state.status) {
       const { ua } = this;
-      if (state.status === 'offline')
-        if (ua?.isRegistered()) ua?.unregister();
-        else if (!ua?.isRegistered()) ua?.register();
+      if (ua) {
+        state.status === 'offline' ? ua.stop() : ua.start();
+      }
     }
 
     if (prevState.ringer !== state.ringer) {
       RING_TONE.setDevice(state.ringer);
-      NOTIFICATION_TONE.setDevice(state.ringer);
     }
-
-    if (!state.sipUri?.length) this.ua?.stop();
   }
 
   componentDidMount = async () => {
     this.unsubscribe = useStore.subscribe(state => {
       const {
         numbers = [],
+        number_out,
+
         speaker,
         microphone,
         ringer,
@@ -553,8 +592,6 @@ class Phone extends React.Component {
         contactsDialer: contacts,
         contactsDialerFilter: contactsFilter
       } = state;
-
-      const { number_out = numbers[0]?.number } = state;
 
       this.setState({
         numbers,
@@ -586,9 +623,9 @@ class Phone extends React.Component {
       });
     });
 
-    this.set_events();
-    this.set_network_handler();
-    this.set_ua_daemon();
+    this.click2CallHandler();
+    this.networkHandler();
+    this.startUADaemon();
   };
 
   componentWillUnmount() {
@@ -627,7 +664,7 @@ class Phone extends React.Component {
       contactsFilter
     } = this.state;
 
-    const noConnection = !this.ua?.isRegistered() || !network;
+    const noConnection = !this.ua?.isConnected() || !network;
     const status_color = statuses.find(
       item => item.value === (noConnection ? 'offline' : status)
     )?.color;
@@ -637,25 +674,34 @@ class Phone extends React.Component {
     };
 
     const showTransferDialerHandler = async (blind = false) => {
-      session?.hasAnswer && session?.hold();
+      await session.hold();
       this.setState({ show_transfer: true, show_blindTransfer: blind });
     };
 
     const transferOnCancelHandler = async () => {
-      this.setState({ show_transfer: false }, async () => {
-        try {
-          sessiont?.terminate();
-        } catch (err) {}
-        session?.unhold();
-      });
+      await session.unhold();
+      switch (sessiont?.state) {
+        case SessionState.Initial:
+        case SessionState.Establishing:
+          sessiont.cancel();
+          break;
+        case SessionState.Established:
+          sessiont.bye();
+          break;
+      }
+
+      this.setState({ show_transfer: false });
     };
 
-    const transferConfirmHandler = () => sessiont.refer(session);
-
-    const onTransferHandler = number => {
+    const transferHandler = number => {
       this.setState({ show_transfer: false }, async () => {
         await this.transfer({ number });
       });
+    };
+
+    const transferConfirmHandler = () => {
+      session.refer(sessiont);
+      session.bye();
     };
 
     const onNumberChangeHandler = number_out =>
@@ -698,8 +744,10 @@ class Phone extends React.Component {
         </View>
 
         <SessionScreen
+          {...session}
           key={session?.id}
           session={session}
+          hold={session?._hold}
           visible={!_.isEmpty(session)}
           onCancel={this.hangup}
           onAccept={this.answer}
@@ -728,9 +776,9 @@ class Phone extends React.Component {
           <Dialer
             testID="transferDialer"
             isTransfer={true}
-            onDialClick={onTransferHandler}
-            onCdrClick={onTransferHandler}
-            onContactClick={(phones = []) => onTransferHandler(phones[0])}
+            onDialClick={transferHandler}
+            onCdrClick={transferHandler}
+            onContactClick={(phones = []) => transferHandler(phones[0])}
             cdrs={this.context.cdrs}
             contacts={contacts}
             contactsFilter={contactsFilter}

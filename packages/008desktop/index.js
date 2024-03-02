@@ -20,6 +20,8 @@ const Store = require('electron-store');
 
 const pjson = require('./package.json');
 
+process.argv.push('--enable-dawn-features=allow_unsafe_apis');
+
 protocol.registerSchemesAsPrivileged([
   {
     scheme: 'file',
@@ -153,6 +155,8 @@ const createWindow = anchor => {
   mainWindow.webContents.on('ready-to-show', () => {
     mainWindow.webContents.send('anchored', { anchored: ANCHORED });
   });
+
+  if (APP_DEBUG) mainWindow.webContents.openDevTools();
 
   mainWindow.setContentSize(0, 0);
   mainWindow.setMenuBarVisibility(false);

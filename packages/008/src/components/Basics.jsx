@@ -1,4 +1,3 @@
-import React from 'react';
 import { 
   ActivityIndicator,
   Image,  
@@ -6,6 +5,7 @@ import {
   TextInput as RNTextInput, 
   TouchableOpacity, 
   View, 
+  Switch as RNSwitch
 } from 'react-native';
 
 import {
@@ -32,7 +32,8 @@ import {
   PhoneIncomingIcon,
   PhoneOutgoingIcon,
   SearchIcon,
-  EyeIcon
+  EyeIcon,
+  QIcon,
 } from './Icons';
 
 import SelectDropdown from 'react-native-select-dropdown';
@@ -138,6 +139,8 @@ export const Select = ({
   )
 }
 
+export const Switch = (props) =>  <RNSwitch activeTrackColor={COLORS.borderColor} activeThumbColor={COLORS.primary} {...props} />;
+
 export const Button = ({ children, color, style, onClick, fullWidth, testID }) => {
   const calculatedColor = COLORS[color] || color;
 
@@ -179,6 +182,7 @@ export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
   if (icon === 'x') return <XIcon { ...styling } />;
   if (icon === 'eye') return <EyeIcon { ...styling } />;
   if (icon === 'search') return <SearchIcon { ...styling } />;
+  if (icon === 'q') return <QIcon { ...styling } />;
 }
 
 export const ButtonIcon = ({ children, icon, onClick, style, color, testID, size = 18 }) => {
@@ -197,7 +201,7 @@ export const ButtonIcon = ({ children, icon, onClick, style, color, testID, size
   )
 };
 
-export const RoundIconButton = ({ color, iconSize, iconColor, style, size = 30, ...props }) => {
+export const RoundIconButton = ({ size = 30, color, iconSize, iconColor, style, ...props }) => {
   return (
     <ButtonIcon 
       {...props}
@@ -350,7 +354,7 @@ export const Status = ({ color, size = 10, style }) => {
 };
 
 export const CallIcon = ({
-  call,
+  call = {},
   ...props
 }) => {
   const { direction } = call;
