@@ -56,9 +56,12 @@ export const SessionScreen = ({
 
   session.stateChange.addListener((state) => {
     if(state === SessionState.Established) {
-      session.setHold(session._hold);
-      session.setMuted(session._muted);
-      session.setMutedVideo(session._mutedVideo);
+      // needs a delay to avoid reinvite exceptions
+      setTimeout(() => {
+        session.setHold(session._hold);
+        session.setMuted(session._muted);
+        session.setMutedVideo(session._mutedVideo);
+      }, 100);
     }
   });
 
