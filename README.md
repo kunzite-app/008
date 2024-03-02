@@ -1,5 +1,7 @@
 ![008-Banner](https://user-images.githubusercontent.com/414967/286295040-fa676e0f-6ae8-4e7f-a2c1-432ac2596ea9.png)
 
+[:mega: Want to do a quick test it without having to install a SIP server?](#quick-test)
+
 # 008 Event-driven AI powered Open Source Softphone
 
 008 is an open-source event-driven AI powered WebRTC Softphone compatible with macOS, Windows, and Linux.  
