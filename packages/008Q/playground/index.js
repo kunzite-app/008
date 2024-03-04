@@ -17,7 +17,9 @@ const main2 = async () => {
 
 const transcribe = async ({ audio }) => {
   const transcriptElem = document.getElementById("transcript");
+  transcriptElem.innerHTML = "";
   const summaElem = document.getElementById("summa");
+  summaElem.innerHTML = "";
 
   const { wav } = await processAudio({ input: audio });
   transcriptElem.innerHTML = "Transcribing...";
@@ -27,9 +29,15 @@ const transcribe = async ({ audio }) => {
       progress * 100
     )}%`;
   };
-  const transcription = await transcript({ wav, onInitProgress });
-
   let transcript_ = "";
+
+  let onProgress = ({ text }) => {
+    transcript_ += `${text}<br/>`;
+    transcriptElem.innerHTML = transcript_;
+    transcriptElem.scrollTop = transcriptElem.scrollHeight;
+  };
+  const transcription = await transcript({ wav, onInitProgress, onProgress });
+  transcript_ = "";
   transcription.forEach(({ text }) => {
     transcript_ += `${text}<br/>`;
   });

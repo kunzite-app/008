@@ -4,18 +4,26 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="index.css">
   </head>
   
   <body>
+    <div class="center-flex">
+      <h1>Just try <span style="color: #F02E65;">008Q</span></h1>
+    </div>
+
     <audio id="audioPlayer" controls src="carrental.mp3"></audio>
     <br>
-    <button type="button" id="transcribeBtn">Let's go</button> or
+    <button class="buttonDemo" type="button" id="transcribeBtn">Let's go</button> or
     <input type="file" id="audioFile" accept="audio/*" />
-    <br><br>
-    <div id="transcript" style="width: 100%; height: 300px; overflow-y: auto; border: 1px solid black;"></div>
-    <br><br>
-    <div id="summa"></div>
 
+    <br><br>
+    <div class="transcript-box" id="transcript"></div>
+    
+    <br><br>
+    <div class="summa-box" id="summa"></div>
+ 
     <script src="../dist/008Q.js"></script>
     <script src="index.js"></script>
   </body>
