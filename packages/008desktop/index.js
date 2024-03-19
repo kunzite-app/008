@@ -35,8 +35,8 @@ const {
     protocol: 'file:',
     slashes: true
   }),
-  APP_DEBUG = false
-} = process.env;
+  APP_DEBUG = true
+} = {};
 
 const STORE = new Store();
 
@@ -51,6 +51,8 @@ let ANCHORED = ISLINUX
   ? true
   : STORE.get('anchored');
 let TRAYPOS;
+
+ANCHORED = false;
 
 let mainWindow;
 let tray;
@@ -144,6 +146,7 @@ const createWindow = anchor => {
       webSecurity: false,
       nodeIntegration: true,
       contextIsolation: false,
+      enableRemoteModule: true,
       preload: path.join(__dirname, 'loader.js')
     }
   });
@@ -158,7 +161,7 @@ const createWindow = anchor => {
 
   if (APP_DEBUG) mainWindow.webContents.openDevTools();
 
-  mainWindow.setContentSize(0, 0);
+  mainWindow.setContentSize(600, 600);
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(APP_URL);
 
