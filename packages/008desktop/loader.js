@@ -51,7 +51,7 @@ app.get('/transcribe', async (req, res, next) => {
   }
 });
 
-app.post('/wht', upload.single('file'), async (req, res, next) => {
+app.post('/q008', upload.single('file'), async (req, res, next) => {
   try {
     await QUEUE.add(async () => {
       const { processAudio } = window.Q008;
