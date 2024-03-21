@@ -4,7 +4,7 @@ import PQueue from 'p-queue';
 import _ from 'lodash';
 
 import { useStore } from './Context';
-import { request } from '../utils';
+import { blobToDataURL, request } from '../utils';
 
 const QUEUE = new PQueue();
 
@@ -77,9 +77,16 @@ export const init = () => {
   );
 
   if (Platform.OS === 'web') {
-    const events = ['contacts', 'settings', 'click2call', 'call', 'hangup'];
+    const events = [
+      'contacts',
+      'settings',
+      'click2call',
+      'call',
+      'hangup',
+      'Q008:audio'
+    ];
 
-    const eventHandler = ev => {
+    const eventHandler = async ev => {
       const { type, detail, data } = ev.data || ev;
 
       if (!events.includes(type)) return;
@@ -89,6 +96,18 @@ export const init = () => {
       if (type === 'contacts') store.contacts().index({ contacts: payload });
 
       if (type === 'settings') store.setSettings(payload);
+
+      if (type === 'Q008:audio') {
+        const { id, wav } = payload;
+        const type = 'audio/webm';
+        const blob = await blobToDataURL(new Blob([wav], { type }));
+        emit({
+          type: 'phone:recording',
+          data: { id, audio: { blob } }
+        });
+
+        if (qTTSEnabled) qworkerTTS.postMessage({ id, wav });
+      }
     };
 
     window?.addEventListener('message', eventHandler);

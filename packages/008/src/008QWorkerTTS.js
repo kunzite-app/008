@@ -1,16 +1,17 @@
 import PQueue from 'p-queue';
 
-import { tts } from '008Q';
+import { transcript, tts } from '008Q';
 
-const QUEUE = new PQueue({ concurrency: 2 });
+const QUEUE = new PQueue({ concurrency: 5 });
 
 self.addEventListener('message', async ({ data }) => {
   console.log(`[008Q] Queuing job ${data.id}`);
-  const { id, audio } = data;
+  const { id, audio, wav } = data;
   QUEUE.add(async () => {
     console.log('[008Q] Transcribing...');
-    const transcript = await tts({ audio });
 
-    self.postMessage({ id, ...transcript });
+    const transcription = await (audio ? tts({ audio }) : transcript({ wav }));
+
+    self.postMessage({ id, transcription });
   });
 });
