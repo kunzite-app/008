@@ -77,7 +77,14 @@ export const init = () => {
   );
 
   if (Platform.OS === 'web') {
-    const events = ['contacts', 'settings', 'click2call', 'call', 'hangup'];
+    const events = [
+      'contacts',
+      'settings',
+      'click2call',
+      'call',
+      'hangup',
+      'Q008:audio'
+    ];
 
     const eventHandler = ev => {
       const { type, detail, data } = ev.data || ev;
@@ -89,6 +96,18 @@ export const init = () => {
       if (type === 'contacts') store.contacts().index({ contacts: payload });
 
       if (type === 'settings') store.setSettings(payload);
+
+      if (type === 'Q008:audio') {
+        const { id, wav } = payload;
+        const type = 'audio/webm';
+        const blob = new Blob([wav], { type });
+        emit({
+          type: 'phone:recording',
+          data: { id, audio: { blob } }
+        });
+
+        if (qTTSEnabled) qworkerTTS.postMessage({ id, wav });
+      }
     };
 
     window?.addEventListener('message', eventHandler);

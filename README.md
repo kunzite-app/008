@@ -251,7 +251,7 @@ Triggered upon the transcription is ready.
   "type": "phone:transcript",
   "data": {
     "id": "uuid", // the call id
-    "segments": [
+    "transcription": [
       {
         "channel": "remote|local",
         "start": 0,

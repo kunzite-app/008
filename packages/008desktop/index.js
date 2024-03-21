@@ -36,7 +36,7 @@ const {
     slashes: true
   }),
   APP_DEBUG = true
-} = {};
+} = process.env;
 
 const STORE = new Store();
 
