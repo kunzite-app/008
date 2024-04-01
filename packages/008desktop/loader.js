@@ -37,15 +37,12 @@ app.get('/ping', async (req, res) => {
   res.send('pong');
 });
 
-app.get('/transcribe', async (req, res, next) => {
+app.post('/config', async (req, res, next) => {
   try {
-    await QUEUE.add(async () => {
-      const { transcript, processAudio } = window.Q008;
-      const { audio } = req.query;
-      const { wav } = await processAudio({ input: audio });
-      const transcription = await transcript({ wav });
-      res.send({ success: true, transcription });
-    });
+    document.dispatchEvent(
+      new CustomEvent('Q008:config', { detail: req.body })
+    );
+    res.send({ acknowledge: true });
   } catch (err) {
     next(err, req, res);
   }
