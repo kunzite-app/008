@@ -103,10 +103,7 @@ export const init = () => {
 
       if (type === 'Q008:audio') {
         const { webhooks = [] } = useStore.getState();
-        if (!webhooks.length) {
-          console.log('no webhooks brodel');
-          // return;
-        }
+        if (!webhooks.length) return;
 
         const { id, path } = payload;
         const { wav } = await processAudio({ input: path });
