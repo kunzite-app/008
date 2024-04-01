@@ -49,11 +49,10 @@ app.post('/login', async (req, res, next) => {
 app.post('/q008', upload.single('file'), async (req, res, next) => {
   try {
     await QUEUE.add(async () => {
-      const { processAudio } = window.Q008;
-      const { wav } = await processAudio({ input: `file://${req.file.path}` });
+      const path = `file://${req.file.path}`;
       const id = req.body.uuid;
       document.dispatchEvent(
-        new CustomEvent('Q008:audio', { detail: { id, wav } })
+        new CustomEvent('Q008:audio', { detail: { id, path } })
       );
 
       res.send({ success: true, id });

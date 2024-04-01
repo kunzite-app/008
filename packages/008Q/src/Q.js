@@ -88,7 +88,9 @@ export const transcript = async ({
   const inputs = new Uint8Array(wav);
 
   const tokenizer = await fetchBytes({ url: data });
+  console.log("tokejnizer", tokenizer);
   const model = await fetchBytes({ url: bin, onProgress: onInitProgress });
+  console.log("model", model);
 
   const consolewarn = console.warn;
   console.warn = () => {};

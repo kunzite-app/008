@@ -5,8 +5,10 @@ import { transcript, tts } from '008Q';
 const QUEUE = new PQueue({ concurrency: 5 });
 
 self.addEventListener('message', async ({ data }) => {
-  console.log(`[008Q] Queuing job ${data.id}`);
   const { id, audio, wav } = data;
+  console.log(`[008Q] Queuing job ${id}`);
+
+  console.log('[008Q]', audio, wav);
   QUEUE.add(async () => {
     console.log('[008Q] Transcribing...');
 

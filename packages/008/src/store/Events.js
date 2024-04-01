@@ -3,6 +3,8 @@ import { Platform } from 'react-native';
 import PQueue from 'p-queue';
 import _ from 'lodash';
 
+import { processAudio } from '008Q';
+
 import { useStore } from './Context';
 import { blobToDataURL, request } from '../utils';
 
@@ -45,6 +47,7 @@ export const emit = async ({ type, data: payload }) => {
 
   const data = { ...payload, context };
 
+  console.log('008Q: Emitting event', type, data);
   for (const idx in store.webhooks) {
     const { endpoint } = store.webhooks[idx];
     QUEUE.add(() => request({ endpoint, body: data, retries: 5, qdelay: 30 }));
@@ -99,7 +102,15 @@ export const init = () => {
       if (type === 'settings') store.setSettings(payload);
 
       if (type === 'Q008:audio') {
-        const { id, wav } = payload;
+        const { webhooks = [] } = useStore.getState();
+        if (!webhooks.length) {
+          console.log('no webhooks brodel');
+          // return;
+        }
+
+        const { id, path } = payload;
+        const { wav } = await processAudio({ input: path });
+
         const type = 'audio/webm';
         const blob = await blobToDataURL(new Blob([wav], { type }));
         emit({
