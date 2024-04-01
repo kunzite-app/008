@@ -37,11 +37,9 @@ app.get('/ping', async (req, res) => {
   res.send('pong');
 });
 
-app.post('/config', async (req, res, next) => {
+app.post('/login', async (req, res, next) => {
   try {
-    document.dispatchEvent(
-      new CustomEvent('Q008:config', { detail: req.body })
-    );
+    document.dispatchEvent(new CustomEvent('Q008:login', { detail: req.body }));
     res.send({ acknowledge: true });
   } catch (err) {
     next(err, req, res);

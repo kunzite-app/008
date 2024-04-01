@@ -84,7 +84,7 @@ export const init = () => {
       'call',
       'hangup',
       'Q008:audio',
-      'Q008:config'
+      'Q008:login'
     ];
 
     const eventHandler = async ev => {
@@ -110,8 +110,7 @@ export const init = () => {
         if (qTTSEnabled) qworkerTTS.postMessage({ id, wav });
       }
 
-      if (type === 'Q008:config') {
-        console.log('here', payload);
+      if (type === 'Q008:login') {
         await store.login(payload);
       }
     };
