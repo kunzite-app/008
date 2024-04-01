@@ -8,7 +8,6 @@ self.addEventListener('message', async ({ data }) => {
   const { id, audio, wav } = data;
   console.log(`[008Q] Queuing job ${id}`);
 
-  console.log('[008Q]', audio, wav);
   QUEUE.add(async () => {
     console.log('[008Q] Transcribing...');
 

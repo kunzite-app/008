@@ -13,5 +13,7 @@
     { "value": "offline", "text": "Offline", "color": "#A9A9A9" }
   ],
   "avatar": "https://avatars.githubusercontent.com/u/59776461",
-  "nickname": "Demo"
+  "nickname": "Demo",
+  "qTts": true,
+  "qSummarization": true
 }
