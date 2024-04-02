@@ -3,8 +3,10 @@ import { Platform } from 'react-native';
 import PQueue from 'p-queue';
 import _ from 'lodash';
 
+import { processAudio } from '008Q';
+
 import { useStore } from './Context';
-import { request } from '../utils';
+import { blobToDataURL, request } from '../utils';
 
 const QUEUE = new PQueue();
 
@@ -45,6 +47,7 @@ export const emit = async ({ type, data: payload }) => {
 
   const data = { ...payload, context };
 
+  console.log('008Q: Emitting event', type, data);
   for (const idx in store.webhooks) {
     const { endpoint } = store.webhooks[idx];
     QUEUE.add(() => request({ endpoint, body: data, retries: 5, qdelay: 30 }));
@@ -77,9 +80,17 @@ export const init = () => {
   );
 
   if (Platform.OS === 'web') {
-    const events = ['contacts', 'settings', 'click2call', 'call', 'hangup'];
+    const events = [
+      'contacts',
+      'settings',
+      'click2call',
+      'call',
+      'hangup',
+      'Q008:audio',
+      'Q008:login'
+    ];
 
-    const eventHandler = ev => {
+    const eventHandler = async ev => {
       const { type, detail, data } = ev.data || ev;
 
       if (!events.includes(type)) return;
@@ -89,6 +100,27 @@ export const init = () => {
       if (type === 'contacts') store.contacts().index({ contacts: payload });
 
       if (type === 'settings') store.setSettings(payload);
+
+      if (type === 'Q008:audio') {
+        const { webhooks = [] } = useStore.getState();
+        if (!webhooks.length) return;
+
+        const { id, path } = payload;
+        const { wav } = await processAudio({ input: path });
+
+        const type = 'audio/webm';
+        const blob = await blobToDataURL(new Blob([wav], { type }));
+        emit({
+          type: 'phone:recording',
+          data: { id, audio: { blob } }
+        });
+
+        if (qTTSEnabled) qworkerTTS.postMessage({ id, wav });
+      }
+
+      if (type === 'Q008:login') {
+        await store.login(payload);
+      }
     };
 
     window?.addEventListener('message', eventHandler);

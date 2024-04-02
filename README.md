@@ -65,7 +65,9 @@ To do so, follow these steps:
     "height": 500
   },
   "avatar": "https://example.com/avatar.jpg",
-  "nickname": "John Doe" // used as Basic Auth user
+  "nickname": "John Doe" // used as Basic Auth user,
+  "qTts": true, // enable transcription
+  "qSummarization": true //enable summarization
 }
 ```
 
@@ -251,7 +253,7 @@ Triggered upon the transcription is ready.
   "type": "phone:transcript",
   "data": {
     "id": "uuid", // the call id
-    "segments": [
+    "transcription": [
       {
         "channel": "remote|local",
         "start": 0,
@@ -331,7 +333,7 @@ We offer a commercial version that incorporates embedded AI models and provides 
 | Events                            | :green_circle: | :green_circle:       |
 | Integrations                      | :red_circle:   | :green_circle:       |
 | AI Speech2Text                    | :green_circle: | :green_circle:       |
-| AI Summarization                  | :red_circle:   | :green_circle:       |
+| AI Summarization                  | :green_circle: | :green_circle:       |
 | AI Sentiment Analysis             | :red_circle:   | :green_circle:       |
 | AI KPI insights                   | :red_circle:   | :green_circle:       |
 | Programmable conversational agent | `ChatGPT`      | `ChatGPT` `embedded` |

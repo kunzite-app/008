@@ -144,6 +144,7 @@ const createWindow = anchor => {
       webSecurity: false,
       nodeIntegration: true,
       contextIsolation: false,
+      enableRemoteModule: true,
       preload: path.join(__dirname, 'loader.js')
     }
   });
