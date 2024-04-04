@@ -27,5 +27,6 @@
     "**/*.{json,md,yaml,yml}": [
       "lerna run format -- --write ."
     ]
-  }
+  },
+  "version": "v1.23.00"
 }
