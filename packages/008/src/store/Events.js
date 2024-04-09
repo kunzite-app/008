@@ -8,7 +8,7 @@ import { processAudio } from '008Q';
 import { useStore } from './Context';
 import { blobToDataURL, request } from '../utils';
 
-const QUEUE = new PQueue();
+const QUEUE = new PQueue({ concurrency: 5 });
 
 let qLLMEnabled = false;
 const qworkerLLM = new Worker(new URL('../008QWorkerLLM.js', import.meta.url), {
