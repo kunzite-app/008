@@ -30,12 +30,12 @@ protocol.registerSchemesAsPrivileged([
 ]);
 
 const {
-  APP_URL = url.format({
+  APP_URL_008 = url.format({
     pathname: path.join(__dirname, 'app/index.html'),
     protocol: 'file:',
     slashes: true
   }),
-  APP_DEBUG = false
+  APP_DEBUG_008 = 'no'
 } = process.env;
 
 const STORE = new Store();
@@ -135,7 +135,7 @@ const createWindow = anchor => {
     frame: !ANCHORED,
     skipTaskbar: ANCHORED,
     useContentSize: !ANCHORED,
-    resizable: APP_DEBUG,
+    resizable: APP_DEBUG_008 === 'yes',
     fullscreenable: false,
     maximizable: false,
     minimizable: false,
@@ -150,18 +150,18 @@ const createWindow = anchor => {
   });
 
   mainWindow.webContents.on('did-fail-load', () => {
-    setTimeout(() => mainWindow.loadURL(APP_URL), 1000);
+    setTimeout(() => mainWindow.loadURL(APP_URL_008), 1000);
   });
 
   mainWindow.webContents.on('ready-to-show', () => {
     mainWindow.webContents.send('anchored', { anchored: ANCHORED });
   });
 
-  if (APP_DEBUG) mainWindow.webContents.openDevTools();
+  if (APP_DEBUG_008 === 'yes') mainWindow.webContents.openDevTools();
 
   mainWindow.setContentSize(0, 0);
   mainWindow.setMenuBarVisibility(false);
-  mainWindow.loadURL(APP_URL);
+  mainWindow.loadURL(APP_URL_008);
 
   mainWindow.on('close', ev => {
     if (!QUITTING) ev.preventDefault();

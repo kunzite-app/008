@@ -14,7 +14,7 @@
   "productName": "008",
   "main": "index.js",
   "scripts": {
-    "start": "APP_DEBUG=true APP_URL=http://localhost:19006/ electron .",
+    "start": "APP_DEBUG_008=yes APP_URL_008=http://localhost:19006/ electron .",
     "lint": "eslint ./",
     "format": "prettier --write",
     "build": "yarn build-icons && electron-builder build -mwl -c.extraMetadata.main=index.js --publish never",
