@@ -32,6 +32,7 @@ const initializeStore = async state => {
 
   const initAudioDevices = async () => {
     const setAudioDevices = async () => {
+    try {
       const devices = await getSpeakers();
       const microphones = await getMicrophones();
 
@@ -42,11 +43,14 @@ const initializeStore = async state => {
       }
 
       state.setSettings({ devices, microphones });
+
+      } catch (err) {
+        console.error(err);
+      };
     };
 
-    if (Platform.OS === 'web') {
+    if (Platform.OS === 'web')
       navigator.mediaDevices.ondevicechange = setAudioDevices;
-    }
     setAudioDevices();
   };
 
@@ -65,9 +69,11 @@ const initializeStore = async state => {
 
   await requestPermissions();
   initAudioDevices();
-  initContacts();
+
   initElectron();
   initEvents();
+
+  initContacts();
 };
 
 const DEFAULTS = {
