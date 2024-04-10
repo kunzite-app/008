@@ -2,5 +2,5 @@
   "$schema": "node_modules/lerna/schemas/lerna-schema.json",
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "version": "2.0.2-dev.1"
+  "version": "2.0.2-dev.2"
 }
