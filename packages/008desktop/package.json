@@ -1,7 +1,7 @@
 {
   "name": "008desktop",
   "description": "Open-source event-driven AI powered Softphone",
-  "version": "2.0.2-dev.2",
+  "version": "2.0.2-beta.0",
   "license": "AGPL-3.0-only",
   "private": true,
   "author": {
@@ -78,7 +78,7 @@
     }
   },
   "dependencies": {
-    "008Q": "^2.0.0-beta.0",
+    "008Q": "file:../008Q",
     "body-parser": "^1.20.2",
     "electron-log": "^4.4.8",
     "electron-store": "^8.1.0",

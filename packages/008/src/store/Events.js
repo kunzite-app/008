@@ -102,7 +102,6 @@ export const init = () => {
       if (type === 'settings') store.setSettings(payload);
 
       if (type === 'Q008:audio') {
-        console.log('008Q: Processing audio');
         const { webhooks = [] } = useStore.getState();
         if (!webhooks.length) return;
 

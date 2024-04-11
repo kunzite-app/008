@@ -2,6 +2,14 @@
 # yarn lockfile v1
 
 
+"008Q@file:packages/008Q":
+  version "2.0.0-beta.0"
+  dependencies:
+    "@mlc-ai/web-llm" "file:../../../../Library/Caches/Yarn/v6/npm-008-2.0.0-beta.0-beeee4bf-2ea5-413c-b238-6b056b045220-1712857151608/node_modules/web-llm"
+    audiobuffer-to-wav "^1.0.0"
+    onnxruntime-web "^1.16.3"
+    whisper-webgpu "^0.8.0"
+
 "7zip-bin@~5.1.1":
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/7zip-bin/-/7zip-bin-5.1.1.tgz#9274ec7460652f9c632c59addf24efb1684ef876"
@@ -2568,6 +2576,9 @@
   integrity sha512-MB8trWaFREpmb037k/d0bB7T2BP7Ai24w1e1tbz3ASLB0/lwphsq3Nq8S9I5AsI5vs4zAQT+SB5nC5/dLYTiOg==
   dependencies:
     "@nevware21/ts-utils" ">= 0.9.4 < 2.x"
+
+"@mlc-ai/web-llm@file:packages/web-llm":
+  version "0.0.1"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"

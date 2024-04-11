@@ -16,7 +16,7 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "@mlc-ai/web-llm": "^2.0.0-beta.0",
+    "@mlc-ai/web-llm": "file:../web-llm",
     "audiobuffer-to-wav": "^1.0.0",
     "onnxruntime-web": "^1.16.3",
     "whisper-webgpu": "^0.8.0"
