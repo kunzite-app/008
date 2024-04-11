@@ -35,7 +35,7 @@ const {
     protocol: 'file:',
     slashes: true
   }),
-  APP_DEBUG_008 = 'yes'
+  APP_DEBUG_008 = 'no'
 } = process.env;
 
 const STORE = new Store();
