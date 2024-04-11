@@ -10,6 +10,8 @@ import { encode } from 'base-64';
 import _ from 'lodash';
 
 import { getMicrophones, getSpeakers } from '../Sound';
+import { init as initElectron } from './Electron';
+import { init as initEvents } from './Events';
 import Contacts from './Contacts';
 
 const contacts = new Contacts();
@@ -67,6 +69,9 @@ const initializeStore = async state => {
 
   await requestPermissions();
   initAudioDevices();
+
+  initElectron();
+  initEvents();
 
   initContacts();
 };
