@@ -1,0 +1,22 @@
+{
+  "name": "@mlc-ai/web-llm",
+  "version": "0.0.0",
+  "description": "Hardware accelerated language model chats on browsers",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "type": "module",
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mlc-ai/web-llm"
+  },
+  "keywords": [
+    "llm",
+    "large language model",
+    "machine learning"
+  ],
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/mlc-ai/web-llm"
+}

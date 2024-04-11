@@ -3,9 +3,9 @@
 
 
 "008Q@file:packages/008Q":
-  version "2.0.0-beta.0"
+  version "2.0.2-dev.4"
   dependencies:
-    "@mlc-ai/web-llm" "file:../../../../Library/Caches/Yarn/v6/npm-008-2.0.0-beta.0-f5e59798-0bb9-4c85-86d7-e6cc5b9c6631-1712860367705/node_modules/web-llm"
+    "@mlc-ai/web-llm" "file:../../../../Library/Caches/Yarn/v6/npm-008-2.0.2-dev.4-035b6c86-e254-4f59-9b6b-b59dcbf3657f-1712879796222/3Party/web-llm"
     audiobuffer-to-wav "^1.0.0"
     onnxruntime-web "^1.16.3"
     whisper-webgpu "^0.8.0"
@@ -2602,7 +2602,7 @@
   dependencies:
     "@nevware21/ts-utils" ">= 0.10.4 < 2.x"
 
-"@mlc-ai/web-llm@file:packages/web-llm":
+"@mlc-ai/web-llm@file:3Party/web-llm":
   version "0.0.0"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
