@@ -11,6 +11,7 @@ export const unanchor = () => ipcRenderer?.send('unanchor');
 export const resize = size => ipcRenderer?.send('resize', { ...size });
 
 export const init = () => {
+  console.log( 'Electron init')
   try {
     ipcRenderer = window.require('electron').ipcRenderer;
 

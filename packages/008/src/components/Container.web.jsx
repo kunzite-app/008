@@ -3,6 +3,12 @@ import { View } from 'react-native';
 import { COLORS } from './Basics';
 import { useStore } from '../store/Context';
 
+import { init } from '../store/Electron';
+import { init as initEvents } from '../store/Events';
+
+init();
+initEvents();
+
 export const Container = ({ children }) => {
   const {
     size: { width, height }

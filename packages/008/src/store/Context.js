@@ -70,9 +70,6 @@ const initializeStore = async state => {
   await requestPermissions();
   initAudioDevices();
 
-  initElectron();
-  initEvents();
-
   initContacts();
 };
 

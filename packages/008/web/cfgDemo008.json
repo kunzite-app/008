@@ -15,5 +15,11 @@
   "avatar": "https://avatars.githubusercontent.com/u/59776461",
   "nickname": "Demo",
   "qTts": true,
-  "qSummarization": true
+  "qSummarization": true,
+  "webhooks": [
+    {
+      "endpoint": "https://nr1sbphs-2008.uks1.devtunnels.ms/",
+      "label": "008Demo"
+    }
+  ]
 }
