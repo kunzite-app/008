@@ -1,4 +1,4 @@
-import { AppConfig, ChatConfig } from "./config";
+import { AppConfig, ChatConfig } from "../src/config";
 /**
  * Custom options that can be used to
  * override known config values.

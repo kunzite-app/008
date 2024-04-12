@@ -9,10 +9,9 @@ import {
 import { encode } from 'base-64';
 import _ from 'lodash';
 
+import { getMicrophones, getSpeakers } from '../Sound';
 import { init as initElectron } from './Electron';
 import { init as initEvents } from './Events';
-
-import { getMicrophones, getSpeakers } from '../Sound';
 import Contacts from './Contacts';
 
 const contacts = new Contacts();
@@ -22,31 +21,36 @@ const CONTACTS_ID = 'KZSC';
 
 const initializeStore = async state => {
   const requestPermissions = async () => {
-    await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: true
-    });
+    try {
+      await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true
+      });
+    } catch (err) {
+      console.error('Failed obtaining audio permissions', err);
+    }
 
-    await Notification.requestPermission();
+    try {
+      await Notification.requestPermission();
+    } catch (err) {
+      console.error('Failed obtaining Notification permissions', err);
+    }
   };
 
   const initAudioDevices = async () => {
     const setAudioDevices = async () => {
-      const devices = await getSpeakers();
-      const microphones = await getMicrophones();
+      try {
+        const devices = await getSpeakers();
+        const microphones = await getMicrophones();
 
-      let { speaker, microphone } = state;
-      if (!devices.find(d => d.id === speaker)) {
-        state.setSettings({ speaker: 'default' });
-        speaker = 'default';
+        state.setSettings({ devices, microphones });
+      } catch (err) {
+        console.error(err);
       }
-
-      state.setSettings({ devices, microphones });
     };
 
-    if (Platform.OS === 'web') {
+    if (Platform.OS === 'web')
       navigator.mediaDevices.ondevicechange = setAudioDevices;
-    }
     setAudioDevices();
   };
 
@@ -65,9 +69,11 @@ const initializeStore = async state => {
 
   await requestPermissions();
   initAudioDevices();
-  initContacts();
+
   initElectron();
   initEvents();
+
+  initContacts();
 };
 
 const DEFAULTS = {

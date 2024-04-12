@@ -186,8 +186,8 @@ WebLLM package is a web runtime designed for [MLC LLM](https://github.com/mlc-ai
    2. Install jekyll by following the [official guides](https://jekyllrb.com/docs/installation/). It is the package we use for website. This is not needed if you're using nextjs (see next-simple-chat in the examples).
    3. Install jekyll-remote-theme by command. Try [gem mirror](https://gems.ruby-china.com/) if install blocked.
       `shell
-    gem install jekyll-remote-theme
-    `
+gem install jekyll-remote-theme
+`
       We can verify the successful installation by trying out `emcc` and `jekyll` in terminal, respectively.
 
 2. Setup necessary environment

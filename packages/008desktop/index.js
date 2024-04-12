@@ -135,7 +135,7 @@ const createWindow = anchor => {
     frame: !ANCHORED,
     skipTaskbar: ANCHORED,
     useContentSize: !ANCHORED,
-    resizable: APP_DEBUG_008 === 'yes',
+    resizable: true,
     fullscreenable: false,
     maximizable: false,
     minimizable: false,
@@ -159,7 +159,7 @@ const createWindow = anchor => {
 
   if (APP_DEBUG_008 === 'yes') mainWindow.webContents.openDevTools();
 
-  mainWindow.setContentSize(0, 0);
+  mainWindow.setContentSize(340, 460);
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadURL(APP_URL_008);
 

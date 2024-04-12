@@ -1,7 +1,7 @@
 import * as tvmjs from "tvmjs";
 import { Tokenizer } from "@mlc-ai/web-tokenizers";
-import { ChatConfig } from "./config";
-import { LogitProcessor } from "./types";
+import { ChatConfig } from "../src/config";
+import { LogitProcessor } from "../src/types";
 export declare class LLMChatPipeline {
     private config;
     private tokenizer;

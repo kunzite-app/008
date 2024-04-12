@@ -26,7 +26,7 @@
     "e2e": "yarn web & cypress run"
   },
   "dependencies": {
-    "008Q": "^2.0.0-beta.0",
+    "008Q": "file:../008Q",
     "@expo/webpack-config": "^18.0.1",
     "@microsoft/applicationinsights-react-js": "^17.0.1",
     "@microsoft/applicationinsights-web": "^3.0.3",
