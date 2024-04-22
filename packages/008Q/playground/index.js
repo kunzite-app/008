@@ -43,7 +43,6 @@ const transcribe = async ({ audio }) => {
     )}%`;
   };
 
-  console.log("hjererrer");
   const summa = await summarize({ transcription, onInitProgress });
   summaElem.innerHTML = summa;
 };
