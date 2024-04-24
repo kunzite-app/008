@@ -1,4 +1,5 @@
 const createExpoWebpackConfigAsync = require('@expo/webpack-config');
+const isElectron = process.env.IS_ELECTRON === 'yes';
 
 module.exports = async function (env, argv) {
   const config = await createExpoWebpackConfigAsync(
@@ -8,7 +9,7 @@ module.exports = async function (env, argv) {
     argv
   );
 
-  // config.output.publicPath = '/';
+  if (!isElectron) config.output.publicPath = '/';
 
   return config;
 };
