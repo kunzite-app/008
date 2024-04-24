@@ -13,7 +13,7 @@
     "start": "yarn start-desktop",
     "start-desktop": "lerna run web --scope @kunzite/008 & lerna run start --scope 008desktop",
     "build-web": "lerna run build-web",
-    "build-desktop": "lerna run build-web && rm -rf packages/008desktop/app && mv packages/008/web-build packages/008desktop/app && lerna run build --scope 008desktop",
+    "build-desktop": "lerna run build-web && rm -rf packages/008desktop/app && mv packages/008/web-build packages/008desktop/app && cp -R packages/008desktop/app/static/ packages/008desktop/app/static2/ && mv packages/008desktop/app/static2 packages/008desktop/app/static/js/static && lerna run build --scope 008desktop",
     "clean": "lerna clean",
     "prepare": "husky install",
     "lint": "lerna run lint",
