@@ -9,7 +9,7 @@ module.exports = async function (env, argv) {
     argv
   );
 
-  if (isElectron) config.output.publicPath = '/';
+  if (!isElectron) config.output.publicPath = '/';
 
   return config;
 };
