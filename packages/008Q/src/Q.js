@@ -190,10 +190,28 @@ const llmconf = {
   useIndexedDBCache: true,
   model_list: [
     {
+      model_id: "3B32Q4",
+      model_url: "https://huggingface.co/OO8/3B32/resolve/main/Q4/",
+      model_lib_url:
+        "https://huggingface.co/OO8/3B32/resolve/main/Q4/webllm.wasm",
+    },
+    {
+      model_id: "3B32",
+      model_url: "https://huggingface.co/OO8/3B32/resolve/main/",
+      model_lib_url: "https://huggingface.co/OO8/3B32/resolve/main/webllm.wasm",
+    },
+    {
       model_id: "3B",
       model_url: "https://huggingface.co/OO8/3B/resolve/v2/",
       model_lib_url:
         "https://huggingface.co/OO8/3B/resolve/v2/phi-2-q0f16-ctx2k-webgpu.wasm",
+      required_features: ["shader-f16"],
+    },
+    {
+      model_id: "3Bdev",
+      model_url: "http://localhost:8082/dolphin-2_6-phi-2/MLC/",
+      model_lib_url:
+        "https://huggingface.co/OO8/dolphin-2_6-phi-2/MLC/webllm.wasm",
       required_features: ["shader-f16"],
     },
   ],
@@ -203,26 +221,29 @@ let LLM;
 export const chat = async ({
   prompt,
   chatOpts,
-  model = "3B",
+  model = "3B32Q4",
   onInitProgress = (report) => console.log(report),
   onProgress = (step, message) => console.log(step, message),
 }) => {
   let chat = LLM;
 
-  if (!chat) {
-    chat = new webllm.Engine();
-    chat.setInitProgressCallback(onInitProgress);
-    await chat.reload(model, chatOpts, llmconf);
+  const run = async (model) => {
+    if (!chat) {
+      chat = new webllm.Engine();
+      chat.setInitProgressCallback(onInitProgress);
+      await chat.reload(model, chatOpts, llmconf);
 
-    LLM = chat;
-  } else {
-    chat.interruptGenerate();
-  }
+      LLM = chat;
+    } else {
+      chat.interruptGenerate();
+    }
+    const response = await chat.generate(prompt, onProgress);
+    chat.resetChat();
 
-  const response = await chat.generate(prompt, onProgress);
-  chat.resetChat();
+    return response;
+  };
 
-  return response;
+  return run(model);
 };
 
 export const summarize = async ({
