@@ -152,6 +152,17 @@ const WebhookCell = ({ webhook, onClick }) => {
   );
 }
 
+const EventCell = ({ event }) => {
+  const { type, data: { id, error } } = event;
+  return (
+    <View style={{ flex: 1, justifyContent: 'space-evenly', height: CELL_HEIGHT, marginVertical: PADDING  }}>
+      <Text style={{ fontSize: SMALLFONT, color: error ? COLORS.danger : COLORS.primary }}>
+        {JSON.stringify({ type, id, error })}
+      </Text>
+    </View>
+  );
+}
+
 export const CdrsList = (props) => (
   <List {...props} renderItem={({ item }) =>
     <CdrCell cdr={item} onClick={props?.onClick} />} />
@@ -165,4 +176,9 @@ export const ContactsList = (props) => (
 export const WebhooksList = (props) => (
   <List {...props} renderItem={({ item }) =>
     <WebhookCell webhook={item} onClick={props?.onClick} />} />
+)
+
+export const EventsList = (props) => (
+  <List {...props} renderItem={({ item }) =>
+    <EventCell event={item} />} />
 )

@@ -10,7 +10,12 @@ self.addEventListener('message', async ({ data }) => {
 
   QUEUE.add(async () => {
     console.log('[008Q] Summarizing...');
-    const summarization = await summarize({ transcription });
-    self.postMessage({ id, summarization });
+    try {
+      const summarization = await summarize({ transcription });
+      self.postMessage({ id, summarization });
+    } catch (err) {
+      console.error('[008Q] Error summarizing', err);
+      self.postMessage({ id, error: err.message });
+    }
   });
 });

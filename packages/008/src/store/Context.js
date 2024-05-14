@@ -104,6 +104,7 @@ const DEFAULTS = {
 
   qTts: true,
   qSummarization: false,
+  events: [],
 
   size: { width: 340, height: 460 }
 };
@@ -206,6 +207,12 @@ export const useStore = create(
           const { headers, ...rest } = cdr;
           cdrs.unshift(rest);
           set(() => ({ cdrs: cdrs.slice(0, 100) }));
+        },
+
+        eventAdd: event => {
+          const { events } = get();
+          events.unshift(event);
+          set(() => ({ events: events.slice(0, 100) }));
         },
 
         clear: () => {
