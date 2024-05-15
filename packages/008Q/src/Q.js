@@ -200,20 +200,6 @@ const llmconf = {
       model_url: "https://huggingface.co/OO8/3B32/resolve/main/",
       model_lib_url: "https://huggingface.co/OO8/3B32/resolve/main/webllm.wasm",
     },
-    {
-      model_id: "3B",
-      model_url: "https://huggingface.co/OO8/3B/resolve/v2/",
-      model_lib_url:
-        "https://huggingface.co/OO8/3B/resolve/v2/phi-2-q0f16-ctx2k-webgpu.wasm",
-      required_features: ["shader-f16"],
-    },
-    {
-      model_id: "3Bdev",
-      model_url: "http://localhost:8082/dolphin-2_6-phi-2/MLC/",
-      model_lib_url:
-        "https://huggingface.co/OO8/dolphin-2_6-phi-2/MLC/webllm.wasm",
-      required_features: ["shader-f16"],
-    },
   ],
 };
 
