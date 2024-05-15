@@ -213,23 +213,18 @@ export const chat = async ({
 }) => {
   let chat = LLM;
 
-  const run = async (model) => {
-    if (!chat) {
-      chat = new webllm.Engine();
-      chat.setInitProgressCallback(onInitProgress);
-      await chat.reload(model, chatOpts, llmconf);
+  if (!chat) {
+    chat = new webllm.Engine();
+    chat.setInitProgressCallback(onInitProgress);
+    await chat.reload(model, chatOpts, llmconf);
 
-      LLM = chat;
-    } else {
-      chat.interruptGenerate();
-    }
-    const response = await chat.generate(prompt, onProgress);
-    chat.resetChat();
+    LLM = chat;
+  }
 
-    return response;
-  };
+  const response = await chat.generate(prompt, onProgress);
+  chat.resetChat();
 
-  return run(model);
+  return response;
 };
 
 export const summarize = async ({
