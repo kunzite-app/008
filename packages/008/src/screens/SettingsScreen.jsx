@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 
 import { Screen } from './Screen';
@@ -12,7 +12,7 @@ import {
   UnanchorIcon,
   XIcon
 } from '../components/Icons';
-import { WebhooksList } from '../components/Lists';
+import { EventsList, WebhooksList } from '../components/Lists';
 
 import { useStore } from '../store/Context';
 
@@ -70,7 +70,6 @@ export const ExitForm = () => {
 
   return (
     <View>
-      <HRule />
       <RowLink onClick={() => setSettings({ anchored: !anchored })}
         text={!anchored ? 'Anchor' : 'Unanchor'}
       />
@@ -114,7 +113,7 @@ const StatusText = ({ text, color } = {}) => (
   </View>
 )
 
-export const SettingsForm = (props) => {
+export const StatusForm = (props) => {
   const { style, onChange, ...initialValues } = props
   const [values, setValues] = useState(initialValues);
 
@@ -306,7 +305,39 @@ export const ContactsForm = () => {
   );
 };
 
-export const SettingsScreen = () => {
+export const QView = () => {
+  const store = useStore();
+  const {
+    setSettings,
+
+    qTts,
+    qSummarization,
+    events
+  } = store;
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Title>008Q</Title>
+      <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
+        <Text>Transcribe</Text>
+        <Switch value={qTts} onValueChange={() => {
+          const value = !qTts;
+          value ? setSettings({ qTts: value }) : setSettings({ qTts: false, qSummarization: false })
+        }} />
+      </View>
+      <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
+        <Text>Summarize</Text>
+        <Switch value={qSummarization} onValueChange={() => setSettings({ qSummarization: !qSummarization })} />
+      </View>
+      <HRule />
+      <View style={{ flex: 1 }}>
+        <EventsList data={events} />
+      </View>
+    </View>
+  )
+}
+
+export const SettingsScreen = ({ visible = false, closeable = true, server = false }) => {
   const store = useStore();
   const {
     settingsUri,
@@ -320,9 +351,6 @@ export const SettingsScreen = () => {
     settingsTab = 'user',
 
     webhooks,
-
-    qTts,
-    qSummarization
   } = store;
 
   const [option, setOption] = useState(settingsTab);
@@ -352,7 +380,13 @@ export const SettingsScreen = () => {
   const content = {
     user: (
       <View style={{ flex: 1 }}>
-        <SettingsForm {...store} onChange={onChangeSettingsHandler} />
+        {!server &&
+          <Fragment>
+            <StatusForm {...store} onChange={onChangeSettingsHandler} />
+            <HRule />
+          </Fragment>
+        }
+
         <ExitForm />
         <View style={{ flex: 1, justifyContent: 'flex-end' }}>
           <DangerZone />
@@ -408,37 +442,26 @@ export const SettingsScreen = () => {
         <WebhooksList data={webhooks} />
       </View>
     ),
-    q: (
-      <View style={{ flex: 1 }}>
-        <Title>008Q</Title>
-        <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
-          <Text>Transcribe</Text>
-          <Switch value={qTts} onValueChange={() => {
-            const value = !qTts;
-            value ? setSettings({ qTts: value }) : setSettings({ qTts: false, qSummarization: false })
-          }} />
-        </View>
-        <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
-        <Text>Summarize</Text>
-        <Switch value={qSummarization} onValueChange={() => setSettings({ qSummarization: !qSummarization })} />
-        </View>
-      </View>
-    ),
+    q: <QView />,
   };
-  
-  const opts = [
-    { option: 'user', icon: 'user' },
-    { option: 'connection', icon: 'settings' },
+
+  let opts = [
+    { option: 'user', icon: 'user', server: true },
+    { option: 'connection', icon: 'settings', server: true },
     { option: 'devices', icon: 'headphones' },
     { option: 'contacts', icon: 'users' },
-    { option: 'webhooks', icon: 'share2' },
-    { option: 'q', icon: 'q' }
+    { option: 'webhooks', icon: 'share2', server: true },
+    { option: 'q', icon: 'q', server: true }
   ]
 
+
+  if (server)
+    opts = opts.filter(opt => opt.server);
+  
   return (
     <Screen
-      closeable={true}
-      visible={showSettings}
+      closeable={closeable}
+      visible={visible || showSettings}
       onClose={toggleShowSettings}
     >
       <View  style={{ flex: 1, flexDirection: 'row' }}>

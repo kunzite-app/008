@@ -48,6 +48,9 @@ export const emit = async ({ type, data: payload }) => {
   const data = { ...payload, context };
 
   console.log('008Q: Emitting event', type, data);
+  const { blob, ...valid } = data;
+  store.eventAdd({ type, data: valid });
+
   for (const idx in store.webhooks) {
     const { endpoint } = store.webhooks[idx];
     QUEUE.add(() => request({ endpoint, body: data, retries: 5, qdelay: 30 }));

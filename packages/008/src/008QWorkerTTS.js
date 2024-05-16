@@ -10,9 +10,14 @@ self.addEventListener('message', async ({ data }) => {
 
   QUEUE.add(async () => {
     console.log('[008Q] Transcribing...');
-
-    const transcription = await (audio ? tts({ audio }) : transcript({ wav }));
-
-    self.postMessage({ id, transcription });
+    try {
+      const transcription = await (audio
+        ? tts({ audio })
+        : transcript({ wav }));
+      self.postMessage({ id, transcription });
+    } catch (err) {
+      console.error('[008Q] Error transcribing', err);
+      self.postMessage({ id, error: err.message });
+    }
   });
 });
