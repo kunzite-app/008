@@ -312,12 +312,21 @@ export const QView = () => {
 
     qTts,
     qSummarization,
-    events
+    events,
+
+    server
   } = store;
 
   return (
     <View style={{ flex: 1 }}>
       <Title>008Q</Title>
+      <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
+        <Text>Server Only</Text>
+        <Switch value={server} onValueChange={(val) => setSettings({ server: val })} />
+      </View>
+
+      <HRule />
+      
       <View style={{ flexDirection: 'row',  justifyContent: 'space-between', padding: 5 }}>
         <Text>Transcribe</Text>
         <Switch value={qTts} onValueChange={() => {
@@ -337,7 +346,7 @@ export const QView = () => {
   )
 }
 
-export const SettingsScreen = ({ visible = false, closeable = true, server = false }) => {
+export const SettingsScreen = ({ visible = false, closeable = true }) => {
   const store = useStore();
   const {
     settingsUri,
@@ -351,6 +360,8 @@ export const SettingsScreen = ({ visible = false, closeable = true, server = fal
     settingsTab = 'user',
 
     webhooks,
+    
+    server,
   } = store;
 
   const [option, setOption] = useState(settingsTab);
