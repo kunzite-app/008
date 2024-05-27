@@ -3,6 +3,10 @@ on: pull_request
 
 jobs:
   test:
+    env:
+      SDL_VIDEODRIVER: "dummy"
+      SDL_AUDIODRIVER: "disk"
+
     runs-on: ubuntu-latest
 
     steps:
