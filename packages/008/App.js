@@ -26,7 +26,7 @@ appInsights.trackPageView();
 
 export default function App() {
   const store = useStore();
-  const { settingsUri, toggleShowSettings, server } = store;
+  const { settingsUri, toggleShowSettings, server, showSettings } = store;
 
   useEffect(() => {
     const mustSettings = !settingsUri;
@@ -56,7 +56,10 @@ export default function App() {
       <ContextProvider>
         <Container>
           {!server && <PhoneScreen />}
-          <SettingsScreen closeable={!server} />
+          <SettingsScreen
+            closeable={!server}
+            visible={showSettings || server}
+          />
         </Container>
       </ContextProvider>
     </AppInsightsErrorBoundary>
