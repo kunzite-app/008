@@ -355,7 +355,6 @@ export const SettingsScreen = ({ visible = false, closeable = true }) => {
     login,
 
     setSettings,
-    showSettings,
     toggleShowSettings,
     settingsTab = 'user',
 
@@ -472,7 +471,7 @@ export const SettingsScreen = ({ visible = false, closeable = true }) => {
   return (
     <Screen
       closeable={closeable}
-      visible={visible || showSettings}
+      visible={visible}
       onClose={toggleShowSettings}
     >
       <View  style={{ flex: 1, flexDirection: 'row' }}>
