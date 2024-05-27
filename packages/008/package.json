@@ -1,7 +1,7 @@
 {
   "name": "@kunzite/008",
   "description": "Open-source event-driven AI powered Softphone",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "license": "AGPL-3.0-only",
   "private": true,
   "author": {
