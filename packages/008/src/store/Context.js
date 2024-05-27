@@ -106,7 +106,9 @@ const DEFAULTS = {
   qSummarization: false,
   events: [],
 
-  size: { width: 340, height: 460 }
+  size: { width: 340, height: 460 },
+
+  server: false
 };
 
 const DEFAULTS_NOCONFIG = {
