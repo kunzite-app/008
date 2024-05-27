@@ -55,7 +55,7 @@ export default function App() {
     >
       <ContextProvider>
         <Container>
-          {server && <PhoneScreen />}
+          {!server && <PhoneScreen />}
           <SettingsScreen closeable={!server} />
         </Container>
       </ContextProvider>
