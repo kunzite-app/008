@@ -15,5 +15,11 @@
   "avatar": "https://avatars.githubusercontent.com/u/59776461",
   "nickname": "Demo",
   "qTts": true,
-  "qSummarization": true
+  "qSummarization": true,
+  "webhooks": [
+    {
+      "label": "mywebhook",
+      "endpoint": "http://localhost:2008"
+    }
+  ]
 }

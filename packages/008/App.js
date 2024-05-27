@@ -55,8 +55,7 @@ export default function App() {
     >
       <ContextProvider>
         <Container>
-          <PhoneScreen />
-          <SettingsScreen />
+          <SettingsScreen server={true} closeable={false} />
         </Container>
       </ContextProvider>
     </AppInsightsErrorBoundary>
