@@ -5,11 +5,10 @@ import { SessionState } from 'sip.js';
 
 import { Screen } from './Screen';
 import { Player } from '../components/Player';
-import { COLORS, CallIcon, CancelAccept, CancelAcceptCall, Link, RoundIconButton, Text } from '../components/Basics';
+import { COLORS, CallIcon, CancelAccept, CancelAcceptCall, AvatarContact, Link, RoundIconButton, Text } from '../components/Basics';
 import { DialGrid } from '../components/Dialer';
 import { useStore } from '../store/Context';
 import Timer from '../components/Timer';
-import { ContactAvatar } from '../components/Avatars';
 
 const CallButton = ({ style, size = 40, iconSize = 20, ...props }) => {
   return (
@@ -104,7 +103,7 @@ export const SessionScreen = ({
             <DialGrid onPress={dialHandler} style={{ backgroundColor: '#ffffff80', borderRadius: 30 }} />
           ) : (!isVideo &&
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} >
-              <ContactAvatar size={100} contact={contact} />
+              <AvatarContact size={100} contact={contact} />
 
               {contact?.name &&
                 <Link onClick={() => onContactClick?.(contact)} style={{ fontSize: 20, marginTop: 10 }}>
@@ -132,7 +131,7 @@ export const SessionScreen = ({
 
             <CallButton
               iconColor={session._muted ? 'danger' : undefined}
-              icon="micOff"
+              icon="mic-off"
               onClick={muteHandler}
             />
             
@@ -154,7 +153,7 @@ export const SessionScreen = ({
             <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
               {allowTransfer && (
                 <CallButton
-                  icon="phoneForwarded" 
+                  icon="phone-forwarded" 
                   onClick={onTransfer} 
                 />
               )}
@@ -164,7 +163,7 @@ export const SessionScreen = ({
                   <CallButton
                     testID="blindTransferButton"
                     iconColor="danger"
-                    icon="phoneForwarded"
+                    icon="phone-forwarded"
                     onClick={onBlindTransfer}
                   />
                 </View>

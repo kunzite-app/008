@@ -1,7 +1,8 @@
+import { Platform } from 'react-native';
 import { useStore } from './Context';
 
-const emit = (ev, data) =>
-  document?.dispatchEvent(new CustomEvent(ev, { detail: data }));
+const emit = (ev, data) => 
+  document.dispatchEvent(new CustomEvent(ev, { detail: data }));
 
 let ipcRenderer;
 export const quit = () => ipcRenderer?.send('quit');
@@ -11,6 +12,8 @@ export const unanchor = () => ipcRenderer?.send('unanchor');
 export const resize = size => ipcRenderer?.send('resize', { ...size });
 
 export const init = () => {
+  if (!Platform.OS === 'web') return;
+
   try {
     ipcRenderer = window.require('electron').ipcRenderer;
 
@@ -33,7 +36,7 @@ export const init = () => {
       emit('click2call', { number })
     );
 
-    document?.addEventListener('notification:click', show);
+    document.addEventListener('notification:click', show);
 
     resize(useStore.getState().size);
   } catch (err) {
@@ -42,6 +45,8 @@ export const init = () => {
 };
 
 export const openLink = ({ url }) => {
-  ipcRenderer?.send('open', { url });
-  window?.open(url, '_blank');
+  if (!ipcRenderer) return
+
+  ipcRenderer.send('open', { url });
+  window.open(url, '_blank');
 };

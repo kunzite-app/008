@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#f02f65"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.kunzite.008"
@@ -21,10 +23,29 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.kunzite.008"
+      "package": "app.kunzite.OO8"
     },
     "web": {
       "favicon": "./web/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "38711c52-ddf9-4daf-b83c-8fb7f02dc34b"
+      }
     }
-  }
+  },
+  "plugins": [
+    [
+      "expo-asset",
+      {
+        "assets": ["web/assets"]
+      }
+    ],
+    [
+      "expo-av",
+      {
+        "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+      }
+    ]
+  ]
 }

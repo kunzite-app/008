@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import Sound from '../Sound';
 import { ButtonIcon, COLORS, RoundIconButton, Text, TextInput } from './Basics';
 import { CdrsList, ContactsList } from './Lists';
+import { Platform } from 'react-native';
 
 const keys = [
   { keypad: '1', sub: '' },
@@ -23,19 +24,21 @@ const keys = [
 const tones = {};
 keys.forEach(async ({ keypad }) => {
   const key = keypad.replace('#', 'hash').replace('*', 'star');
-  tones[keypad] = new Sound({ media: `dtmf/dtmf-${key}` });
+  tones[keypad] = new Sound({ media: `dtmf${key}` });
 });
 
-const DialButton = ({ style, item, onPress, onLongPress }) => {
+const DialButton = ({ style, item, onPress, onLongPress, fontSize = 18, secondFontSize = 9 }) => {
   const { keypad, sub } = item;
+
   return (
-    <TouchableOpacity
+    <Pressable
       key={keypad}
       focusable={false}
       tabIndex="-1"
       style={[{
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 10,
       }, style]}
       onPress={() => {
         tones[keypad].play?.();
@@ -45,26 +48,42 @@ const DialButton = ({ style, item, onPress, onLongPress }) => {
         if (sub.length === 1) onLongPress?.(sub);
       }}
     >
-      <Text style={{ fontSize: 18 }}>{keypad}</Text>
-      <Text style={{ fontSize: 9 }}>{sub}</Text>
-    </TouchableOpacity>
+      <Text style={{ fontSize }}>{keypad}</Text>
+      <Text style={{ fontSize: secondFontSize }}>{sub}</Text>
+    </Pressable>
   );
 };
 
-export const DialGrid = ({ style, buttonStyle, ...events }) => (
-  <View
-    style={[{
-      flex: 1,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-evenly'
-    }, style]}
-  >
-    {keys.map((item, idx) => (
-      <DialButton key={`dialbtn-${idx}`} item={item} {...events} style={[{ width: '33%' }, buttonStyle]} />
-    ))}
-  </View>
-);
+export const DialGrid = ({ style, buttonStyle, ...events }) => {
+  const isMobile = Platform.OS !== 'web';
+
+  return (
+    <View
+      style={[{
+        flex: 1,
+        justifyContent: 'center',
+      }]}
+    >
+    <View
+      style={[{
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-evenly'
+      }, style]}
+    >
+      {keys.map((item, idx) => (
+        <DialButton 
+          fontSize={isMobile ? 30 : 18}
+          secondFontSize={isMobile ? 12 : 9}
+          key={`dialbtn-${idx}`} 
+          item={item} {...events} 
+          style={[{ width: '33%' }, 
+          buttonStyle]} />
+      ))}
+    </View>
+    </View>
+  )
+};
 
 export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style, testID }) => {
   const [value, setValue] = useState(number);
@@ -84,13 +103,14 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style,
   return (
     <View style={[{ flex: 1 }, style]}>
       <View 
-        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderColor: COLORS.borderColor, borderBottomWidth: 1 }}
+        style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderColor: COLORS.borderColor, borderBottomWidth: 1, }}
       >
         <TextInput
           style={{ flex: 1, fontSize: 18, textAlign: 'center' }}
           value={value}
           onChangeText={text => setValue(text)}
           testID={`${testID? testID : ''}dialerTextInput`}
+          showSoftInputOnFocus={false}
         />
         <ButtonIcon icon="delete" onClick={onPressDelete} color='textSecondary' />
       </View>
@@ -130,7 +150,7 @@ export const DialPad = ({ number = '', onClick, onClickVideo, isTransfer, style,
           {isTransfer &&
             <ButtonIcon
               testID="transferButton"
-              icon="phoneForwarded"
+              icon="phone-forwarded"
               size={iconSize}
               style={{ backgroundColor: COLORS.secondary, width: 50, height: 50, borderRadius: 30 }}
               color="white" 

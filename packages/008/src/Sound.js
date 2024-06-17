@@ -1,14 +1,14 @@
 import { Platform } from 'react-native';
-import { Audio as AVAudio } from 'expo-av';
+// import { Audio as AVAudio } from 'expo-av';
+import RNSound from 'react-native-sound';
+
 
 const setSinkId = async ({ audio, deviceId }) => {
-  await audio?.stopAsync?.();
-  audio.pause?.();
-
   const speakers = await getSpeakers();
   const speaker =
     speakers.find(dev => dev.deviceId === deviceId)?.deviceId || 'default';
-  await audio.setSinkId(speaker);
+
+  await audio.setSinkId?.(speaker);
 };
 
 export default class Sound {
@@ -18,11 +18,8 @@ export default class Sound {
         this.audio = new Audio(`./assets/sounds/${media}.mp3`);
         this.audio.loop = loop;
       } else {
-        const { sound } = await AVAudio.Sound.createAsync(
-          require(`../web/assets/sounds/${media}.mp3`),
-          { isLooping: loop }
-        );
-        this.audio = sound;
+        this.audio = new RNSound(`${media}.mp3`, RNSound.MAIN_BUNDLE);
+        this.audio.setNumberOfLoops(loop ? -1 : 0);
       }
     };
 
@@ -30,18 +27,22 @@ export default class Sound {
   }
 
   async play() {
+    if (!this.audio) return;
+
+    this.stop();
     await setSinkId({ audio: this.audio, deviceId: this.deviceId });
-    this.audio?.playAsync?.();
-    this.audio?.play?.();
+    this.audio.play?.();
     this.playing = true;
   }
 
   async stop(pause) {
-    await this.audio?.stopAsync?.();
+    if (!this.audio) return;
+
+    await this.audio.stopAsync?.();
     this.audio.pause?.();
 
     if (!pause) {
-      await this.audio?.setPositionAsync?.(0);
+      await this.audio.setPositionAsync?.(0);
       this.audio.currentTime = 0;
     }
 
@@ -53,7 +54,7 @@ export default class Sound {
 
     if (this.playing) {
       this.stop(true);
-      this.audio.play();
+      this.play();
     }
   }
 }
@@ -92,6 +93,8 @@ export const getMicrophones = async () => {
 };
 
 export const getDevices = async ({ kind }) => {
+  if (Platform.OS !== 'web') return [];
+
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
     return devices.filter(dev => dev.kind === kind);

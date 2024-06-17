@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "690352986324",
+    "project_id": "kunzite-fcf04",
+    "storage_bucket": "kunzite-fcf04.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690352986324:android:452e139c7af8df541fc341",
+        "android_client_info": {
+          "package_name": "app.kunzite.OO8"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWpgIlBFSyyw0DYRM7IbPhDBNoyQQZQXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690352986324:android:046d33fa1a6ad6831fc341",
+        "android_client_info": {
+          "package_name": "com.awesomeproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWpgIlBFSyyw0DYRM7IbPhDBNoyQQZQXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

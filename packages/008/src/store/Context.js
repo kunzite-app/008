@@ -1,42 +1,31 @@
 import { createContext } from 'react';
 import { Platform } from 'react-native';
+
 import { create } from 'zustand';
 import {
   persist,
   createJSONStorage,
   subscribeWithSelector
 } from 'zustand/middleware';
+
 import { encode } from 'base-64';
 import _ from 'lodash';
 
 import { getMicrophones, getSpeakers } from '../Sound';
-import { init as initElectron } from './Electron';
-import { init as initEvents } from './Events';
-import Contacts from './Contacts';
+import { storage } from './Storage';
 
-const contacts = new Contacts();
+// import { init as initElectron } from './Electron';
+// import { init as initEvents } from './Events';
+// import Contacts from './Contacts';
 
-const COOKIE_ID = 'KZS';
-const CONTACTS_ID = 'KZSC';
+const localStorage = storage();
+const STOR_ID = 'KZS';
+
+// const contacts = new Contacts();
+const STOR_CONTACTS = 'KZSC';
+
 
 const initializeStore = async state => {
-  const requestPermissions = async () => {
-    try {
-      await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true
-      });
-    } catch (err) {
-      console.error('Failed obtaining audio permissions', err);
-    }
-
-    try {
-      await Notification.requestPermission();
-    } catch (err) {
-      console.error('Failed obtaining Notification permissions', err);
-    }
-  };
-
   const initAudioDevices = async () => {
     const setAudioDevices = async () => {
       try {
@@ -60,14 +49,13 @@ const initializeStore = async state => {
         const contactsDialer = contacts.query({ query: '' });
         state.setSettings({ contactsDialer });
 
-        contacts.save(CONTACTS_ID);
+        contacts.save(STOR_CONTACTS);
       });
     }
 
-    contacts.load(CONTACTS_ID);
+    contacts.load(STOR_CONTACTS);
   };
 
-  await requestPermissions();
   initAudioDevices();
 
   initElectron();
@@ -120,8 +108,10 @@ const DEFAULTS_NOCONFIG = {
   ringer: 'default',
   speaker: 'default',
   microphone: 'default',
+
   contactsDialer: {},
   contactsDialerFilter: '',
+  
   cdrs: []
 };
 
@@ -228,9 +218,9 @@ export const useStore = create(
       };
     }),
     {
-      name: COOKIE_ID,
+      name: STOR_ID,
       storage: createJSONStorage(() => localStorage),
-      onRehydrateStorage: state => initializeStore(state),
+      // onRehydrateStorage: state => initializeStore(state),
       partialize: ({
         doquit,
         devices,

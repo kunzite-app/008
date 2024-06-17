@@ -1,22 +1,15 @@
 import _ from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, Pressable } from 'react-native';
 
 import { Screen } from './Screen';
-import { COLORS, Status , ButtonIcon, HRule, Select, CancelAccept, Button, Text, Switch } from '../components/Basics';
-import { FormRow, InputRow } from '../components/Forms';
-import {
-  AnchorIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  UnanchorIcon,
-  XIcon
-} from '../components/Icons';
+import { COLORS, Status, ButtonIcon, FormRow, InputRow, HRule, Select, CancelAccept, Button, Text, Switch, Icon } from '../components/Basics';
 import { EventsList, WebhooksList } from '../components/Lists';
 
 import { useStore } from '../store/Context';
 
 import { readFileAsText } from '../utils';
+import { Platform } from 'react-native';
 
 const SelectDevice = ({ devices, deviceId, onChange }) => (
   <Select
@@ -39,12 +32,12 @@ const Title = ({ children, style }) => (
 
 const RowLink = ({ onClick, text, iconSize = 15 }) => {
   const icons = {
-    anchor: <AnchorIcon size={iconSize} />,
-    unanchor: <UnanchorIcon size={iconSize} />,
-    quit: <XIcon size={iconSize} />,
+    anchor: <Icon icon="anchor" size={iconSize} />,
+    unanchor: <Icon icon="unanchor" size={iconSize} />,
+    quit: <Icon icon="x"  size={iconSize} />,
   };
   return (
-    <TouchableOpacity
+    <Pressable
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -55,7 +48,7 @@ const RowLink = ({ onClick, text, iconSize = 15 }) => {
       <Text style={{ paddingLeft: 5 }} onClick={onClick}>
         {text}
       </Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
@@ -195,14 +188,14 @@ export const ConnectionForm = ({ onChange, ...initialValues }) => {
         onChange={val => setValue('settingsUri', val)}
       />
 
-      <TouchableOpacity
+      <Pressable
         style={{ paddingVertical: 10, flexDirection: 'row', alignItems: 'center' }}
         onPress={() => setIsBasicAuthEnabled(!isBasicAuthEnabled)}
       >
         <Text style={{ fontSize: 12 }}>Basic Auth</Text>
 
-        {isBasicAuthEnabled ? < ChevronDownIcon /> : <ChevronRightIcon /> }
-      </TouchableOpacity>
+        {isBasicAuthEnabled ? < Icon icon="chevron-down" /> : <Icon icon="chevron-right" /> }
+      </Pressable>
         
       {isBasicAuthEnabled && (
         <>
@@ -262,6 +255,8 @@ export const DevicesForm = (props) => {
 
 export const ContactsForm = () => {
   const { contacts } = useStore();
+
+  if(Platform.OS !== 'web') return <Text>TODO</Text>;
 
   const onDragOver = ev => {
     ev.preventDefault();
@@ -460,10 +455,9 @@ export const SettingsScreen = ({ visible = false, closeable = true }) => {
     { option: 'connection', icon: 'settings', server: true },
     { option: 'devices', icon: 'headphones' },
     { option: 'contacts', icon: 'users' },
-    { option: 'webhooks', icon: 'share2', server: true },
+    { option: 'webhooks', icon: 'share-2', server: true },
     { option: 'q', icon: 'q', server: true }
   ]
-
 
   if (server)
     opts = opts.filter(opt => opt.server);

@@ -2,13 +2,11 @@ import moment from 'moment';
 import React from 'react';
 import {
   View,
-  TouchableOpacity,
+  Pressable,
   FlatList
 } from 'react-native';
 
-import { ContactAvatar } from './Avatars';
-import { BORDERCOLOR, COLORS, CallIcon, Icon, Text, TextInput } from './Basics';
-import { VideoIcon } from './Icons';
+import { BORDERCOLOR, COLORS, CallIcon, AvatarContact, Icon, Text, TextInput } from './Basics';
 
 const PADDING = 10;
 const CELL_HEIGHT = 40;
@@ -92,12 +90,12 @@ const CdrCell = ({ cdr = {}, onClick, lang = 'en' }) => {
 
   const subcellStyle = { justifyContent: 'center', marginRight: PADDING }
   return (
-    <TouchableOpacity
+    <Pressable
       style={{ height: CELL_HEIGHT, marginVertical: PADDING / 2, flexDirection: 'row' }}
       onPress={() => onClick?.(destination, video)}
     >
       <View style={subcellStyle}>
-        <ContactAvatar contact={cdr.contact} />
+        <AvatarContact contact={cdr.contact} />
       </View>
 
       <View style={{ ...subcellStyle, flex: 1, justifyContent: 'space-evenly' }}>
@@ -112,34 +110,34 @@ const CdrCell = ({ cdr = {}, onClick, lang = 'en' }) => {
 
       {video &&
         <View style={subcellStyle}>
-          <VideoIcon size={11} />
+          <Icon icon="video" size={11} />
         </View>
       }
       <View style={subcellStyle}>
         <CallIcon call={cdr} size={14} />
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
 const ContactCell = ({ contact = {}, onClick }) => (
-  <TouchableOpacity
+  <Pressable
     style={{ height: CELL_HEIGHT, marginVertical: PADDING / 2, flexDirection: 'row' }}
     onPress={() => onClick?.(contact)}
   >
-    <ContactAvatar contact={contact} />
+    <AvatarContact contact={contact} />
 
     <View style={{ flex: 1, justifyContent: 'center', paddingLeft: PADDING }}>
       <Text numberOfLines={1} >{contact?.name || contact?.phones?.[0]}</Text>
     </View>
-  </TouchableOpacity>
+  </Pressable>
 )
 
 const WebhookCell = ({ webhook, onClick }) => {
   const { label, endpoint } = webhook;
 
   return (
-    <TouchableOpacity
+    <Pressable
       style={{ height: CELL_HEIGHT, marginVertical: PADDING / 2, flexDirection: 'row' }}
       onPress={() => onClick?.(webhook)}
     >
@@ -148,7 +146,7 @@ const WebhookCell = ({ webhook, onClick }) => {
 
         <Text style={{ fontSize: SMALLFONT, color: COLORS.textSecondary }}>{endpoint}</Text>
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 

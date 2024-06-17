@@ -1,9 +1,15 @@
 {
   "name": "kunzite",
   "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packagessss/*"
+    ],
+    "nohoist": [
+      "**/react-native-svg",
+      "**/react-native-svg/**"
+    ]
+  },
   "devDependencies": {
     "husky": "^8.0.0",
     "lerna": "^6.1.0",
@@ -27,5 +33,6 @@
     "**/*.{json,md,yaml,yml}": [
       "lerna run format -- --write ."
     ]
-  }
+  },
+  "version": "0.0.0"
 }

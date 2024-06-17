@@ -3,7 +3,7 @@ import { Platform } from 'react-native';
 import PQueue from 'p-queue';
 import _ from 'lodash';
 
-import { processAudio } from '008Q';
+// import { processAudio } from '008Q';
 
 import { useStore } from './Context';
 import { blobToDataURL, request } from '../utils';
@@ -11,26 +11,34 @@ import { blobToDataURL, request } from '../utils';
 const QUEUE = new PQueue({ concurrency: 5 });
 
 let qLLMEnabled = false;
-const qworkerLLM = new Worker(new URL('../008QWorkerLLM.js', import.meta.url), {
-  type: 'module'
-});
-qworkerLLM.addEventListener('message', ({ data }) =>
-  emit({ type: 'phone:summarization', data })
-);
+let qworkerLLM;
 
 let qTTSEnabled = false;
-const qworkerTTS = new Worker(new URL('../008QWorkerTTS.js', import.meta.url), {
-  type: 'module'
-});
-qworkerTTS.addEventListener('message', ({ data }) => {
-  emit({ type: 'phone:transcript', data });
+let qworkerTTS;
 
-  if (qLLMEnabled) qworkerLLM.postMessage(data);
-});
+if (Platform.OS === 'web') {
+  /*
+  qworkerLLM = new Worker(new URL('../008QWorkerLLM.js', import.meta.url), {
+    type: 'module'
+  });
+  qworkerLLM.addEventListener('message', ({ data }) =>
+    emit({ type: 'phone:summarization', data })
+  );
+
+  qworkerTTS = new Worker(new URL('../008QWorkerTTS.js', import.meta.url), {
+    type: 'module'
+  });
+  qworkerTTS.addEventListener('message', ({ data }) => {
+    emit({ type: 'phone:transcript', data });
+
+    if (qLLMEnabled) qworkerLLM.postMessage(data);
+  });
+  */
+}
 
 export const emit = async ({ type, data: payload }) => {
   if (type === 'phone:audio' && qTTSEnabled) {
-    qworkerTTS.postMessage(payload);
+    qworkerTTS?.postMessage(payload);
     return;
   }
 
@@ -56,8 +64,10 @@ export const emit = async ({ type, data: payload }) => {
     QUEUE.add(() => request({ endpoint, body: data, retries: 5, qdelay: 30 }));
   }
 
-  document?.dispatchEvent?.(new CustomEvent(type, { detail: data }));
-  window?.parent?.postMessage?.({ type, data }, '*');
+  if (Platform.OS === 'web') {
+    document.dispatchEvent(new CustomEvent(type, { detail: data }));
+    window.parent?.postMessage({ type, data }, '*');
+  }
 };
 
 export const init = () => {

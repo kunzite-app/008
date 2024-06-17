@@ -1,2 +1,2 @@
 export { SettingsScreen } from './SettingsScreen';
-export { PhoneScreen } from './PhoneScreen';
+export { SessionScreen } from './SessionScreen';

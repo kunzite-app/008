@@ -3,37 +3,13 @@ import {
   Image,  
   Text as RNText, 
   TextInput as RNTextInput, 
-  TouchableOpacity, 
+  Pressable, 
   View, 
   Switch as RNSwitch
 } from 'react-native';
 
 import {
-  CheckIcon,
-  ClockIcon,
-  DeleteIcon,
-  GridIcon,
-  HeadphonesIcon,
-  MicOffIcon,
-  PauseIcon,
-  PhoneForwardedIcon,
-  PhoneIcon,
-  PlayIcon,
-  SettingsIcon,
-  UserIcon,
-  UsersIcon,
-  XIcon,
-  TrashIcon,
-  Share2Icon,
-  PlusIcon,
-  VideoIcon,
-  ChevronIcon,
-  PhoneOffIcon,
-  PhoneIncomingIcon,
-  PhoneOutgoingIcon,
-  SearchIcon,
-  EyeIcon,
-  QIcon,
+  Icon as NIcon,
 } from './Icons';
 
 import SelectDropdown from 'react-native-select-dropdown';
@@ -73,7 +49,7 @@ export const Text = ({ children, style, ...props }) => (
 
 export const TextInput = ({ style, ...props }) =>
   <RNTextInput 
-    style={[{ fontFamily, color: COLORS.textPrimary, outlineStyle: 'none' }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} 
+    style={[{ fontFamily, color: COLORS.textPrimary, /* outlineStyle: 'none' */ }, props.disabled ? { backgroundColor: BACKCOLOR } : {}, style ]} 
       {...props} 
   />
 
@@ -88,7 +64,7 @@ export const TextField = ({
 
   return (
     <TextInput
-      style={[{ ...defaultStyle, placeholderTextColor: BORDERCOLOR }, style]}
+      style={[{ ...defaultStyle, /* placeholderTextColor: BORDERCOLOR */ }, style]}
       onChangeText={onChange}
       secureTextEntry={password}
       {...props}
@@ -133,7 +109,7 @@ export const Select = ({
       rowTextStyle={{ textAlign: 'left', fontSize: 14, fontFamily, ...rowTextStyle }}
       renderCustomizedRowChild={renderCustomizedRowChild}
       dropdownStyle={dropdownStyle}
-      renderDropdownIcon={(opened) => renderDropdownIcon ? renderDropdownIcon(opened) : <ChevronIcon { ...iconStyle }/>}
+      renderDropdownIcon={(opened) => renderDropdownIcon ? renderDropdownIcon(opened) : <Icon icon="chevron-down" { ...iconStyle }/>}
     />
 
   )
@@ -148,46 +124,36 @@ export const Button = ({ children, color, style, onClick, fullWidth, testID }) =
   if ( fullWidth ) stylex = { ...stylex, flex:1 }
   
   return (
-    <TouchableOpacity 
+    <Pressable 
       testID={testID}
       style={[ stylex, style ]}
       onPress={onClick} 
     >
       {children}
-    </TouchableOpacity>
+    </Pressable>
   )
 };
 
 export const Icon = ({ icon, size, color = COLORS.textPrimary }) => {
-  const styling = { size, color: COLORS[color] || color }
-
-  if (icon === 'phoneForwarded') return <PhoneForwardedIcon { ...styling } />;
-  if (icon === 'hang') return <PhoneOffIcon { ...styling } />;
-  if (icon === 'micOff') return <MicOffIcon { ...styling } />;
-  if (icon === 'play') return <PlayIcon { ...styling } />;
-  if (icon === 'pause') return <PauseIcon { ...styling } />;
-  if (icon === 'grid') return <GridIcon { ...styling } />;
-  if (icon === 'clock') return <ClockIcon { ...styling } />;
-  if (icon === 'users') return <UsersIcon { ...styling } />;
-  if (icon === 'user') return <UserIcon { ...styling } />;
-  if (icon === 'settings') return <SettingsIcon { ...styling } />;
-  if (icon === 'headphones') return <HeadphonesIcon { ...styling }/>;
-  if (icon === 'phone') return <PhoneIcon { ...styling } />;
-  if (icon === 'delete') return <DeleteIcon { ...styling } />;
-  if (icon === 'trash') return <TrashIcon { ...styling } />;
-  if (icon === 'share2') return <Share2Icon { ...styling } />;
-  if (icon === 'plus') return <PlusIcon { ...styling } />;
-  if (icon === 'video') return <VideoIcon { ...styling } />;
-  if (icon === 'check') return <CheckIcon { ...styling } />;
-  if (icon === 'x') return <XIcon { ...styling } />;
-  if (icon === 'eye') return <EyeIcon { ...styling } />;
-  if (icon === 'search') return <SearchIcon { ...styling } />;
-  if (icon === 'q') return <QIcon { ...styling } />;
+  const styling = { icon, size, color: COLORS[color] || color }
+  return <NIcon {...styling} />
 }
+
+export const CallIcon = ({
+  call = {},
+  ...props
+}) => {
+  const { direction } = call;
+  const color = props.color ? props.color : call.status === 'answered' ? COLORS.textSecondary : COLORS.danger
+  if (direction === 'inbound')
+    return <Icon icon="phone-incoming" {...props} color={color} />;
+
+  return <Icon icon="phone-outgoing"  {...props} color={color} />;
+};
 
 export const ButtonIcon = ({ children, icon, onClick, style, color, testID, size = 18 }) => {
   return (
-    <TouchableOpacity
+    <Pressable
       testID={testID}
       onPress={onClick}
       style={[
@@ -197,7 +163,7 @@ export const ButtonIcon = ({ children, icon, onClick, style, color, testID, size
     >
       { icon && <Icon {...{icon, size, color }} />}
       {children}
-    </TouchableOpacity>
+    </Pressable>
   )
 };
 
@@ -219,9 +185,9 @@ export const RoundIconButton = ({ size = 30, color, iconSize, iconColor, style, 
 }
 
 export const Link = ({ children, style = {}, onClick }) => (
-  <TouchableOpacity onPress={() => onClick?.()}>
+  <Pressable onPress={() => onClick?.()}>
     <Text style={{ ...style }}>{children}</Text>
-  </TouchableOpacity>
+  </Pressable>
 );
 
 export const Loader = () => (
@@ -258,13 +224,13 @@ export const CancelAccept = ({ onCancel, onAccept, acceptTestID, cancelTestID, }
     >
       {onCancel && (
         <Button testID={cancelTestID} color="danger" onClick={onCancel} fullWidth={!onAccept}>
-          <XIcon />
+           <Icon icon="x" color='white' />
         </Button>
       )}
 
       {onAccept && (
         <Button testID={acceptTestID} color="secondary" onClick={onAccept} fullWidth={!onCancel}>
-          <CheckIcon />
+           <Icon icon="check" color='white' />
         </Button>
       )}
     </View>
@@ -307,7 +273,10 @@ export const CancelAcceptCall = ({ onCancel, onAccept, cancelTestID, acceptTestI
   );
 };
 
-export const Avatar = ({ imageUrl, name = '', size = 35 }) => {
+export const Avatar = ({ 
+  source, 
+  name = '', 
+  size = 35 }) => {
   const letters = name.split(/\s+/g).map(chunk => chunk[0]).join('').substring(0, 3).toUpperCase();
   
   const stringToHslColor = (str, s, l) => {
@@ -328,18 +297,45 @@ export const Avatar = ({ imageUrl, name = '', size = 35 }) => {
       width: size, height: size, borderRadius: size / 2 
     }}>
 
-      {imageUrl || !name.length ? (
-        <Image source={{ uri: imageUrl }} style={{ width: size, height: size, borderRadius: size / 2 }} />
-      ) : (
-        <Text   
-          numberOfLines={1} 
-          ellipsizeMode='tail' 
-          style={{ fontSize: size * 0.4 }}>
-            {letters}
-        </Text>
-      )}
+      <Text   
+        numberOfLines={1} 
+        ellipsizeMode='tail' 
+        style={{ fontSize: size * 0.4 }}>
+          {letters}
+      </Text>
+
+      {source &&
+      <Image source={source} 
+        style={[{ width: size, height: size, borderRadius: size / 2 }, {position: 'absolute'}]} />
+      }
     </View>
     )
+};
+
+const ImageAvatar = require('../../web/avatar.png');
+export const AvatarContact = ({ contact = {}, ...props }) => {
+  const { name, avatar } = contact;
+
+  return (
+    <Avatar
+      {...props}
+      name={name}
+      source={avatar?.length > 0 ? { uri: avatar } : name ? undefined : ImageAvatar}
+    />
+  );
+};
+
+export const AvatarUser = ({
+  color,
+  avatar,
+  ...props
+}) => {
+  return (
+    <View>
+      <Avatar size={50} {...props} source={avatar ? { uri: avatar } : ImageAvatar} />
+      <Status color={color} size={12} style={{ position: 'absolute', bottom: 0, right: 0 }} />
+    </View>
+  );
 };
 
 export const Status = ({ color, size = 10, style }) => {
@@ -353,14 +349,19 @@ export const Status = ({ color, size = 10, style }) => {
   return <View style={{ ...style, ...roundstyle }} />;
 };
 
-export const CallIcon = ({
-  call = {},
-  ...props
-}) => {
-  const { direction } = call;
-  const color = props.color ? props.color : call.status === 'answered' ? COLORS.textSecondary : COLORS.danger
-  if (direction === 'inbound')
-    return <PhoneIncomingIcon {...props} color={color} />;
+export const FormRow = ({ children, label, style = {} }) => (
+  <View style={{ width: '100%', paddingVertical: 10, ...style }}>
+    {label && (
+      <Text style={{ paddingBottom: 5, fontSize: 12, fontWeight: 500 }}>
+        {label}
+      </Text>
+    )}
+    {children}
+  </View>
+);
 
-  return <PhoneOutgoingIcon {...props} color={color} />;
-};
+export const InputRow = ({ label, ...rest }) => (
+  <FormRow label={label}>
+    <TextField testID={label} {...rest} />
+  </FormRow>
+);
