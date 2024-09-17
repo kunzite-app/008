@@ -187,22 +187,18 @@ export const vad = async ({ audio, size = 1536, session }) => {
 };
 
 const llmconf = {
+  useIndexedDBCache: true,
   model_list: [
     {
-      local_id: "1_6B_dev",
-      model_url: "http://localhost:8082/1_6B_dev/",
-      model_lib_url: "http://localhost:8082/1_6B_dev/webgpu.wasm",
+      model_id: "3B32Q4",
+      model_url: "https://huggingface.co/OO8/3B32/resolve/main/Q4/",
+      model_lib_url:
+        "https://huggingface.co/OO8/3B32/resolve/main/Q4/webllm.wasm",
     },
     {
-      local_id: "3B",
-      model_url: "https://huggingface.co/OO8/3B/resolve/main/",
-      model_lib_url: "https://huggingface.co/OO8/3B/resolve/main/webgpu.wasm",
-    },
-    {
-      local_id: "7B",
-      model_url: "https://huggingface.co/OO8/7B/resolve/main/",
-      model_lib_url: "https://huggingface.co/OO8/7B/resolve/main/webgpu.wasm",
-      required_features: ["shader-f16"],
+      model_id: "3B32",
+      model_url: "https://huggingface.co/OO8/3B32/resolve/main/",
+      model_lib_url: "https://huggingface.co/OO8/3B32/resolve/main/webllm.wasm",
     },
   ],
 };
@@ -211,20 +207,18 @@ let LLM;
 export const chat = async ({
   prompt,
   chatOpts,
-  model = "3B",
+  model = "3B32Q4",
   onInitProgress = (report) => console.log(report),
   onProgress = (step, message) => console.log(step, message),
 }) => {
   let chat = LLM;
 
   if (!chat) {
-    chat = new webllm.ChatModule();
+    chat = new webllm.Engine();
     chat.setInitProgressCallback(onInitProgress);
     await chat.reload(model, chatOpts, llmconf);
 
     LLM = chat;
-  } else {
-    chat.interruptGenerate();
   }
 
   const response = await chat.generate(prompt, onProgress);
