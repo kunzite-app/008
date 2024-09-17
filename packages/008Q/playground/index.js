@@ -65,6 +65,21 @@ document.getElementById("audioFile").addEventListener(
   false
 );
 
+const deleteDatabase = (dbName) => {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(dbName);
+    request.onsuccess = resolve
+    request.onerror = () => reject('DB can not be deleted');
+    request.onblocked = () => reject('DB is blocked');
+  });
+}
+
 document.getElementById("transcribeBtn").addEventListener("click", async () => {
+  try {
+    await deleteDatabase('webllm/config');
+    await deleteDatabase('webllm/wasm');
+  } catch (e) {
+    console.log(e);
+  }
   await transcribe({ audio: document.getElementById("audioPlayer").src });
 });
