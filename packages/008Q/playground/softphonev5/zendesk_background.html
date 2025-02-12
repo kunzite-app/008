@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head></head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+    <script src="https://static.zdassets.com/zendesk_app_framework_sdk/2.0/zaf_sdk.min.js"></script>
+    <script>
+      const init = async () => {
+        const ZAF = ZAFClient.init();
+
+        const { instances } = await ZAF.get('instances');
+        for (let id in instances) {
+          if (instances[id].location === 'top_bar') {
+            ZAF.instance(id).invoke('preloadPane');
+          }
+        }
+      };
+
+      init();
+    </script>
+  </body>
+</html>
