@@ -1,0 +1,22 @@
+{
+  "background_color": "#f02f65",
+  "description": "Open-source event-driven AI powered Softphone",
+  "display": "standalone",
+  "lang": "en",
+  "name": "OO8",
+  "short_name": "OO8",
+  "start_url": "/?utm_source=web_app_manifest",
+  "orientation": "portrait",
+  "related_applications": [
+    {
+      "platform": "itunes",
+      "id": "app.kunzite.008"
+    },
+    {
+      "platform": "play",
+      "url": "http://play.google.com/store/apps/details?id=app.kunzite.OO8",
+      "id": "app.kunzite.OO8"
+    }
+  ],
+  "prefer_related_applications": true
+}
