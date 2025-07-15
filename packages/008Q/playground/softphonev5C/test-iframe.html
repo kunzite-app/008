@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>008 Iframe Test</title>
+<meta name="robots" content="noindex, nofollow" />
+</head>
+<body>
+<iframe id="phoneIframe" src="/" width="340px" height="460px" ></iframe>
+
+<div>
+  <button id="callButton">Call 008</button>
+  <button id="callVideoButton">Call 007 (Video)</button>
+  <br>
+  <button id="hangupButton">Hang Up</button>
+  <button id="answerButton">Answer</button>
+</div>
+</body>
+
+<script>
+  const iframe = document.getElementById('phoneIframe');
+
+  // Listen for messages from the iframe
+  window.addEventListener('message', (event) => {
+    console.log('Message from iframe:', event.data);
+  });
+
+  // Send setConfig message to the iframe
+  iframe.onload = () => {
+    const config = {
+      "sipUri": "sip:demo@demo.008agent.ai",
+      "sipPassword": "008Demo",
+      "wsUri": "wss://demo.008agent.ai:8089/ws",
+      "numbers": [
+        {
+          "number": "+1",
+          "tags": ["Main"]
+        }
+      ],
+      "statuses": [
+        { "value": "online", "text": "Online", "color": "#057e74" },
+        { "value": "offline", "text": "Offline", "color": "#A9A9A9" }
+      ],
+      "avatar": "https://avatars.githubusercontent.com/u/59776461",
+      "nickname": "Demo",
+    };
+    iframe.contentWindow.postMessage({ type: 'phone:setConfig', data: config }, '*');
+  };
+
+  // Call button functionality
+  document.getElementById('callButton').addEventListener('click', () => {
+    iframe.contentWindow.postMessage({ type: 'phone:call', data: { number: '008' } }, '*');
+  });
+
+  // Answer button functionality
+  document.getElementById('answerButton').addEventListener('click', () => {
+    iframe.contentWindow.postMessage({ type: 'phone:answer' }, '*');
+  });
+
+  // Call Video button functionality
+  document.getElementById('callVideoButton').addEventListener('click', () => {
+    iframe.contentWindow.postMessage({ type: 'phone:call', data: { number: '007', video: true } }, '*');
+  });
+
+  // Hang Up button functionality
+  document.getElementById('hangupButton').addEventListener('click', () => {
+    iframe.contentWindow.postMessage({ type: 'phone:hang' }, '*');
+  });
+</script>
+</body>
+</html>
