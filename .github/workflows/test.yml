@@ -1,29 +1,58 @@
 name: Test
-on: pull_request
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    env:
-      SDL_VIDEODRIVER: "dummy"
-      SDL_AUDIODRIVER: "disk"
-
+  lint:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn lint
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - run: yarn install --frozen-lockfile
+
+      - name: unit tests
+        run: yarn test
+
+  e2e:
+    runs-on: ubuntu-latest
+    env:
+      SDL_VIDEODRIVER: 'dummy'
+      SDL_AUDIODRIVER: 'disk'
 
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'yarn'
 
-      - name: prerequisites
-        run: |
-          yarn install
+      - run: yarn install --frozen-lockfile
 
-      - name: lint
-        run: |
-          yarn lint
-
-      - name: tests
-        run: |
-          yarn run e2e
+      - name: e2e
+        run: yarn run e2e

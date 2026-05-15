@@ -3,20 +3,21 @@ name: build
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 jobs:
   build:
     runs-on: [self-hosted, M1]
     permissions:
       contents: write
-      
-    steps:
-      - uses: actions/checkout@v2
 
-      - uses: actions/setup-node@v2
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: '20'
+          cache: 'yarn'
 
       - name: Build
         env:
@@ -25,12 +26,13 @@ jobs:
           NOT_APPLE_ID: ${{ secrets.APPLE_ID }}
           NOT_APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
         run: |
-          yarn install
+          yarn install --frozen-lockfile
           yarn run build-desktop
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
+          name: desktop-builds
           retention-days: 1
           path: |
             packages/008desktop/build/008-desktop-win.exe
@@ -45,15 +47,15 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
-          name: artifact
+          name: desktop-builds
           path: bin
 
       - name: Sign win
         shell: bash
         run: |
-          dotnet tool install --global AzureSignTool 
+          dotnet tool install --global AzureSignTool
           AzureSignTool sign -kvu "${{ secrets.AZURE_KEY_VAULT_URI }}" -kvi "${{ secrets.AZURE_CLIENT_ID }}" -kvt "${{ secrets.AZURE_TENANT_ID }}" -kvs "${{ secrets.AZURE_CLIENT_SECRET }}" -kvc ${{ secrets.AZURE_CERT_NAME }} -tr http://timestamp.digicert.com -v "bin/008-desktop-win.exe"
 
       - name: Release

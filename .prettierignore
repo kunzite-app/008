@@ -1,0 +1,11 @@
+node_modules
+build
+lib
+dist
+app
+web-build
+packages/008/web-build
+packages/008desktop/app
+packages/008desktop/build
+packages/web-llm
+yarn.lock
